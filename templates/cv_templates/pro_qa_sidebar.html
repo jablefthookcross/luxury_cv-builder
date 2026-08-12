@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="{{ lang if lang else 'pl' }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ data.personal_info.full_name }} - CV Pro QA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            line-height: 1.55;
+        }
+
+        .cv-wrapper {
+            max-width: 920px;
+            min-height: 100vh;
+            margin: 2rem auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08);
+            display: grid;
+            grid-template-columns: 310px 1fr;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            align-items: stretch;
+        }
+
+        /* Left Sidebar */
+        .sidebar {
+            background: #0f172a !important;
+            color: #f8fafc;
+            padding: 2.5rem 1.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .avatar-circle {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+            margin-bottom: 0.5rem;
+        }
+
+        .sb-sec-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #94a3b8;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 0.4rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .sb-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            font-size: 0.86rem;
+            color: #cbd5e1;
+        }
+
+        .sb-list-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sb-list-item a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        .sb-list-item a:hover {
+            text-decoration: underline;
+        }
+
+        .skill-group {
+            margin-bottom: 1rem;
+        }
+
+        .skill-cat-name {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 0.4rem;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        /* Right Main Section */
+        .main-content {
+            padding: 2.8rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+            background: #ffffff;
+        }
+
+        .header-main {
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 1.2rem;
+        }
+
+        .candidate-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .candidate-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2563eb;
+            margin-top: 0.3rem;
+        }
+
+        .sec-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #0f172a;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 0.35rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .summary-p {
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.65;
+        }
+
+        .exp-item {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Fixed Row Layout: Role + Date on Row 1, Company on Row 2 */
+        .exp-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 1rem;
+        }
+
+        .exp-role {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #0f172a;
+        }
+
+        .exp-company {
+            color: #2563eb;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-top: 0.15rem;
+        }
+
+        .exp-meta {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .bullet-list {
+            padding-left: 1.2rem;
+            margin-top: 0.45rem;
+        }
+
+        .bullet-list li {
+            font-size: 0.91rem;
+            color: #334155;
+            margin-bottom: 0.35rem;
+            line-height: 1.5;
+        }
+
+        .rodo-clause {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 1rem;
+            margin-top: auto;
+            font-style: italic;
+        }
+
+        @media print {
+            html, body { background: white; height: auto; }
+            .cv-wrapper {
+                max-width: 100%;
+                margin: 0;
+                border: none;
+                box-shadow: none;
+                border-radius: 0;
+                grid-template-columns: 290px 1fr;
+                min-height: 100vh;
+            }
+            .sidebar {
+                background: #0f172a !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cv-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div>
+                <div class="avatar-circle">
+                    {% set initials = data.personal_info.full_name.split(' ') %}
+                    {{ initials[0][0] }}{{ initials[1][0] if initials|length > 1 else '' }}
+                </div>
+            </div>
+
+            <div>
+                <div class="sb-sec-title">{% if lang == 'en' %}Personal Info{% else %}Dane Kontaktowe{% endif %}</div>
+                <ul class="sb-list">
+                    {% if data.personal_info.phone %}
+                    <li class="sb-list-item">📞 {{ data.personal_info.phone }}</li>
+                    {% endif %}
+                    {% if data.personal_info.email %}
+                    <li class="sb-list-item">📧 {{ data.personal_info.email }}</li>
+                    {% endif %}
+                    {% if data.personal_info.location %}
+                    <li class="sb-list-item">📍 {{ data.personal_info.location }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div>
+                <div class="sb-sec-title">{% if lang == 'en' %}Links{% else %}Linki{% endif %}</div>
+                <ul class="sb-list">
+                    {% if data.personal_info.github %}
+                    <li class="sb-list-item">💻 <a href="{{ data.personal_info.github }}" target="_blank">GitHub Profile</a></li>
+                    {% endif %}
+                    {% if data.personal_info.linkedin %}
+                    <li class="sb-list-item">🔗 <a href="{{ data.personal_info.linkedin }}" target="_blank">LinkedIn Profile</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            {% if data.skills %}
+            <div>
+                <div class="sb-sec-title">{% if lang == 'en' %}Skills{% else %}Umiejętności{% endif %}</div>
+                {% for cat in data.skills %}
+                <div class="skill-group">
+                    <div class="skill-cat-name">{{ cat.category }}</div>
+                    <div class="badges">
+                        {% for item in cat['items'] %}
+                        <span class="badge">{{ item }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if data.languages %}
+            <div>
+                <div class="sb-sec-title">{% if lang == 'en' %}Languages{% else %}Języki{% endif %}</div>
+                <ul class="sb-list">
+                    {% for lang_item in data.languages %}
+                    <li class="sb-list-item">🌐 <strong>{{ lang_item.language }}:</strong>&nbsp;{{ lang_item.level }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header-main">
+                <h1 class="candidate-name">{{ data.personal_info.full_name }}</h1>
+                <div class="candidate-title">{{ data.personal_info.title }}</div>
+            </header>
+
+            {% if data.summary %}
+            <section>
+                <h2 class="sec-title">{% if lang == 'en' %}Professional Summary{% else %}Podsumowanie Zawodowe{% endif %}</h2>
+                <p class="summary-p">{{ data.summary }}</p>
+            </section>
+            {% endif %}
+
+            {% if data.experience %}
+            <section>
+                <h2 class="sec-title">{% if lang == 'en' %}Work Experience{% else %}Doświadczenie Zawodowe{% endif %}</h2>
+                {% for job in data.experience %}
+                <div class="exp-item">
+                    <div class="exp-top-row">
+                        <div class="exp-role">{{ job.position }}</div>
+                        <div class="exp-meta">{{ job.start_date }} – {{ job.end_date }} | {{ job.location }}</div>
+                    </div>
+                    <div class="exp-company">{{ job.company }}</div>
+                    {% if job['highlights'] %}
+                    <ul class="bullet-list">
+                        {% for h in job['highlights'] %}
+                        <li>{{ h }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+
+            {% if data.education %}
+            <section>
+                <h2 class="sec-title">{% if lang == 'en' %}Education{% else %}Wykształcenie{% endif %}</h2>
+                {% for edu in data.education %}
+                <div class="exp-item">
+                    <div class="exp-top-row">
+                        <div class="exp-role">{{ edu.degree }}</div>
+                        <div class="exp-meta">{{ edu.graduation_year }} | {{ edu.location }}</div>
+                    </div>
+                    <div class="exp-company">{{ edu.institution }}</div>
+                </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+
+            <div class="rodo-clause">
+                {% if lang == 'en' %}
+                I hereby give consent for my personal data included in my application to be processed for the purposes of current and future recruitment processes in accordance with Regulation (EU) 2016/679 of the European Parliament and of the Council (GDPR).
+                {% else %}
+                Wyrażam zgodę na przetwarzanie moich danych osobowych dla potrzeb niezbędnych do realizacji procesu rekrutacji (zgodnie z ustawą z dnia 10 maja 2018 roku o ochronie danych osobowych (Dz. U. ustaw z 2018, poz. 1000) oraz zgodnie z Rozporządzeniem Parlamentu Europejskiego i Rady (UE) 2016/679 z dnia 27 kwietnia 2016 r. w sprawie ochrony osób fizycznych w związku z przetwarzaniem danych osobowych i w sprawie swobodnego przepływu takich danych oraz uchylenia dyrektywy 95/46/WE (RODO)).
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

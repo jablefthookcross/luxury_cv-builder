@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ data.personal_info.full_name }} - CV Eleganckie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #fff; color: #0f172a; line-height: 1.6; padding: 3rem; max-width: 850px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 1.5rem; margin-bottom: 2rem; }
+        .name { font-family: 'Merriweather', serif; font-size: 2.2rem; font-weight: 700; color: #0f172a; letter-spacing: -0.01em; }
+        .title { font-size: 1rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.4rem; }
+        .contact { display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; margin-top: 1rem; font-size: 0.85rem; color: #64748b; }
+        .contact a { color: #64748b; text-decoration: none; }
+        .section { margin-bottom: 2rem; }
+        .sec-title { font-family: 'Merriweather', serif; font-size: 1.1rem; font-weight: 700; color: #0f172a; border-bottom: 2px solid #0f172a; padding-bottom: 0.3rem; margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .item { margin-bottom: 1.5rem; }
+        .item-head { display: flex; justify-content: space-between; align-items: baseline; }
+        .role { font-weight: 700; color: #0f172a; font-size: 1.02rem; }
+        .company { color: #334155; font-weight: 600; font-style: italic; }
+        .meta { font-size: 0.85rem; color: #64748b; }
+        .list { margin-top: 0.5rem; padding-left: 1.2rem; }
+        .list li { margin-bottom: 0.4rem; font-size: 0.92rem; color: #334155; }
+        .skills-line { font-size: 0.92rem; color: #334155; margin-bottom: 0.5rem; }
+        @media print { body { padding: 0; } .section { page-break-inside: avoid; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1 class="name">{{ data.personal_info.full_name }}</h1>
+        <div class="title">{{ data.personal_info.title }}</div>
+        <div class="contact">
+            {% if data.personal_info.email %}<span>{{ data.personal_info.email }}</span>{% endif %}
+            {% if data.personal_info.phone %}<span>{{ data.personal_info.phone }}</span>{% endif %}
+            {% if data.personal_info.location %}<span>{{ data.personal_info.location }}</span>{% endif %}
+            {% if data.personal_info.website %}<span><a href="{{ data.personal_info.website }}">{{ data.personal_info.website }}</a></span>{% endif %}
+            {% if data.personal_info.linkedin %}<span><a href="{{ data.personal_info.linkedin }}">LinkedIn</a></span>{% endif %}
+        </div>
+    </header>
+
+    {% if data.summary %}
+    <section class="section">
+        <h2 class="sec-title">Podsumowanie Menedżerskie</h2>
+        <p style="font-size: 0.95rem; color: #334155; line-height: 1.7;">{{ data.summary }}</p>
+    </section>
+    {% endif %}
+
+    {% if data.experience %}
+    <section class="section">
+        <h2 class="sec-title">Doświadczenie Zawodowe</h2>
+        {% for job in data.experience %}
+        <div class="item">
+            <div class="item-head">
+                <div class="role">{{ job.position }} — <span class="company">{{ job.company }}</span></div>
+                <div class="meta">{{ job.start_date }} – {{ job.end_date }} | {{ job.location }}</div>
+            </div>
+            {% if job['highlights'] %}
+            <ul class="list">
+                {% for h in job['highlights'] %}
+                <li>{{ h }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if data.skills %}
+    <section class="section">
+        <h2 class="sec-title">Główne Kompetencje</h2>
+        {% for cat in data.skills %}
+        <div class="skills-line">
+            <strong>{{ cat.category }}:</strong> {{ cat['items'] | join(', ') }}
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if data.education %}
+    <section class="section">
+        <h2 class="sec-title">Wykształcenie i Kwalifikacje</h2>
+        {% for edu in data.education %}
+        <div class="item">
+            <div class="item-head">
+                <div class="role">{{ edu.degree }} — <span class="company">{{ edu.institution }}</span></div>
+                <div class="meta">{{ edu.graduation_year }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+</body>
+</html>

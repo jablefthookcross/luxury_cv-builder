@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitaeCraft AI — Inteligentny Kreator i Generator CV (QA Architecture)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .editor-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.4rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-card-item {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .btn-danger-sm {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            cursor: pointer;
+        }
+        .btn-danger-sm:hover { background: rgba(239, 68, 68, 0.4); }
+
+        .btn-add-sm {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-add-sm:hover { background: rgba(16, 185, 129, 0.3); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+            <span class="brand-title">VitaeCraft AI</span>
+            <span class="brand-tag">v1.6 QA Pro</span>
+        </div>
+        <nav class="nav-tabs">
+            <button class="nav-btn active" onclick="switchTab('tailor', this)">⚡ Dopasuj CV (QA Focus)</button>
+            <button class="nav-btn" onclick="switchTab('profile', this)">📋 Główny Profil & PDF</button>
+            <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Ustawienia AI</button>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <!-- TAB 1: DOPASUJ CV -->
+        <div id="tab-tailor" class="tab-content active">
+            <div class="left-panel">
+                <div class="card">
+                    <h2 class="section-h2">🎯 Oferta Pracy i Personalizacja</h2>
+                    <div class="form-group">
+                        <label class="form-label">Docelowe Stanowisko / Firma</label>
+                        <input type="text" id="targetRole" class="form-input" placeholder="np. Senior QA Engineer / QA Automation w Benefit Systems">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Treść Oferty Pracy / Wymagania</label>
+                        <textarea id="jobDescription" class="form-textarea" placeholder="Wklej treść oferty pracy lub wymagania stanowiska tutaj..."></textarea>
+                    </div>
+                    
+                    <!-- Row 1: Język & Szablon -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Język CV</label>
+                            <select id="cvLanguage" class="form-select" onchange="updatePreview()">
+                                <option value="pl">🇵🇱 Polski (PL)</option>
+                                <option value="en">🇬🇧 English (EN)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Szablon Wizualny CV</label>
+                            <select id="cvTemplate" class="form-select" onchange="updatePreview()">
+                                <option value="pro_qa_sidebar">⭐ Ultra Pro Sidebar (2-Kolumny)</option>
+                                <option value="ats_single_column">🎯 ATS-Proof Standard (100% Skaner ATS)</option>
+                                <option value="modern_tech">Nowoczesny Tech</option>
+                                <option value="executive">Elegancki Biznes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Silnik AI -->
+                    <div class="form-group">
+                        <label class="form-label">Dostawca Silnika AI</label>
+                        <select id="aiProvider" class="form-select">
+                            <option value="auto">Auto (Gemini / Ollama / Reguły)</option>
+                            <option value="gemini">Google Gemini API (Darmowy Tier)</option>
+                            <option value="ollama">Ollama (Lokalny LLM)</option>
+                            <option value="fallback">Silnik Regułowy (Bez AI)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-primary" onclick="runTailorProcess()" style="width: 100%; margin-top: 0.5rem;">
+                        <div class="spinner" id="tailorSpinner"></div>
+                        <span id="tailorBtnText">✨ Dopasuj CV (Weryfikacja Logiki QA)</span>
+                    </button>
+                </div>
+
+                <!-- ATS Widget -->
+                <div class="ats-widget" id="atsWidget">
+                    <div class="score-circle" id="scoreCircle">
+                        <div class="score-inner" id="scoreValue">92%</div>
+                    </div>
+                    <div class="score-info">
+                        <div class="score-title">QA & ATS Match Score</div>
+                        <div class="form-label" style="font-size: 0.8rem;">Weryfikacja Kompetencji Testera:</div>
+                        <div class="kw-badges" id="matchedBadges">
+                            <span class="kw-badge">Playwright</span>
+                            <span class="kw-badge">TypeScript</span>
+                            <span class="kw-badge">Postman</span>
+                            <span class="kw-badge">REST API</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="card" style="padding: 0.85rem 1.2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                    <div style="font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <span>Podgląd CV na Żywo</span>
+                        <span style="font-size: 0.72rem; background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500;">1:1 Pixel-Perfect</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <a href="/api/export/pdf" download class="btn-secondary" style="text-decoration:none; background: var(--accent-blue); color: white; border: none;">📥 Pobierz PDF (1:1)</a>
+                        <button class="btn-secondary" onclick="printPreviewIframe()">🖨️ Drukuj w Przeglądarce</button>
+                        <a href="/api/export/html" download class="btn-secondary" style="text-decoration:none;">💾 HTML</a>
+                    </div>
+                </div>
+                <div class="preview-frame-wrapper">
+                    <iframe id="previewIframe" class="cv-iframe" src="/preview/current?template=pro_qa_sidebar"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: GŁÓWNY PROFIL & PDF UPLOAD -->
+        <div id="tab-profile" class="tab-content">
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <!-- PDF Upload Card -->
+                <div class="card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border: 1px dashed var(--accent-blue);">
+                    <h2 class="section-h2">📥 Importuj Swoje Obecne CV z Pliku PDF</h2>
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Wybierz plik PDF ze swoim dotychczasowym CV. Aplikacja automatycznie odczyta tekst i przetworzy go na Twój Główny Profil Kandydata!
+                    </p>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="file" id="pdfFileInput" accept=".pdf" class="form-input" style="max-width: 400px; padding: 0.5rem;">
+                        <button class="btn-primary" onclick="uploadPdfCV()">
+                            <div class="spinner" id="pdfSpinner"></div>
+                            <span id="pdfBtnText">🚀 Zaimportuj CV z PDF</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visual Profile Editor Card -->
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                        <h2 class="section-h2">📋 Edytor Głównego Profilu Kandydata</h2>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn-secondary" onclick="toggleEditorMode('form')" id="btnEditForm">📝 Formularz Wizualny</button>
+                            <button class="btn-secondary" onclick="toggleEditorMode('json')" id="btnEditJson">💻 Kod JSON</button>
+                            <button class="btn-primary" onclick="saveProfileFromFormOrJson()">💾 Zapisz Profil Główny</button>
+                        </div>
+                    </div>
+
+                    <!-- Visual Form Editor -->
+                    <div id="editorFormContainer">
+                        <!-- Dane Podstawowe -->
+                        <div class="editor-section-title">
+                            <span>👤 Dane Podstawowe i Kontaktowe</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Imię i Nazwisko</label>
+                                <input type="text" id="formFullName" class="form-input" placeholder="Michał Kosowski">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tytuł Zawodowy</label>
+                                <input type="text" id="formTitle" class="form-input" placeholder="Software QA Engineer">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="formEmail" class="form-input" placeholder="mmkosowski94@gmail.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Telefon</label>
+                                <input type="text" id="formPhone" class="form-input" placeholder="518075716">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lokalizacja</label>
+                                <input type="text" id="formLocation" class="form-input" placeholder="Warsaw, Poland">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">LinkedIn URL</label>
+                                <input type="text" id="formLinkedin" class="form-input" placeholder="https://linkedin.com/in/michal-kosowski">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">GitHub URL</label>
+                                <input type="text" id="formGithub" class="form-input" placeholder="https://github.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Podsumowanie Zawodowe</label>
+                            <textarea id="formSummary" class="form-textarea" style="min-height: 110px;"></textarea>
+                        </div>
+
+                        <!-- Doświadczenie Zawodowe -->
+                        <div class="editor-section-title">
+                            <span>💼 Doświadczenie Zawodowe</span>
+                            <button class="btn-add-sm" onclick="addExperienceCard()">➕ Dodaj Stanowisko</button>
+                        </div>
+                        <div id="experienceCardsList"></div>
+
+                        <!-- Umiejętności -->
+                        <div class="editor-section-title">
+                            <span>🛠️ Umiejętności i Technologie</span>
+                            <button class="btn-add-sm" onclick="addSkillCard()">➕ Dodaj Kategorię Umiejętności</button>
+                        </div>
+                        <div id="skillsCardsList"></div>
+
+                        <!-- Języki Obce -->
+                        <div class="editor-section-title">
+                            <span>🌐 Języki Obce</span>
+                            <button class="btn-add-sm" onclick="addLanguageCard()">➕ Dodaj Język</button>
+                        </div>
+                        <div id="languagesCardsList"></div>
+                    </div>
+
+                    <!-- Raw JSON Textarea (Hidden by default) -->
+                    <div id="editorJsonContainer" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Kod JSON (źródło prawdy dla AI):</label>
+                            <textarea id="profileJsonEditor" class="form-textarea" style="min-height: 520px; font-family: monospace; font-size: 0.9rem; line-height: 1.5;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: USTAWIENIA AI -->
+        <div id="tab-settings" class="tab-content">
+            <div class="card" style="max-width: 650px; width: 100%; margin: 0 auto;">
+                <h2 class="section-h2">⚙️ Konfiguracja Dostawców AI</h2>
+                <div class="form-group">
+                    <label class="form-label">Klucz API Google Gemini (100% Darmowy)</label>
+                    <input type="password" id="geminiApiKey" class="form-input" placeholder="AIzaSy...">
+                    <small style="color: var(--text-muted); font-size: 0.78rem; margin-top: 0.2rem;">
+                        Pobierz darmowy klucz w <a href="https://aistudio.google.com/" target="_blank" style="color: var(--accent-blue);">Google AI Studio</a>.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Adres URL Ollama (Lokalny LLM)</label>
+                    <input type="text" id="ollamaUrl" class="form-input" value="http://localhost:11434">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nazwa Modelu Ollama</label>
+                    <input type="text" id="ollamaModel" class="form-input" value="llama3.2">
+                </div>
+                <button class="btn-primary" onclick="saveSettings()" style="margin-top: 1rem;">💾 Zapisz Ustawienia</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentProfileData = {};
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btn.classList.add('active');
+
+            if (tabId === 'profile') {
+                loadMasterProfileData();
+            }
+        }
+
+        function toggleEditorMode(mode) {
+            const formContainer = document.getElementById('editorFormContainer');
+            const jsonContainer = document.getElementById('editorJsonContainer');
+            const btnForm = document.getElementById('btnEditForm');
+            const btnJson = document.getElementById('btnEditJson');
+
+            if (mode === 'form') {
+                formContainer.style.display = 'block';
+                jsonContainer.style.display = 'none';
+                btnForm.classList.add('active');
+                btnJson.classList.remove('active');
+            } else {
+                formContainer.style.display = 'none';
+                jsonContainer.style.display = 'block';
+                btnJson.classList.add('active');
+                btnForm.classList.remove('active');
+            }
+        }
+
+        async function loadMasterProfileData() {
+            try {
+                const res = await fetch('/api/profile');
+                const data = await res.json();
+                currentProfileData = data;
+                
+                // Base Info
+                const pinfo = data.personal_info || {};
+                document.getElementById('formFullName').value = pinfo.full_name || "Michał Kosowski";
+                document.getElementById('formTitle').value = pinfo.title || "Software QA Engineer";
+                document.getElementById('formEmail').value = pinfo.email || "mmkosowski94@gmail.com";
+                document.getElementById('formPhone').value = pinfo.phone || "518075716";
+                document.getElementById('formLocation').value = pinfo.location || "Warsaw, Poland";
+                document.getElementById('formLinkedin').value = pinfo.linkedin || "";
+                document.getElementById('formGithub').value = pinfo.github || "";
+                document.getElementById('formSummary').value = data.summary || "";
+
+                // Render Dynamic Lists
+                renderExperienceList(data.experience || []);
+                renderSkillsList(data.skills || []);
+                renderLanguagesList(data.languages || []);
+
+                // Populate JSON Textarea
+                document.getElementById('profileJsonEditor').value = JSON.stringify(data, null, 2);
+            } catch (err) {
+                console.error("Błąd ładowania danych profilu", err);
+            }
+        }
+
+        /* Experience Dynamic Cards */
+        function renderExperienceList(expArray) {
+            const container = document.getElementById('experienceCardsList');
+            container.innerHTML = "";
+
+            expArray.forEach((job, index) => {
+                const card = document.createElement('div');
+                card.className = 'editor-card-item';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem;">
+                        <strong style="color: #60a5fa;">Stanowisko #${index + 1}</strong>
+                        <button class="btn-danger-sm" onclick="removeExperienceCard(${index})">🗑️ Usuń</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.6rem;">
+                        <div class="form-group">
+                            <label class="form-label">Nazwa Stanowiska</label>
+                            <input type="text" class="form-input exp-position" value="${escapeHtml(job.position || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Firma</label>
+                            <input type="text" class="form-input exp-company" value="${escapeHtml(job.company || '')}">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; margin-bottom: 0.6rem;">
+                        <div class="form-group">
+                            <label class="form-label">Data Rozpoczęcia</label>
+                            <input type="text" class="form-input exp-start" value="${escapeHtml(job.start_date || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Data Zakończenia</label>
+                            <input type="text" class="form-input exp-end" value="${escapeHtml(job.end_date || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Lokalizacja</label>
+                            <input type="text" class="form-input exp-location" value="${escapeHtml(job.location || '')}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Obowiązki / Osiągnięcia (Każdy punkt w nowej linii)</label>
+                        <textarea class="form-textarea exp-highlights" style="min-height: 90px;">${(job.highlights || []).join('\n')}</textarea>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addExperienceCard() {
+            if (!currentProfileData.experience) currentProfileData.experience = [];
+            currentProfileData.experience.push({
+                position: "Software QA Engineer",
+                company: "Nowa Firma S.A.",
+                start_date: "2023",
+                end_date: "Obecnie",
+                location: "Warsaw",
+                highlights: ["Wykonywanie testów automatycznych w Playwright i walidacja API."]
+            });
+            renderExperienceList(currentProfileData.experience);
+        }
+
+        function removeExperienceCard(index) {
+            currentProfileData.experience.splice(index, 1);
+            renderExperienceList(currentProfileData.experience);
+        }
+
+        /* Skills Dynamic Cards */
+        function renderSkillsList(skillsArray) {
+            const container = document.getElementById('skillsCardsList');
+            container.innerHTML = "";
+
+            skillsArray.forEach((cat, index) => {
+                const card = document.createElement('div');
+                card.className = 'editor-card-item';
+                const itemsStr = Array.isArray(cat.items) ? cat.items.join(', ') : (cat.items || '');
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem;">
+                        <strong style="color: #c084fc;">Kategoria Umiejętności #${index + 1}</strong>
+                        <button class="btn-danger-sm" onclick="removeSkillCard(${index})">🗑️ Usuń</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 0.8rem;">
+                        <div class="form-group">
+                            <label class="form-label">Nazwa Kategorii</label>
+                            <input type="text" class="form-input skill-cat-name" value="${escapeHtml(cat.category || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Umiejętności (Oddzielone przecinkami)</label>
+                            <input type="text" class="form-input skill-items" value="${escapeHtml(itemsStr)}">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addSkillCard() {
+            if (!currentProfileData.skills) currentProfileData.skills = [];
+            currentProfileData.skills.push({
+                category: "Nowa Kategoria",
+                items: ["Narzędzie 1", "Narzędzie 2"]
+            });
+            renderSkillsList(currentProfileData.skills);
+        }
+
+        function removeSkillCard(index) {
+            currentProfileData.skills.splice(index, 1);
+            renderSkillsList(currentProfileData.skills);
+        }
+
+        /* Languages Dynamic Cards */
+        function renderLanguagesList(langArray) {
+            const container = document.getElementById('languagesCardsList');
+            container.innerHTML = "";
+
+            langArray.forEach((l, index) => {
+                const card = document.createElement('div');
+                card.className = 'editor-card-item';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem;">
+                        <strong style="color: #34d399;">Język #${index + 1}</strong>
+                        <button class="btn-danger-sm" onclick="removeLanguageCard(${index})">🗑️ Usuń</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                        <div class="form-group">
+                            <label class="form-label">Język</label>
+                            <input type="text" class="form-input lang-name" value="${escapeHtml(l.language || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Poziom Zaawansowania</label>
+                            <input type="text" class="form-input lang-level" value="${escapeHtml(l.level || '')}">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addLanguageCard() {
+            if (!currentProfileData.languages) currentProfileData.languages = [];
+            currentProfileData.languages.push({
+                language: "Hiszpański",
+                level: "Podstawowy (A2)"
+            });
+            renderLanguagesList(currentProfileData.languages);
+        }
+
+        function removeLanguageCard(index) {
+            currentProfileData.languages.splice(index, 1);
+            renderLanguagesList(currentProfileData.languages);
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/"/g, '&quot;');
+        }
+
+        async function saveProfileFromFormOrJson() {
+            const isJsonVisible = document.getElementById('editorJsonContainer').style.display !== 'none';
+            let profileToSave = {};
+
+            if (isJsonVisible) {
+                try {
+                    profileToSave = JSON.parse(document.getElementById('profileJsonEditor').value);
+                } catch (err) {
+                    alert("Błąd formatu JSON: " + err.message);
+                    return;
+                }
+            } else {
+                profileToSave = jsonClone(currentProfileData);
+                if (!profileToSave.personal_info) profileToSave.personal_info = {};
+
+                profileToSave.personal_info.full_name = document.getElementById('formFullName').value || "Michał Kosowski";
+                profileToSave.personal_info.title = document.getElementById('formTitle').value || "Software QA Engineer";
+                profileToSave.personal_info.email = document.getElementById('formEmail').value || "";
+                profileToSave.personal_info.phone = document.getElementById('formPhone').value || "";
+                profileToSave.personal_info.location = document.getElementById('formLocation').value || "";
+                profileToSave.personal_info.linkedin = document.getElementById('formLinkedin').value || "";
+                profileToSave.personal_info.github = document.getElementById('formGithub').value || "";
+                profileToSave.summary = document.getElementById('formSummary').value || "";
+
+                // Collect Experience
+                const expCards = document.querySelectorAll('#experienceCardsList .editor-card-item');
+                const newExp = [];
+                expCards.forEach(card => {
+                    const pos = card.querySelector('.exp-position').value;
+                    const comp = card.querySelector('.exp-company').value;
+                    const start = card.querySelector('.exp-start').value;
+                    const end = card.querySelector('.exp-end').value;
+                    const loc = card.querySelector('.exp-location').value;
+                    const hlText = card.querySelector('.exp-highlights').value;
+                    const hls = hlText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+
+                    newExp.push({
+                        position: pos,
+                        company: comp,
+                        start_date: start,
+                        end_date: end,
+                        location: loc,
+                        highlights: hls
+                    });
+                });
+                profileToSave.experience = newExp;
+
+                // Collect Skills
+                const skillCards = document.querySelectorAll('#skillsCardsList .editor-card-item');
+                const newSkills = [];
+                skillCards.forEach(card => {
+                    const catName = card.querySelector('.skill-cat-name').value;
+                    const itemsText = card.querySelector('.skill-items').value;
+                    const items = itemsText.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+                    newSkills.push({
+                        category: catName,
+                        items: items
+                    });
+                });
+                profileToSave.skills = newSkills;
+
+                // Collect Languages
+                const langCards = document.querySelectorAll('#languagesCardsList .editor-card-item');
+                const newLangs = [];
+                langCards.forEach(card => {
+                    const lname = card.querySelector('.lang-name').value;
+                    const llevel = card.querySelector('.lang-level').value;
+                    if (lname) {
+                        newLangs.push({ language: lname, level: llevel });
+                    }
+                });
+                profileToSave.languages = newLangs;
+            }
+
+            try {
+                const res = await fetch('/api/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(profileToSave)
+                });
+                const result = await res.json();
+                alert(result.message || "Profil główny został pomyślnie zapisany!");
+                currentProfileData = profileToSave;
+                updatePreview();
+            } catch (err) {
+                alert("Błąd zapisu profilu: " + err.message);
+            }
+        }
+
+        function jsonClone(obj) {
+            return JSON.parse(JSON.stringify(obj || {}));
+        }
+
+        async function uploadPdfCV() {
+            const fileInput = document.getElementById('pdfFileInput');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Wybierz plik PDF ze swoim CV przed kliknięciem przycisku.");
+                return;
+            }
+
+            const btnText = document.getElementById('pdfBtnText');
+            const spinner = document.getElementById('pdfSpinner');
+            btnText.textContent = "Przetwarzanie pliku PDF...";
+            spinner.style.display = "block";
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const res = await fetch('/api/upload-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.status === "success") {
+                    alert("🎉 " + data.message);
+                    loadMasterProfileData();
+                    updatePreview();
+                } else {
+                    alert("Błąd: " + (data.message || "Nie udało się przetworzyć pliku PDF."));
+                }
+            } catch (err) {
+                alert("Błąd wysyłania pliku: " + err.message);
+            } finally {
+                btnText.textContent = "🚀 Zaimportuj CV z PDF";
+                spinner.style.display = "none";
+            }
+        }
+
+        async function runTailorProcess() {
+            const btnText = document.getElementById('tailorBtnText');
+            const spinner = document.getElementById('tailorSpinner');
+            btnText.textContent = "Analizowanie i Weryfikacja QA...";
+            spinner.style.display = "block";
+
+            const jobDescription = document.getElementById('jobDescription').value;
+            const targetRole = document.getElementById('targetRole').value;
+            const provider = document.getElementById('aiProvider').value;
+            const template = document.getElementById('cvTemplate').value;
+            const lang = document.getElementById('cvLanguage').value;
+
+            try {
+                const res = await fetch('/api/tailor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        job_description: jobDescription,
+                        target_role: targetRole,
+                        provider: provider,
+                        template: template,
+                        lang: lang
+                    })
+                });
+                const data = await res.json();
+
+                if (data.status === "success") {
+                    updatePreview();
+                    if (data.ats_analysis) {
+                        updateAtsWidget(data.ats_analysis);
+                    }
+                } else {
+                    alert("Informacja: " + (data.message || "Ukończono w trybie awaryjnym."));
+                }
+            } catch (err) {
+                alert("Błąd podczas dopasowywania przez AI: " + err.message);
+            } finally {
+                btnText.textContent = "✨ Dopasuj CV (Weryfikacja Logiki QA)";
+                spinner.style.display = "none";
+            }
+        }
+
+        function updateAtsWidget(analysis) {
+            const scoreVal = document.getElementById('scoreValue');
+            const scoreCircle = document.getElementById('scoreCircle');
+            const matchedBadges = document.getElementById('matchedBadges');
+
+            const score = analysis.match_score || 0;
+            scoreVal.textContent = score + "%";
+            scoreCircle.style.setProperty('--score-deg', (score * 3.6) + 'deg');
+
+            matchedBadges.innerHTML = "";
+            (analysis.matched_keywords || []).forEach(kw => {
+                const span = document.createElement('span');
+                span.className = 'kw-badge';
+                span.textContent = kw;
+                matchedBadges.appendChild(span);
+            });
+            (analysis.missing_keywords || []).forEach(kw => {
+                const span = document.createElement('span');
+                span.className = 'kw-badge missing';
+                span.textContent = 'brakujące: ' + kw;
+                matchedBadges.appendChild(span);
+            });
+        }
+
+        function updatePreview() {
+            const template = document.getElementById('cvTemplate').value;
+            const lang = document.getElementById('cvLanguage').value;
+            const iframe = document.getElementById('previewIframe');
+            iframe.src = '/preview/current?template=' + template + '&lang=' + lang + '&t=' + new Date().getTime();
+        }
+
+        function printPreviewIframe() {
+            const iframe = document.getElementById('previewIframe');
+            iframe.contentWindow.print();
+        }
+
+        async function saveSettings() {
+            const geminiKey = document.getElementById('geminiApiKey').value;
+            const ollamaUrl = document.getElementById('ollamaUrl').value;
+            const ollamaModel = document.getElementById('ollamaModel').value;
+
+            const res = await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gemini_key: geminiKey, ollama_url: ollamaUrl, ollama_model: ollamaModel })
+            });
+            const data = await res.json();
+            alert(data.message || "Ustawienia zapisane!");
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/settings');
+                const s = await res.json();
+                if (s.gemini_key) document.getElementById('geminiApiKey').value = s.gemini_key;
+                if (s.ollama_url) document.getElementById('ollamaUrl').value = s.ollama_url;
+                if (s.ollama_model) document.getElementById('ollamaModel').value = s.ollama_model;
+            } catch(e){}
+        });
+    </script>
+</body>
+</html>
