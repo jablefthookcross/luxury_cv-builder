@@ -9,7 +9,7 @@
     "linkedin": "https://linkedin.com/in/michal-kosowski",
     "github": "https://github.com"
   },
-  "summary": "QA Engineer z ponad 5-letnim doświadczeniem w zapewnianiu jakości aplikacji webowych i mobilnych poprzez testy manualne, API oraz automatyczne w Playwright (TypeScript/JavaScript).",
+  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w zapewnianiu jakości cyfrowych platform webowych i mobilnych poprzez testy manualne, eksploracyjne, API oraz automatyzację. Specjalista w analizie kryteriów akceptacji (Acceptance Criteria), weryfikacji logów urządzeń, testach funkcjonalnych i regresyjnych z wykorzystaniem narzędzi Jira, Xray oraz Postman, z praktycznym doświadczeniem w automatyzacji w Playwright (TypeScript).",
   "skills": [
     {
       "category": "Programowanie & Automatyzacja",
@@ -27,25 +27,29 @@
       "category": "Testowanie & API",
       "items": [
         "Manual Testing",
-        "Functional Testing",
+        "Mobile Testing",
+        "Exploratory Testing",
+        "User Stories Analysis",
         "Regression Testing",
-        "E2E Testing",
-        "REST/SOAP API Testing",
+        "REST API Testing",
         "Postman",
-        "Swagger"
+        "Swagger",
+        "ISTQB Standards"
       ]
     },
     {
-      "category": "Narzędzia & Systemy",
+      "category": "Narzędzia & Mobilne Debugowanie",
       "items": [
-        "Jira (AIO Tests / Xray)",
+        "Android Studio",
+        "Xcode",
+        "Mobile Device Logs",
+        "TestRail",
+        "Jira (AIO / Xray)",
         "Confluence",
         "Kibana",
         "Docker",
         "WSL",
-        "Figma",
-        "Claude Code",
-        "GitHub Copilot"
+        "Figma"
       ]
     }
   ],
@@ -57,33 +61,35 @@
       "start_date": "2022",
       "end_date": "Obecnie",
       "highlights": [
+        "Wykonywanie testów manualnych, eksploracyjnych i regresyjnych aplikacji webowych oraz mobilnych w oparciu o wymagania i User Stories.",
         "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
         "Przeprowadzanie testów REST API oraz analiza dokumentacji w Postman i Swagger w celu walidacji integracji backendowych.",
-        "Wykonywanie testów funkcjonalnych, regresyjnych, integracyjnych i eksploracyjnych na platformach webowych i mobilnych.",
+        "Analiza logów aplikacji mobilnych (Android Studio / Xcode logcat) i weryfikacja kryteriów akceptacji.",
+        "Aktywny udział w wydarzeniach Scrum i ścisła współpraca z programistami, PO i BA w zakresie jakości wydań.",
         "Dokumentowanie błędów i scenariuszy testowych w Jira (AIO Tests/Xray) oraz Confluence."
       ]
     },
     {
       "position": "Test And Analysis Engineer",
-      "company": "Sii Polska Sp. z o.o.",
+      "company": "Sii Polska Sp. z o.o. (Freelance)",
       "location": "Warsaw",
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o backlog.",
-        "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z SQL Developer.",
-        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira."
+        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu.",
+        "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
+        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira w metodologii Scrum."
       ]
     },
     {
       "position": "Software tester",
-      "company": "Euroloan Group",
+      "company": "Euroloan Group (Freelance)",
       "location": "Warsaw",
       "start_date": "2019-07",
       "end_date": "2021-01",
       "highlights": [
-        "Kompleksowe testy UI, funkcjonalne i regresyjne systemów E-commerce.",
-        "Tworzenie i wykonywanie scenariuszy testowych."
+        "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych na platformach webowych i mobilnych.",
+        "Projektowanie, wykonywanie i optymalizacja przypadków i scenariuszy testowych zgodnych z wymaganiami biznesowymi."
       ]
     }
   ],
