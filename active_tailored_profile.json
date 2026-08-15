@@ -9,47 +9,41 @@
     "linkedin": "https://linkedin.com/in/michal-kosowski",
     "github": "https://github.com"
   },
-  "summary": "QA Engineer with 5+ years of experience delivering quality assurance for web and mobile applications through manual, exploratory, API, and automated testing. Skilled in acceptance criteria verification, mobile device log analysis (Android Studio / Xcode), REST API validation (Postman / Swagger), and defect tracking in Jira, Xray, and TestRail within Agile/Scrum environments. Hands-on experience developing test automation scripts using Playwright in TypeScript.",
+  "summary": "QA Engineer with 5+ years of experience in manual, integration, and API testing (REST & SOAP). Proficient in backend verification and database testing using SQL, test scenario design, and end-to-end defect tracking in Jira and Xray within Agile/Scrum methodologies. Experienced in preparing comprehensive test documentation, plans, and summary reports for enterprise systems. Complemented by test automation experience using Playwright in TypeScript.",
   "skills": [
-    {
-      "category": "Programming & Automation",
-      "items": [
-        "Playwright",
-        "TypeScript",
-        "JavaScript",
-        "SQL",
-        "Git",
-        "GitLab CI/CD",
-        "GitHub Actions"
-      ]
-    },
     {
       "category": "Testing & API",
       "items": [
-        "Manual Testing",
-        "Mobile Testing",
-        "Exploratory Testing",
-        "Acceptance Criteria",
-        "Regression Testing",
-        "REST API Testing",
+        "SOAP & REST API Testing",
+        "SoapUI",
         "Postman",
-        "Swagger",
+        "SQL Database Verification",
+        "Integration Testing",
+        "Functional Testing",
+        "Regression Testing",
         "ISTQB Standards"
       ]
     },
     {
-      "category": "Tools & Mobile Debugging",
+      "category": "Tools & Test Management",
       "items": [
-        "Android Studio",
-        "Xcode",
-        "Mobile Device Logs",
-        "TestRail",
-        "Jira (AIO / Xray)",
+        "Jira (Xray)",
         "Confluence",
-        "Kibana",
-        "Docker",
-        "WSL",
-        "Figma"
+        "Git",
+        "SQL Developer / DBeaver",
+        "Test Documentation & Reporting",
+        "Docker"
+      ]
+    },
+    {
+      "category": "Automation & Languages",
+      "items": [
+        "SQL",
+        "Playwright",
+        "TypeScript",
+        "JavaScript",
+        "GitLab CI/CD",
+        "GitHub Actions"
       ]
     }
   ],
@@ -61,12 +55,10 @@
       "start_date": "2022",
       "end_date": "Present",
       "highlights": [
-        "Performed manual, exploratory, and regression testing for web and mobile applications based on user stories and requirements.",
-        "Designed, executed, and maintained automated E2E test scripts for web applications using Playwright (TypeScript/JavaScript).",
-        "Conducted REST API testing and documentation analysis using Postman and Swagger to validate backend integration.",
-        "Analyzed mobile application logs (Android Studio / Xcode logcat) and verified business acceptance criteria.",
-        "Active participation in Scrum ceremonies collaborating closely with developers, POs, and BAs.",
-        "Documented defects and test scenarios using Jira (AIO Tests/Xray) and Confluence."
+        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
+        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
+        "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
+        "Tworzenie planów testów, scenariuszy testowych oraz raportów z wykonania w Jira (Xray) i Confluence w zespole Agile/Scrum."
       ]
     },
     {
@@ -76,9 +68,9 @@
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Conducted manual and functional testing of HR web applications based on backlog requirements.",
-        "Executed backend and API tests using Postman and performed data validation using SQL Developer.",
-        "Reported bugs with clear reproduction steps and tracked defects in Jira within Scrum methodology."
+        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu.",
+        "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
+        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum."
       ]
     },
     {
@@ -88,8 +80,8 @@
       "start_date": "2019-07",
       "end_date": "2021-01",
       "highlights": [
-        "Conducted comprehensive UI, functional, and regression testing for digital systems across web and mobile platforms.",
-        "Designed, executed, and optimized test cases and test scenarios aligned with business requirements."
+        "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych na platformach webowych i mobilnych.",
+        "Projektowanie, wykonywanie i optymalizacja przypadków i scenariuszy testowych zgodnych z wymaganiami biznesowymi."
       ]
     }
   ],

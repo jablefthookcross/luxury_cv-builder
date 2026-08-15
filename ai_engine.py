@@ -172,15 +172,15 @@ Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
         english_indicators = ["requirements", "responsibilities", "experience", "skills", "must have", "nice to have", "proficient", "knowledge of"]
         is_english_offer = sum(1 for kw in english_indicators if kw in job_lower) >= 2
 
-        # Role & Technology Detection
-        is_mobile = any(k in job_lower for k in ["mobile", "android", "xcode", "ios", "mobil"])
-        has_soap = "soap" in job_lower or "soapui" in job_lower
-        has_sql = "sql" in job_lower
-        has_xray = "xray" in job_lower
-        has_postman = "postman" in job_lower
-        has_testrail = "testrail" in job_lower
-        has_finance = any(k in job_lower for k in ["finan", "broker", "invest", "giełd"])
-        has_istqb = "istqb" in job_lower
+        # Role & Technology Detection with Exact Word Boundaries
+        is_mobile = bool(re.search(r'\b(mobile|android|xcode|ios|logcat|mobilne|mobilnych)\b', job_lower))
+        has_soap = bool(re.search(r'\b(soap|soapui)\b', job_lower))
+        has_sql = bool(re.search(r'\b(sql)\b', job_lower))
+        has_xray = bool(re.search(r'\b(xray)\b', job_lower))
+        has_postman = bool(re.search(r'\b(postman)\b', job_lower))
+        has_testrail = bool(re.search(r'\b(testrail)\b', job_lower))
+        has_finance = bool(re.search(r'\b(finan|broker|invest|giełd)\b', job_lower))
+        has_istqb = bool(re.search(r'\b(istqb)\b', job_lower))
 
         if target_role:
             tailored["personal_info"]["title"] = target_role
@@ -190,6 +190,9 @@ Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
 
         # Category 1: Testing & API
         testing_items = []
+        if is_mobile:
+            testing_items.append("Mobile Testing")
+
         if has_soap:
             testing_items.extend(["SOAP & REST API Testing", "SoapUI", "Postman"])
         elif has_postman:
@@ -201,8 +204,10 @@ Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
             testing_items.append("SQL Database Verification")
 
         testing_items.extend(["Integration Testing", "Functional Testing", "Regression Testing", "ISTQB Standards"])
-        if is_mobile:
-            testing_items.insert(0, "Mobile Testing")
+        
+        # STRIP BUCKET C: If not mobile, strip Mobile Testing!
+        if not is_mobile:
+            testing_items = [t for t in testing_items if t != "Mobile Testing"]
 
         new_skills.append({
             "category": "Testing & API",
