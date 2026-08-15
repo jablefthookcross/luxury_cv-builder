@@ -9,16 +9,15 @@
     "linkedin": "https://linkedin.com/in/michal-kosowski",
     "github": "https://github.com"
   },
-  "summary": "Software QA Engineer with 5+ years of experience in manual, exploratory, and mobile application testing. Specialized in Acceptance Criteria verification, GUI usability testing, and mobile log analysis using Android Studio and Xcode. Proficient in defect tracking via Jira, Xray, and TestRail within Agile/Scrum delivery teams. Backed by hands-on experience in REST API validation (Postman/Swagger) and Playwright automation in TypeScript.",
+  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym oraz eksploracyjnym aplikacji mobilnych i webowych. Specjalizuje się w weryfikacji kryteriów akceptacji (Acceptance Criteria), testach GUI & Usability oraz analizie logów urządzeń mobilnych (Android Studio, Xcode). Sprawnie zarządza błędami i dokumentacją testową w narzędziach Jira, Xray oraz TestRail w zespole Agile/Scrum. Posiada dodatkowe doświadczenie w walidacji REST API (Postman/Swagger) oraz automatyzacji w Playwright (TypeScript).",
   "skills": [
     {
       "category": "Testowanie & API",
       "items": [
         "Mobile Testing",
-        "REST API Testing",
-        "Postman",
-        "Integration Testing",
-        "Functional Testing",
+        "Exploratory Testing",
+        "User Stories Analysis",
+        "Acceptance Criteria",
         "Regression Testing",
         "ISTQB Standards"
       ]
@@ -26,13 +25,13 @@
     {
       "category": "Narzędzia & Zarządzanie Testami",
       "items": [
-        "Jira",
-        "Confluence",
-        "Git",
-        "Test Documentation & Reporting",
         "Android Studio",
         "Xcode",
         "Mobile Device Logs",
+        "Jira",
+        "TestRail",
+        "Confluence",
+        "Git",
         "Docker"
       ]
     },
@@ -52,37 +51,37 @@
     {
       "position": "Software tester / QA Automation",
       "company": "Benefit Systems S.A.",
-      "location": "Warsaw",
+      "location": "Warszawa",
       "start_date": "2022",
       "end_date": "Obecnie",
       "highlights": [
-        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
-        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
-        "Tworzenie planów testów, scenariuszy testowych oraz raportów z wykonania w Jira (Xray) i Confluence w zespole Agile/Scrum.",
-        "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript)."
+        "Wykonywanie testów manualnych, eksploracyjnych i regresyjnych aplikacji mobilnych (iOS & Android) oraz webowych.",
+        "Analiza logów urządzeń mobilnych przy użyciu Android Studio oraz Xcode logcat w celu izolacji błędów klienta.",
+        "Weryfikacja User Stories oraz kryteriów akceptacji na poszczególnych buildach aplikacji mobilnych.",
+        "Zgłaszanie defektów i zarządzanie przypadkami testowymi w narzędziach Jira oraz TestRail w zespole Agile/Scrum."
       ]
     },
     {
       "position": "Test And Analysis Engineer",
       "company": "Sii Polska Sp. z o.o. (Freelance)",
-      "location": "Warsaw",
+      "location": "Warszawa",
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
-        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum.",
-        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu."
+        "Przeprowadzanie testów manualnych, funkcjonalnych i eksploracyjnych modułów aplikacji webowych i mobilnych.",
+        "Wykonywanie cykli testów regresyjnych oraz dokumentowanie kroków reprodukcji błędów w Jira.",
+        "Walidacja kryteriów akceptacji przed wdrożeniami produkcyjnymi."
       ]
     },
     {
       "position": "Software tester",
       "company": "Euroloan Group (Freelance)",
-      "location": "Warsaw",
+      "location": "Warszawa",
       "start_date": "2019-07",
       "end_date": "2021-01",
       "highlights": [
-        "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych na platformach webowych i mobilnych.",
-        "Projektowanie, wykonywanie i optymalizacja przypadków i scenariuszy testowych zgodnych z wymaganiami biznesowymi."
+        "Przeprowadzanie kompleksowych testów funkcjonalnych i użytecznościowych aplikacji mobilnych i webowych.",
+        "Projektowanie i utrzymanie zestawów testowych dla wydań mobilnych."
       ]
     }
   ],
