@@ -1,7 +1,7 @@
 """
 VitaeCraft AI - AI Engine Module
 Handles CV tailoring using Google Gemini API, Ollama (Local LLM), or a Keyword Fallback Engine.
-Enforces realistic, candidate-authentic domain mapping, dynamic domain cleaning, and concise skill tags.
+Enforces Universal Relevance Filtering, 3 Buckets Selection, Smart Content Budgeting, and Language Sync.
 """
 
 import os
@@ -9,17 +9,30 @@ import re
 import json
 import urllib.request
 import urllib.error
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, Set
 
 ANTI_AI_PROMPT_DIRECTIVE = """
-Rygorystyczne Zasady Pisania (Język Polski / Angielski):
-1. Piszesz naturalnym, profesjonalnym, bezpośrednim i autentycznym głosem doświadczonego inżyniera QA.
-2. ZAKAZ UŻYWANIA sztucznych zwrotów AI i korpo-jargonu, takich jak: "zagłębił się w", "jest świadectwem", "tkanina sukcesu", "transformacyjna podróż", "synergiczne rozwiązania", "przełomowy projekt", "pasjonat kodu".
-3. DYNAMIC DOMAIN CLEANING: Nie przenoś nazw konkretnych branż (np. "sektor finansowy", "biura maklerskie", "e-commerce") do sekcji Summary ani Skills, CHYBA ŻE branża ta jest wprost wymagana w wklejonej ofercie pracy. W przeciwnym razie używaj ogólnych sformułowań (np. "aplikacje o wysokim stopniu złożoności", "rozwój cyfrowych platform web i mobile").
-4. MOBILE TESTING & DEBUGGING FOCUS: Jeśli oferta dotyczy stanowiska "Manual Tester" lub "Mobile Tester" i wymaga narzędzi do debugowania (np. Android Studio, Xcode, logi urządzeń), WYEKSPONUJ te narzędzia na samym początku sekcji Narzędzia & Systemy oraz w spisie umiejętności.
-5. FORMATOWANIE TAGÓW (SKILLS): Skracaj nazwy umiejętności w tagach/pigułkach do maksymalnie 2-3 wyrazów (np. zamień "Techniki testowania wg standardu ISTQB" na "ISTQB Standards", a "Testowanie Aplikacji Mobilnych (Web & Mobile)" na "Mobile Testing"), aby uniknąć rozbijania layoutu w lewej kolumnie.
-6. STRICT ROLE ALIGNMENT: Jeśli oferta dotyczy głównie testów manualnych, w sekcji Summary stawiaj na pierwszym miejscu testy eksploracyjne, weryfikację kryteriów akceptacji (Acceptance Criteria), analizę logów i zgłaszanie błędów, a automatyzację (Playwright) traktuj jako dodatek/uzupełnienie.
-7. NIE zmyślaj stopni naukowych, uczelni ani oficjalnych certyfikatów (np. nie wpisuj certyfikatu ISTQB, jeśli kandydat go nie posiada; używaj tagu "ISTQB Standards").
+GŁÓWNA LOGIKA SELEKCJI DANYCH I BUDŻETOWANIA TREŚCI (CORE RULES):
+
+1. ZASADA 3 KOSZYKÓW DLA UMIEJĘTNOŚCI I NARZĘDZI (3 BUCKETS SELECTION):
+   - KOSZYK A (MUST HAVE): Technologie i umiejętności wprost wymienione w ofercie (w sekcjach wymagania / technologie / zakres zadań). Te elementy MUSZĄ znaleźć się na samej górze sekcji Skills, Summary oraz w doświadczeniu.
+   - KOSZYK B (NICE TO HAVE & VALUE ADD): Twarde umiejętności kandydata z profilu, które wspierają profil oferty (np. znajomość automatyzacji w Playwright przy ofercie manualnej, testy API, SQL, weryfikacja logów, standaryzacja ISTQB). Umieść je jako uzupełnienie.
+   - KOSZYK C (IRRELEVANT / NOISE - KATEGORYCZNY ZAKAZ): Narzędzia i domeny całkowicie niezwiązane z analizowaną ofertą (np. Android Studio / Xcode przy ofercie czysto webowej; specyficzna terminologia domenowa typu Brokerage / Finanse / E-commerce, gdy oferta tego nie wymaga). BEZWZGLĘDNIE USUŃ JE Z DANEGO CV.
+
+2. ŚCISŁY LIMIT DŁUGOŚCI (CONTENT BUDGETING):
+   - Sekcja Skills: Maksymalnie 6-8 najważniejszych tagów na kategorię. Liczy się trafność, a nie objętość. Tagi muszą być krótkie (1–3 słowa, np. Postman, REST API, Mobile Testing, ISTQB Standards).
+   - Professional Summary: Dokładnie 3-4 zwarte, techniczne zdania:
+     * Zdanie 1: Rola, lata doświadczenia i główne domeny pasujące do oferty (bez korpo-żargonu i AI-slopu typu "delivering quality assurance").
+     * Zdanie 2: Główne technologie z KOSZYKA A i typy testów pasujące do projektu.
+     * Zdanie 3: Narzędzia do zgłaszania błędów, CI/CD oraz metodologia (Agile/Scrum).
+     * Zdanie 4 (opcjonalnie): Dodatkowy atut z KOSZYKA B (np. automatyzacja w Playwright, bazy danych SQL, znajomość norm testowania).
+
+3. DYNAMICZNA ADAPTACJA DOŚWIADCZENIA (WORK EXPERIENCE):
+   - W punktach (bullet points) przy poszczególnych firmach zachowaj realne projekty kandydata, ale zmień kolejność: punkty zawierające technologie z KOSZYKA A przesuwaj na 1. i 2. miejsce na liście dla danego stanowiska.
+
+4. DOPASOWANIE JĘZYKA (LANGUAGE SYNC):
+   - Jeśli oferta jest po angielsku -> wygeneruj całą treść CV w 100% po angielsku.
+   - Jeśli oferta jest po polsku -> zachowaj angielskie nazewnictwo techniczne (np. Exploratory Testing, Acceptance Criteria, E2E Tests), ale opisy wygeneruj w języku polskim.
 """
 
 class AIEngine:
@@ -75,8 +88,8 @@ class AIEngine:
             return False
 
     def _build_prompt(self, master_profile: Dict[str, Any], job_description: str, target_role: str) -> str:
-        return f"""Jesteś doświadczonym Rekruterem IT i Ekspertem Tworzenia Technicznych CV dla Inżynierów QA.
-Twoim zadaniem jest dopasowanie Głównego Profilu Kandydata do podanej Oferty Pracy.
+        return f"""Jesteś doświadczonym Rekruterem IT i Ekspertem Tworzenia Technicznych CV dla dowolnych ról IT (QA, Automation, Manual, Mobile, Pentest, Fullstack).
+Twoim zadaniem jest dopasowanie Głównego Profilu Kandydata do podanej Oferty Pracy z zastosowaniem uniwersalnych zasad Relevance Filtering & Smart Content Budgeting.
 
 {ANTI_AI_PROMPT_DIRECTIVE}
 
@@ -92,11 +105,15 @@ Główny Profil Kandydata (JSON):
 {json.dumps(master_profile, ensure_ascii=False, indent=2)}
 \"\"\"
 
-INSTRUKCJA:
-1. Zastosuj DYNAMIC DOMAIN CLEANING: Usunięcie starych branż (np. finanse, e-commerce), jeśli oferta ich nie wymaga.
-2. MOBILE & MANUAL FOCUS: Jeśli oferta to Manual Tester / Mobile, postaw na pierwszym miejscu testy eksploracyjne, weryfikację kryteriów akceptacji i logi urządzeń (Android Studio, Xcode).
-3. TAG FORMATTING: Wszystkie tagi umiejętności muszą mieć max 2-3 wyrazy (np. "Mobile Testing", "ISTQB Standards", "Android Studio").
-4. NIE zmieniaj imienia (Michał Kosowski), danych kontaktowych ani nazw firm kandydata.
+INSTRUKCJA SELEKCJI I BUDŻETOWANIA:
+1. Zastosuj ZASADĘ 3 KOSZYKÓW:
+   - Koszyk A (MUST HAVE): Słowa z oferty -> góra sekcji Skills, Summary i początek punktów doświadczenia.
+   - Koszyk B (VALUE ADD): Pokrewne twarde umiejętności kandydata -> uzupełnienie.
+   - Koszyk C (NOISE): Narzędzia/domeny NIEZWIĄZANE z tą ofertą -> CAŁKOWICIE USUŃ z CV.
+2. LIMIT CONTENT BUDGETING: Max 6-8 tagów na kategorię skills (tagi max 1-3 słowa). Summary dokładnie 3-4 zwarte, techniczne zdania.
+3. DYNAMIC EXPERIENCE: Zmień kolejność bullet points w firmach, tak by te z technologiami z Koszyka A były na 1. i 2. miejscu.
+4. LANGUAGE SYNC: Jeśli oferta jest po angielsku -> wygeneruj CV w 100% po angielsku. Jeśli po polsku -> opisy po polsku z angielskimi pojęciami technicznymi.
+5. NIE zmieniaj imienia (Michał Kosowski), danych kontaktowych ani nazw firm kandydata.
 
 Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
 """
@@ -147,77 +164,114 @@ Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
             return self._clean_and_parse_json(text_response, master_profile)
 
     def _tailor_with_fallback(self, master_profile: Dict[str, Any], job_description: str, target_role: str = "") -> Dict[str, Any]:
-        """Domain-aware rule engine for precise QA job tailoring with dynamic cleaning."""
+        """Universal Rule Engine implementing 3-Buckets Selection & Content Budgeting."""
         tailored = json.loads(json.dumps(master_profile))
         job_lower = job_description.lower()
 
-        # Update candidate title if target role specified
-        if target_role:
-            tailored["personal_info"]["title"] = target_role
+        # Language Detection
+        english_indicators = ["requirements", "responsibilities", "experience", "skills", "must have", "nice to have"]
+        is_english_offer = sum(1 for kw in english_indicators if kw in job_lower) >= 2
 
-        # Detect offer characteristics
+        # Role & Domain Detection
+        is_mobile = any(k in job_lower for k in ["mobile", "android", "xcode", "ios", "mobil"])
         is_manual = "manual" in job_lower or "manualny" in job_lower
-        is_mobile = "mobile" in job_lower or "mobil" in job_lower or "android" in job_lower or "xcode" in job_lower
         has_testrail = "testrail" in job_lower
         has_finance = any(k in job_lower for k in ["finan", "broker", "invest", "giełd"])
         has_istqb = "istqb" in job_lower
 
-        # Dynamic Domain Cleaning & Skill Formatting
+        if target_role:
+            tailored["personal_info"]["title"] = target_role
+
+        # 1. BUCKETS SELECTION & SKILL BUDGETING
         for skill_cat in tailored.get("skills", []):
             cat_name = skill_cat.get("category", "")
             items = skill_cat.get("items", [])
 
-            # Format item tags to max 2-3 words
-            formatted_items = []
+            bucket_a = []
+            bucket_b = []
+
             for item in items:
-                if item == "Testowanie Aplikacji Mobilnych (Web & Mobile)" or item == "Testowanie Aplikacji Mobilnych":
-                    formatted_items.append("Mobile Testing")
-                elif "ISTQB" in item:
-                    formatted_items.append("ISTQB Standards")
-                elif item == "Sektor Finansowy & Brokerage Systems":
-                    if has_finance:
-                        formatted_items.append("Financial Systems")
+                item_lower = item.lower()
+                # Bucket C Removal: If Android Studio / Xcode but job is not mobile, strip it!
+                if ("android studio" in item_lower or "xcode" in item_lower or "mobile logs" in item_lower) and not is_mobile:
+                    continue
+                # Bucket C Removal: If financial/brokerage but job is not finance, strip it!
+                if ("finan" in item_lower or "broker" in item_lower) and not has_finance:
+                    continue
+
+                # Shorten tag formatting to 1-3 words
+                tag_name = item
+                if "ISTQB" in item:
+                    tag_name = "ISTQB Standards"
+                elif "Mobiln" in item or "Mobile Testing" in item:
+                    tag_name = "Mobile Testing"
+
+                if item_lower in job_lower or tag_name.lower() in job_lower:
+                    bucket_a.append(tag_name)
                 else:
-                    formatted_items.append(item)
+                    bucket_b.append(tag_name)
 
+            # Insert Bucket A items that might be missing from candidate profile if present in offer
             if is_mobile:
-                if "Android Studio" not in formatted_items:
-                    formatted_items.insert(0, "Android Studio")
-                if "Xcode" not in formatted_items:
-                    formatted_items.insert(1, "Xcode")
-                if "Mobile Logs" not in formatted_items and "Mobile Device Logs" not in formatted_items:
-                    formatted_items.insert(2, "Mobile Device Logs")
+                for mob_tool in ["Android Studio", "Xcode", "Mobile Device Logs"]:
+                    if mob_tool.lower() in job_lower and mob_tool not in bucket_a:
+                        bucket_a.append(mob_tool)
+            if has_testrail and "TestRail" not in bucket_a:
+                bucket_a.append("TestRail")
+            if has_istqb and "ISTQB Standards" not in bucket_a:
+                bucket_a.append("ISTQB Standards")
 
-            if has_testrail and "TestRail" not in formatted_items:
-                formatted_items.insert(0, "TestRail")
+            # Combine Bucket A (Must Have) + Bucket B (Value Add), cap at max 6-8 tags
+            combined = bucket_a + [b for b in bucket_b if b not in bucket_a]
+            skill_cat["items"] = combined[:8]
 
-            if has_istqb and "ISTQB Standards" not in formatted_items:
-                formatted_items.append("ISTQB Standards")
+        # 2. DYNAMIC WORK EXPERIENCE RE-ORDERING (Bucket A bullets moved to 1st & 2nd place)
+        for job in tailored.get("experience", []):
+            highlights = job.get("highlights", [])
+            scored_highlights = sorted(
+                highlights,
+                key=lambda h: sum(1 for word in re.findall(r'\b\w+\b', job_lower) if len(word) > 3 and word in h.lower()),
+                reverse=True
+            )
+            job["highlights"] = scored_highlights
 
-            skill_cat["items"] = formatted_items
-
-        # Re-sort skills by relevance
-        for skill_cat in tailored.get("skills", []):
-            items = skill_cat.get("items", [])
-            scored_items = sorted(items, key=lambda item: 1 if item.lower() in job_lower else 0, reverse=True)
-            skill_cat["items"] = scored_items
-
-        # Dynamic Summary Construction
-        if is_manual and is_mobile:
-            summary = "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym oraz eksploracyjnym aplikacji mobilnych i webowych. Specjalizuje się w weryfikacji kryteriów akceptacji (Acceptance Criteria), analizie logów urządzeń (Android Studio / Xcode), weryfikacji integracji REST API (Postman/Swagger) oraz zgłaszaniu i śledzeniu defektów w narzędziach Jira, Xray i TestRail w środowisku Agile/Scrum. Posiada praktyczne doświadczenie w automatyzacji testów w Playwright (TypeScript)."
-        elif is_manual:
-            summary = "Inżynier QA z ponad 5-letnim doświadczeniem w testach manualnych, eksploracyjnych oraz walidacji kryteriów akceptacji dla aplikacji webowych i mobilnych. Ekspert w zgłaszaniu defektów, analizie logów i dokumentowaniu przypadków testowych w narzędziach Jira, Xray i TestRail w zespole Agile/Scrum, wspierany znajomością testów REST API oraz automatyzacji w Playwright."
+        # 3. PROFESSIONAL SUMMARY: Exactly 3-4 tight technical sentences
+        if is_english_offer:
+            if is_mobile:
+                s1 = "Software QA Engineer with 5+ years of experience in manual, exploratory, and mobile application testing."
+                s2 = "Specialized in Acceptance Criteria verification, GUI usability testing, and mobile log analysis using Android Studio and Xcode."
+                s3 = "Proficient in defect tracking via Jira, Xray, and TestRail within Agile/Scrum delivery teams."
+                s4 = "Backed by hands-on experience in REST API validation (Postman/Swagger) and Playwright automation in TypeScript."
+            elif is_manual:
+                s1 = "Software QA Engineer with 5+ years of experience delivering quality assurance for web and mobile digital platforms."
+                s2 = "Expert in test case design, exploratory testing, and acceptance criteria verification."
+                s3 = "Experienced in defect management using Jira, Xray, and TestRail in Agile/Scrum environments."
+                s4 = "Complemented by REST API validation (Postman/Swagger) and Playwright automation capabilities."
+            else:
+                s1 = "Software QA Engineer with 5+ years of experience in test automation and quality assurance for web platforms."
+                s2 = "Skilled in E2E web automation using Playwright (TypeScript) and REST API validation."
+                s3 = "Proficient in CI/CD pipeline integration, Git, and defect tracking in Jira/Xray."
+                s4 = "Committed to delivering high-performance, resilient software products in Agile teams."
+            tailored["summary"] = f"{s1} {s2} {s3} {s4}"
         else:
-            summary = master_profile.get("summary", "")
+            if is_mobile:
+                s1 = "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym oraz eksploracyjnym aplikacji mobilnych i webowych."
+                s2 = "Specjalizuje się w weryfikacji kryteriów akceptacji (Acceptance Criteria), testach GUI & Usability oraz analizie logów urządzeń mobilnych (Android Studio, Xcode)."
+                s3 = "Sprawnie zarządza błędami i dokumentacją testową w narzędziach Jira, Xray oraz TestRail w zespole Agile/Scrum."
+                s4 = "Posiada dodatkowe doświadczenie w walidacji REST API (Postman/Swagger) oraz automatyzacji w Playwright (TypeScript)."
+            elif is_manual:
+                s1 = "Inżynier QA z ponad 5-letnim doświadczeniem w testach manualnych, eksploracyjnych oraz walidacji wymagań dla aplikacji cyfrowych."
+                s2 = "Ekspert w projektowaniu przypadków testowych, weryfikacji kryteriów akceptacji oraz testach regresyjnych."
+                s3 = "Odpowiedzialny za śledzenie błędów i tworzenie dokumentacji w Jira, Xray i TestRail w środowisku Agile/Scrum."
+                s4 = "Wspierany praktyczną znajomością testów REST API (Postman/Swagger) oraz automatyzacji w Playwright."
+            else:
+                s1 = "Inżynier QA z ponad 5-letnim doświadczeniem w zapewnianiu jakości oraz automatyzacji testów aplikacji webowych i mobilnych."
+                s2 = "Specjalizuje się w automatyzacji E2E w Playwright (TypeScript) oraz kompleksowych testach REST API."
+                s3 = "Pracuje w oparciu o rurociągi CI/CD (GitLab CI/GitHub Actions) i metodologię Agile/Scrum z narzędziami Jira i Xray."
+                s4 = "Zorientowany na dostarczanie niezawodnego i wydajnego oprogramowania zgodnego z wymaganiami biznesowymi."
+            tailored["summary"] = f"{s1} {s2} {s3} {s4}"
 
-        # Apply domain cleaning: only include finance/brokerage if in job description
-        if not has_finance:
-            summary = summary.replace("ze szczególnym uwzględnieniem rozwiązań dla sektora finansowego i biur maklerskich (Brokerage). ", "")
-            summary = summary.replace("sektora finansowego i biur maklerskich", "rozwijania cyfrowych platform o wysokiej złożoności")
-
-        tailored["summary"] = summary
         tailored["certifications"] = []
-
         return tailored
 
     def _clean_and_parse_json(self, text: str, fallback: Dict[str, Any]) -> Dict[str, Any]:
