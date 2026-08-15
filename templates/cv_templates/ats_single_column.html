@@ -132,8 +132,8 @@
         <div class="title">{{ data.personal_info.title }}</div>
         <div class="contact-line">
             {% if data.personal_info.email %}<span>Email: {{ data.personal_info.email }}</span>{% endif %}
-            {% if data.personal_info.phone %}<span>Tel: {{ data.personal_info.phone }}</span>{% endif %}
-            {% if data.personal_info.location %}<span>Lokalizacja: {{ data.personal_info.location }}</span>{% endif %}
+            {% if data.personal_info.phone %}<span>{% if lang == 'en' %}Phone:{% else %}Tel:{% endif %} {{ data.personal_info.phone }}</span>{% endif %}
+            {% if data.personal_info.location %}<span>{% if lang == 'en' %}Location:{% else %}Lokalizacja:{% endif %} {{ 'Warsaw, Poland' if lang == 'en' and ('Warszaw' in data.personal_info.location or 'Warsaw' in data.personal_info.location) else data.personal_info.location }}</span>{% endif %}
             {% if data.personal_info.linkedin %}<span>LinkedIn: <a href="{{ data.personal_info.linkedin }}">{{ data.personal_info.linkedin }}</a></span>{% endif %}
             {% if data.personal_info.github %}<span>GitHub: <a href="{{ data.personal_info.github }}">{{ data.personal_info.github }}</a></span>{% endif %}
         </div>
@@ -153,7 +153,7 @@
         <div class="exp-item">
             <div class="exp-top">
                 <div class="role">{{ job.position }}</div>
-                <div class="dates">{{ job.start_date }} – {{ job.end_date }} | {{ job.location }}</div>
+                <div class="dates">{{ job.start_date }} – {% if lang == 'en' and job.end_date == 'Obecnie' %}Present{% else %}{{ job.end_date }}{% endif %} | {{ 'Warsaw, Poland' if lang == 'en' and ('Warszaw' in job.location or 'Warsaw' in job.location) else job.location }}</div>
             </div>
             <div class="company">{{ job.company }}</div>
             {% if job['highlights'] %}

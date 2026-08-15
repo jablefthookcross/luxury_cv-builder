@@ -173,7 +173,6 @@
             margin-bottom: 1.5rem;
         }
 
-        /* Fixed Row Layout: Role + Date on Row 1, Company on Row 2 */
         .exp-top-row {
             display: flex;
             justify-content: space-between;
@@ -262,7 +261,7 @@
                     <li class="sb-list-item">📧 {{ data.personal_info.email }}</li>
                     {% endif %}
                     {% if data.personal_info.location %}
-                    <li class="sb-list-item">📍 {{ data.personal_info.location }}</li>
+                    <li class="sb-list-item">📍 {{ 'Warsaw, Poland' if lang == 'en' and ('Warszaw' in data.personal_info.location or 'Warsaw' in data.personal_info.location) else data.personal_info.location }}</li>
                     {% endif %}
                 </ul>
             </div>
@@ -300,7 +299,13 @@
                 <div class="sb-sec-title">{% if lang == 'en' %}Languages{% else %}Języki{% endif %}</div>
                 <ul class="sb-list">
                     {% for lang_item in data.languages %}
-                    <li class="sb-list-item">🌐 <strong>{{ lang_item.language }}:</strong>&nbsp;{{ lang_item.level }}</li>
+                    <li class="sb-list-item">🌐 
+                        {% if lang == 'en' %}
+                            <strong>{{ 'Polish' if 'Polsk' in lang_item.language else lang_item.language }}:</strong>&nbsp;{{ 'Native' if 'Ojczyst' in lang_item.level or 'Native' in lang_item.level else 'Full Professional (C2)' if 'Bieg' in lang_item.level or 'Professional' in lang_item.level else lang_item.level }}
+                        {% else %}
+                            <strong>{{ 'Polski' if 'Polish' in lang_item.language or 'Polsk' in lang_item.language else lang_item.language }}:</strong>&nbsp;{{ 'Ojczysty (Native)' if 'Native' in lang_item.level or 'Ojczyst' in lang_item.level else 'Biegły (Professional)' if 'Professional' in lang_item.level or 'Bieg' in lang_item.level else lang_item.level }}
+                        {% endif %}
+                    </li>
                     {% endfor %}
                 </ul>
             </div>
@@ -328,7 +333,7 @@
                 <div class="exp-item">
                     <div class="exp-top-row">
                         <div class="exp-role">{{ job.position }}</div>
-                        <div class="exp-meta">{{ job.start_date }} – {{ job.end_date }} | {{ job.location }}</div>
+                        <div class="exp-meta">{{ job.start_date }} – {% if lang == 'en' and job.end_date == 'Obecnie' %}Present{% else %}{{ job.end_date }}{% endif %} | {{ 'Warsaw, Poland' if lang == 'en' and ('Warszaw' in job.location or 'Warsaw' in job.location) else job.location }}</div>
                     </div>
                     <div class="exp-company">{{ job.company }}</div>
                     {% if job['highlights'] %}

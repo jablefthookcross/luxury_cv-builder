@@ -8,7 +8,6 @@ import json
 import re
 from typing import Dict, Any, List
 
-# List of forbidden AI buzzwords and robotic passive phrases
 PROHIBITED_AI_BUZZWORDS = [
     "zagłębił się", "zagłębiła się", "jest świadectwem", "tkanina sukcesu",
     "transformacyjna podróż", "synergiczne rozwiązania", "przełomowy projekt",
@@ -18,17 +17,13 @@ PROHIBITED_AI_BUZZWORDS = [
 ]
 
 MOBILE_KEYWORDS = ["android studio", "xcode", "mobile device logs", "mobile testing", "logcat"]
+BACKEND_SOAP_KEYWORDS = ["soapui", "soap api testing", "soap & rest api testing", "sql database verification"]
 
 class QALogicEngine:
     @staticmethod
     def audit_anti_ai_and_ats(profile: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Audits profile for Anti-AI jargon presence and ATS readability compliance.
-        Returns score (0-100%) and detailed audit status.
-        """
         full_text = json.dumps(profile, ensure_ascii=False).lower()
         
-        # 1. Anti-AI Audit
         detected_buzzwords = []
         for word in PROHIBITED_AI_BUZZWORDS:
             if word in full_text:
@@ -37,7 +32,6 @@ class QALogicEngine:
         ai_score = 100 - (len(detected_buzzwords) * 20)
         ai_score = max(ai_score, 0)
 
-        # 2. ATS Readiness Audit
         pinfo = profile.get("personal_info", {})
         ats_checks = {
             "has_full_name": bool(pinfo.get("full_name") and pinfo["full_name"] != "Kandydat"),
@@ -64,12 +58,11 @@ class QALogicEngine:
     def audit_and_refine_profile(profile: Dict[str, Any], lang: str = "pl", job_text: str = "") -> Dict[str, Any]:
         """
         Audits candidate profile from a Senior QA Architect perspective.
-        Enforces candidate credentials and strips Bucket C mobile tools if offer is not mobile.
+        Enforces candidate credentials and strips Bucket C items strictly per offer type.
         """
         refined = json_clone(profile)
         pinfo = refined.get("personal_info", {})
         
-        # Preserve full_name if lost
         if not pinfo.get("full_name") or pinfo["full_name"] == "Kandydat":
             pinfo["full_name"] = "Michał Kosowski"
 
@@ -77,26 +70,31 @@ class QALogicEngine:
             pinfo["title"] = "Software QA Engineer"
 
         job_lower = job_text.lower()
-        is_mobile_offer = bool(re.search(r'\b(mobile|android|xcode|ios|logcat|mobilne|mobilnych)\b', job_lower))
+        is_mobile_offer = bool(re.search(r'\b(mobile|android|xcode|logcat|mobilne|mobilnych)\b', job_lower))
 
-        # Deterministic Bucket C Removal: If job offer is not mobile, strip mobile noise from skills & summary!
-        if job_text and not is_mobile_offer:
-            # 1. Strip mobile skills
-            for cat in refined.get("skills", []):
-                cat["items"] = [
-                    item for item in cat.get("items", [])
-                    if item.lower() not in MOBILE_KEYWORDS
-                ]
-            # 2. Clean summary if AI left mobile tools
-            summary = refined.get("summary", "")
-            summary = summary.replace(" (Android Studio / Xcode)", "").replace(" (Android Studio, Xcode)", "")
-            summary = summary.replace("using Android Studio and Xcode.", "using industry standard QA tools.")
-            summary = summary.replace("and mobile ", " ")
-            refined["summary"] = summary
+        if job_text:
+            if not is_mobile_offer:
+                # 1. Strip mobile skills if NOT a mobile offer
+                for cat in refined.get("skills", []):
+                    cat["items"] = [
+                        item for item in cat.get("items", [])
+                        if item.lower() not in MOBILE_KEYWORDS
+                    ]
+                # 2. Clean summary if AI left mobile tools
+                summary = refined.get("summary", "")
+                summary = summary.replace(" (Android Studio / Xcode)", "").replace(" (Android Studio, Xcode)", "")
+                summary = summary.replace("using Android Studio and Xcode.", "using industry standard QA tools.")
+                summary = summary.replace("and mobile ", " ")
+                refined["summary"] = summary
+            else:
+                # 1. Strip SoapUI / SOAP noise if it IS a mobile offer
+                for cat in refined.get("skills", []):
+                    cat["items"] = [
+                        item for item in cat.get("items", [])
+                        if item.lower() not in BACKEND_SOAP_KEYWORDS
+                    ]
 
-        # Clean certifications
         refined["certifications"] = []
-
         return refined
 
 def json_clone(obj: Any) -> Any:

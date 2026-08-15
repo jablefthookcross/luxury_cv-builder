@@ -9,15 +9,14 @@
     "linkedin": "https://linkedin.com/in/michal-kosowski",
     "github": "https://github.com"
   },
-  "summary": "QA Engineer with 5+ years of experience in manual, integration, and API testing (REST & SOAP). Proficient in backend verification and database testing using SQL, test scenario design, and end-to-end defect tracking in Jira and Xray within Agile/Scrum methodologies. Experienced in preparing comprehensive test documentation, plans, and summary reports for enterprise systems. Complemented by test automation experience using Playwright in TypeScript.",
+  "summary": "Software QA Engineer with 5+ years of experience in manual, exploratory, and mobile application testing. Specialized in Acceptance Criteria verification, GUI usability testing, and mobile log analysis using Android Studio and Xcode. Proficient in defect tracking via Jira, Xray, and TestRail within Agile/Scrum delivery teams. Backed by hands-on experience in REST API validation (Postman/Swagger) and Playwright automation in TypeScript.",
   "skills": [
     {
-      "category": "Testing & API",
+      "category": "Testowanie & API",
       "items": [
-        "SOAP & REST API Testing",
-        "SoapUI",
+        "Mobile Testing",
+        "REST API Testing",
         "Postman",
-        "SQL Database Verification",
         "Integration Testing",
         "Functional Testing",
         "Regression Testing",
@@ -25,18 +24,20 @@
       ]
     },
     {
-      "category": "Tools & Test Management",
+      "category": "Narzędzia & Zarządzanie Testami",
       "items": [
-        "Jira (Xray)",
+        "Jira",
         "Confluence",
         "Git",
-        "SQL Developer / DBeaver",
         "Test Documentation & Reporting",
+        "Android Studio",
+        "Xcode",
+        "Mobile Device Logs",
         "Docker"
       ]
     },
     {
-      "category": "Automation & Languages",
+      "category": "Automatyzacja & Języki",
       "items": [
         "SQL",
         "Playwright",
@@ -68,7 +69,6 @@
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
         "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
         "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum.",
         "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu."
@@ -81,8 +81,6 @@
       "start_date": "2019-07",
       "end_date": "2021-01",
       "highlights": [
-        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
-        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
         "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych na platformach webowych i mobilnych.",
         "Projektowanie, wykonywanie i optymalizacja przypadków i scenariuszy testowych zgodnych z wymaganiami biznesowymi."
       ]
