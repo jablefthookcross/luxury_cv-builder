@@ -1,7 +1,8 @@
 """
 VitaeCraft AI - AI Engine Module
 Handles CV tailoring using Google Gemini API, Ollama (Local LLM), or a Keyword Fallback Engine.
-Enforces 3 Buckets Selection, Smart Content Budgeting, Bucket C Noise Removal, and State Synchronization.
+Enforces 3 Buckets Selection, Smart Content Budgeting, Bucket C Noise Removal,
+100% Language Sync (EN/PL), and Unique Job-Specific Work Experience Bullets.
 """
 
 import os
@@ -27,13 +28,51 @@ GŁÓWNA LOGIKA SELEKCJI DANYCH I BUDŻETOWANIA TREŚCI (CORE RULES):
      * Zdanie 3: Narzędzia śledzenia błędów (Jira Xray), dokumentacja testowa oraz metodologia Agile/Scrum.
      * Zdanie 4: Dodatkowy atut z KOSZYKA B (automatyzacja w Playwright, DBeaver/SQL).
 
-3. DYNAMICZNA ADAPTACJA DOŚWIADCZENIA (WORK EXPERIENCE):
-   - Punkty (bullet points) zawierające technologie z KOSZYKA A (SQL, SoapUI, API, Xray) przesuwaj na 1. i 2. miejsce na liście w poszczególnych firmach.
-
-4. DOPASOWANIE JĘZYKA (LANGUAGE SYNC):
-   - Jeśli oferta jest po angielsku -> wygeneruj całą treść CV w 100% po angielsku.
-   - Jeśli po polsku -> opisy po polsku z angielskimi pojęciami technicznymi.
+3. SPÓJNOŚĆ JĘZYKOWA I UNIKALNE PUNKTY DOŚWIADCZENIA (NO DUPLICATES & 100% LANG SYNC):
+   - BEZWZGLĘDNY ZAKAZ powielania tych samych punktów (bullet points) pomiędzy różnymi pracodawcami. Każda firma posiada wyłącznie własne, unikalne zadania.
+   - Jeśli język CV to Angielski (EN) -> Cała treść CV (podsumowanie, nazwy kategorii, stanowiska i WSZYSTKIE punkty doświadczenia) MUSI być w 100% po angielsku.
+   - Jeśli Polski (PL) -> Opisy obowiązków po polsku z angielskimi pojęciami technicznymi.
 """
+
+# Unique English Work Experience Mapping per Employer
+ENGLISH_WORK_EXPERIENCE = [
+    {
+        "position": "Software tester / QA Automation",
+        "company": "Benefit Systems S.A.",
+        "location": "Warsaw, Poland",
+        "start_date": "2022",
+        "end_date": "Present",
+        "highlights": [
+            "Performed manual, integration, and API testing (REST & SOAP) using Postman and SoapUI to validate backend platform workflows.",
+            "Conducted database verification and data integrity checks using complex SQL queries.",
+            "Designed, executed, and maintained automated E2E web test scripts using Playwright in TypeScript/JavaScript.",
+            "Prepared test plans, test scenarios, and execution summary reports in Jira (Xray) and Confluence within Agile/Scrum delivery teams."
+        ]
+    },
+    {
+        "position": "Test And Analysis Engineer",
+        "company": "Sii Polska Sp. z o.o. (Freelance)",
+        "location": "Warsaw, Poland",
+        "start_date": "2021-09",
+        "end_date": "2022-04",
+        "highlights": [
+            "Conducted manual and functional testing of HR web applications based on product backlog user stories.",
+            "Executed backend API validation via Postman and performed data integrity verification using SQL Developer.",
+            "Documented defects with clear reproduction steps and managed issue tracking in Jira (Xray) following Scrum methodology."
+        ]
+    },
+    {
+        "position": "Software tester",
+        "company": "Euroloan Group (Freelance)",
+        "location": "Warsaw, Poland",
+        "start_date": "2019-07",
+        "end_date": "2021-01",
+        "highlights": [
+            "Executed comprehensive UI, functional, and regression testing for enterprise digital platforms across web and mobile environments.",
+            "Designed, executed, and optimized test cases and test scenarios aligned with business acceptance criteria."
+        ]
+    }
+]
 
 class AIEngine:
     def __init__(self, provider: str = "auto", gemini_key: Optional[str] = None, ollama_url: str = "http://localhost:11434"):
@@ -43,10 +82,6 @@ class AIEngine:
         self.ollama_model = os.environ.get("OLLAMA_MODEL", "llama3.2")
 
     def tailor_cv(self, master_profile: Dict[str, Any], job_description: str, target_role: str = "") -> Dict[str, Any]:
-        """
-        Tailors the candidate's master profile for a specific job offer.
-        Returns a customized profile dictionary.
-        """
         provider_to_use = self._determine_provider()
         print(f"[AIEngine] Tailoring CV using provider: {provider_to_use}")
 
@@ -110,9 +145,9 @@ INSTRUKCJA SELEKCJI I BUDŻETOWANIA:
    - Koszyk A (MUST HAVE): SQL, SoapUI, Postman, Jira Xray, REST/SOAP API, Test Documentation -> góra sekcji Skills, Summary i początek punktów doświadczenia.
    - Koszyk B (VALUE ADD): Pokrewne twarde umiejętności kandydata (Playwright, TypeScript, DBeaver, ISTQB Standards).
    - Koszyk C (NOISE): Narzędzia/domeny NIEZWIĄZANE z tą ofertą (np. Android Studio / Xcode / Mobile Logs, jeśli oferta dotyczy integracji/backendu/webu) -> CAŁKOWICIE USUŃ z CV.
-2. LIMIT CONTENT BUDGETING: Max 6-8 tagów na kategorię skills (tagi max 1-3 słowa). Summary dokładnie 3-4 zwarte, techniczne zdania.
-3. DYNAMIC EXPERIENCE: Zmień kolejność bullet points w firmach, tak by te z technologiami z Koszyka A były na 1. i 2. miejscu.
-4. LANGUAGE SYNC: Jeśli oferta jest po angielsku -> wygeneruj CV w 100% po angielsku. Jeśli po polsku -> opisy po polsku z angielskimi pojęciami technicznymi.
+2. SPÓJNOŚĆ JĘZYKOWA (LANGUAGE SYNC): Jeśli oferta lub język wyjścia to EN, wygeneruj WSZYSTKIE sekcje (summary, skills, experience) w 100% po angielsku. Jeśli PL -> opisy po polsku z angielskimi terminami technicznymi.
+3. BRAK DUPLIKATÓW: Każdy pracodawca musi posiadać wyłącznie własne, unikalne punkty obowiązków!
+4. LIMIT CONTENT BUDGETING: Max 6-8 tagów na kategorię skills. Summary dokładnie 3-4 zwarte, techniczne zdania.
 5. NIE zmieniaj imienia (Michał Kosowski), danych kontaktowych ani nazw firm kandydata.
 
 Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
@@ -164,7 +199,7 @@ Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
             return self._clean_and_parse_json(text_response, master_profile)
 
     def _tailor_with_fallback(self, master_profile: Dict[str, Any], job_description: str, target_role: str = "") -> Dict[str, Any]:
-        """Universal Rule Engine implementing 3-Buckets Selection & Content Budgeting."""
+        """Universal Rule Engine implementing 3-Buckets Selection, Language Sync, and Unique Experience Bullets."""
         tailored = json.loads(json.dumps(master_profile))
         job_lower = job_description.lower()
 
@@ -172,7 +207,7 @@ Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
         english_indicators = ["requirements", "responsibilities", "experience", "skills", "must have", "nice to have", "proficient", "knowledge of"]
         is_english_offer = sum(1 for kw in english_indicators if kw in job_lower) >= 2
 
-        # Role & Technology Detection with Exact Word Boundaries
+        # Technology & Offer Detection with Regex Word Boundaries
         is_mobile = bool(re.search(r'\b(mobile|android|xcode|ios|logcat|mobilne|mobilnych)\b', job_lower))
         has_soap = bool(re.search(r'\b(soap|soapui)\b', job_lower))
         has_sql = bool(re.search(r'\b(sql)\b', job_lower))
@@ -205,12 +240,12 @@ Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
 
         testing_items.extend(["Integration Testing", "Functional Testing", "Regression Testing", "ISTQB Standards"])
         
-        # STRIP BUCKET C: If not mobile, strip Mobile Testing!
         if not is_mobile:
             testing_items = [t for t in testing_items if t != "Mobile Testing"]
 
+        cat1_title = "Testing & API" if is_english_offer else "Testowanie & API"
         new_skills.append({
-            "category": "Testing & API",
+            "category": cat1_title,
             "items": testing_items[:8]
         })
 
@@ -235,34 +270,32 @@ Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
 
         tools_items.append("Docker")
 
-        # STRIP BUCKET C: If not mobile, remove Android Studio / Xcode / Mobile Logs!
         if not is_mobile:
             tools_items = [t for t in tools_items if t not in ["Android Studio", "Xcode", "Mobile Device Logs"]]
 
+        cat2_title = "Tools & Test Management" if is_english_offer else "Narzędzia & Zarządzanie Testami"
         new_skills.append({
-            "category": "Tools & Test Management",
+            "category": cat2_title,
             "items": tools_items[:8]
         })
 
-        # Category 3: Automation & Languages (Secondary / Value Add)
+        # Category 3: Automation & Languages
         auto_items = ["SQL", "Playwright", "TypeScript", "JavaScript", "GitLab CI/CD", "GitHub Actions"]
+        cat3_title = "Automation & Languages" if is_english_offer else "Automatyzacja & Języki"
         new_skills.append({
-            "category": "Automation & Languages",
+            "category": cat3_title,
             "items": auto_items[:8]
         })
 
         tailored["skills"] = new_skills
 
-        # 2. DYNAMIC WORK EXPERIENCE RE-ORDERING (Bucket A bullets moved to 1st & 2nd place)
+        # 2. WORK EXPERIENCE: 100% LANGUAGE SYNC & NO DUPLICATE BULLETS ACROSS EMPLOYERS
+        if is_english_offer:
+            tailored["experience"] = json.loads(json.dumps(ENGLISH_WORK_EXPERIENCE))
+        
+        # Sort each job's highlights by relevance to offer without injecting cross-job duplicates!
         for job in tailored.get("experience", []):
             highlights = job.get("highlights", [])
-
-            # Inject SoapUI / SQL / Xray context into highlights if matching offer
-            if has_soap and not any("SoapUI" in h or "SOAP" in h for h in highlights):
-                highlights.insert(0, "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.")
-            if has_sql and not any("SQL" in h for h in highlights):
-                highlights.insert(1, "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.")
-
             scored_highlights = sorted(
                 highlights,
                 key=lambda h: sum(1 for word in ["sql", "soapui", "soap", "postman", "xray", "api", "integration", "mobile"] if word in h.lower()),

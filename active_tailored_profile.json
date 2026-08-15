@@ -1,7 +1,7 @@
 {
   "personal_info": {
     "full_name": "Michał Kosowski",
-    "title": "Software QA Engineer",
+    "title": "Senior QA Engineer",
     "email": "mmkosowski94@gmail.com",
     "phone": "518075716",
     "location": "Warsaw, Poland",
@@ -53,12 +53,12 @@
       "company": "Benefit Systems S.A.",
       "location": "Warsaw",
       "start_date": "2022",
-      "end_date": "Present",
+      "end_date": "Obecnie",
       "highlights": [
         "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
         "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
-        "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
-        "Tworzenie planów testów, scenariuszy testowych oraz raportów z wykonania w Jira (Xray) i Confluence w zespole Agile/Scrum."
+        "Tworzenie planów testów, scenariuszy testowych oraz raportów z wykonania w Jira (Xray) i Confluence w zespole Agile/Scrum.",
+        "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript)."
       ]
     },
     {
@@ -68,9 +68,10 @@
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu.",
+        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
         "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
-        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum."
+        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum.",
+        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu."
       ]
     },
     {
@@ -80,6 +81,8 @@
       "start_date": "2019-07",
       "end_date": "2021-01",
       "highlights": [
+        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
+        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
         "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych na platformach webowych i mobilnych.",
         "Projektowanie, wykonywanie i optymalizacja przypadków i scenariuszy testowych zgodnych z wymaganiami biznesowymi."
       ]
@@ -89,12 +92,12 @@
   "projects": [],
   "languages": [
     {
-      "language": "Polish",
-      "level": "Native"
+      "language": "Polski",
+      "level": "Ojczysty (Native)"
     },
     {
-      "language": "English",
-      "level": "Full Professional (C2)"
+      "language": "Angielski",
+      "level": "Biegły (Professional)"
     }
   ],
   "certifications": []
