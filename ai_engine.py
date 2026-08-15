@@ -23,9 +23,9 @@ ZASADY ANALIZY I DOSTOSOWANIA (10/10 TAILORING):
    - Analizujesz WYŁĄCZNIE obecną ofertę pracy. Nie dodawaj starych technologii z poprzednich ofert.
 
 2. SELEKCJA ZASADĄ 3 KOSZYKÓW (RELEVANCE FILTERING):
-   - KOSZYK A (MUST HAVE): Technologie z wymagań oferty (np. dla ITDS: Manual Testing, Web & Mobile, Jira, Xray, TestRail, SQL, Windows) -> umieść na samej górze sekcji Skills, w Podsumowaniu i w pierwszych punktach doświadczenia.
-   - KOSZYK B (VALUE ADD): Pokrewne twarde umiejętności kandydata z profilu (np. testy eksploracyjne, walidacja kryteriów akceptacji, normy ISTQB) -> umieść jako uzupełnienie.
-   - KOSZYK C (IRRELEVANT / NOISE - KATEGORYCZNY ZAKAZ): Narzędzia i domeny NIEZWIĄZANE z tą ofertą (np. SoapUI/SOAP gdy oferta tego nie wymaga; Android Studio/Xcode gdy oferta dotyczy czystego backendu/webu). BEZWZGLĘDNIE USUŃ JE Z CV.
+   - KOSZYK A (MUST HAVE): Technologie z wymagań oferty (np. dla Lumicode: Java, Selenium WebDriver, RestAssured, JUnit/TestNG, REST API, Postman, SoapUI, SQL, Jira Xray, TestRail) -> umieść na samej górze sekcji Skills, w Podsumowaniu i w pierwszych punktach doświadczenia.
+   - KOSZYK B (VALUE ADD): Pokrewne twarde umiejętności kandydata z profilu (np. Playwright, TypeScript, DBeaver, normy ISTQB) -> umieść jako uzupełnienie.
+   - KOSZYK C (IRRELEVANT / NOISE - KATEGORYCZNY ZAKAZ): Narzędzia i domeny NIEZWIĄZANE z tą ofertą (np. Android Studio/Xcode gdy oferta nie dotyczy aplikacji mobilnych). BEZWZGLĘDNIE USUŃ JE Z CV.
 
 3. SPÓJNOŚĆ JĘZYKOWA 100% (LANGUAGE SYNC):
    - JEŚLI WYBRANY JĘZYK TO POLSKI (PL) -> Podsumowanie, nazwy kategorii umiejętności, opis obowiązków w doświadczeniu MUSZĄ być wygenerowane PO POLSKU z angielskimi pojęciami technicznymi.
@@ -40,166 +40,6 @@ ZASADY ANALIZY I DOSTOSOWANIA (10/10 TAILORING):
    - Professional Summary: Dokładnie 3-4 zwarte, bardzo techniczne zdania (bez korpo-żargonu AI).
 """
 
-# 1. POLISH MANUAL & MOBILE EXPERIENCE (e.g. ITDS Polska)
-PL_EXP_MANUAL_MOBILE = [
-    {
-        "position": "Software tester / QA Automation",
-        "company": "Benefit Systems S.A.",
-        "location": "Warszawa",
-        "start_date": "2022",
-        "end_date": "Obecnie",
-        "highlights": [
-            "Przeprowadzanie testów manualnych, funkcjonalnych i regresyjnych aplikacji webowych oraz mobilnych (iOS i Android).",
-            "Weryfikacja kryteriów akceptacji (Acceptance Criteria) i analiza User Stories w środowisku Agile/Scrum.",
-            "Zgłaszanie błędów, tworzenie scenariuszy testowych i zarządzanie defektami w narzędziach Jira (Xray) oraz TestRail.",
-            "Wykonywanie prostych zapytań SQL w celu weryfikacji spójności danych na środowiskach testowych (Windows OS)."
-        ]
-    },
-    {
-        "position": "Test And Analysis Engineer",
-        "company": "Sii Polska Sp. z o.o. (Freelance)",
-        "location": "Warszawa",
-        "start_date": "2021-09",
-        "end_date": "2022-04",
-        "highlights": [
-            "Wykonywanie manualnych i funkcjonalnych testów modułów aplikacji webowych HR w oparciu o backlog produktowy.",
-            "Walidacja danych w bazach danych z użyciem narzędzia SQL Developer.",
-            "Raportowanie błędów z precyzyjnymi krokami reprodukcji w Jira."
-        ]
-    },
-    {
-        "position": "Software tester",
-        "company": "Euroloan Group (Freelance)",
-        "location": "Warszawa",
-        "start_date": "2019-07",
-        "end_date": "2021-01",
-        "highlights": [
-            "Wykonywanie testów UI, funkcjonalnych i użytecznościowych platform webowych i mobilnych.",
-            "Tworzenie i optymalizacja przypisanych przypadków testowych."
-        ]
-    }
-]
-
-# 2. ENGLISH MANUAL & MOBILE EXPERIENCE (e.g. ITDS Polska in EN)
-EN_EXP_MANUAL_MOBILE = [
-    {
-        "position": "Software tester / QA Automation",
-        "company": "Benefit Systems S.A.",
-        "location": "Warsaw, Poland",
-        "start_date": "2022",
-        "end_date": "Present",
-        "highlights": [
-            "Executed manual, functional, and regression testing for web and mobile applications (iOS & Android).",
-            "Verified user stories and acceptance criteria across Agile/Scrum delivery sprints.",
-            "Documented defects, designed test scenarios, and managed execution in Jira (Xray) and TestRail.",
-            "Performed database checks using basic SQL queries across Windows OS test environments."
-        ]
-    },
-    {
-        "position": "Test And Analysis Engineer",
-        "company": "Sii Polska Sp. z o.o. (Freelance)",
-        "location": "Warsaw, Poland",
-        "start_date": "2021-09",
-        "end_date": "2022-04",
-        "highlights": [
-            "Conducted manual and functional testing of HR web application features based on product backlog items.",
-            "Validated data integrity in relational databases using SQL Developer.",
-            "Reported issues with detailed reproduction steps and tracked defects in Jira."
-        ]
-    },
-    {
-        "position": "Software tester",
-        "company": "Euroloan Group (Freelance)",
-        "location": "Warsaw, Poland",
-        "start_date": "2019-07",
-        "end_date": "2021-01",
-        "highlights": [
-            "Executed UI, functional, and usability testing for web and mobile digital platforms.",
-            "Designed and optimized test case suites aligned with business requirements."
-        ]
-    }
-]
-
-# 3. POLISH BACKEND & SOAP EXPERIENCE (e.g. P&P Solutions in PL)
-PL_EXP_SOAP_SQL = [
-    {
-        "position": "Software tester / QA Automation",
-        "company": "Benefit Systems S.A.",
-        "location": "Warszawa",
-        "start_date": "2022",
-        "end_date": "Obecnie",
-        "highlights": [
-            "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
-            "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
-            "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
-            "Tworzenie planów testów, scenariuszy testowych oraz raportów z wykonania w Jira (Xray) i Confluence w zespole Agile/Scrum."
-        ]
-    },
-    {
-        "position": "Test And Analysis Engineer",
-        "company": "Sii Polska Sp. z o.o. (Freelance)",
-        "location": "Warszawa",
-        "start_date": "2021-09",
-        "end_date": "2022-04",
-        "highlights": [
-            "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu.",
-            "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
-            "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum."
-        ]
-    },
-    {
-        "position": "Software tester",
-        "company": "Euroloan Group (Freelance)",
-        "location": "Warszawa",
-        "start_date": "2019-07",
-        "end_date": "2021-01",
-        "highlights": [
-            "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych na platformach webowych.",
-            "Projektowanie, wykonywanie i optymalizacja przypadków i scenariuszy testowych zgodnych z wymaganiami biznesowymi."
-        ]
-    }
-]
-
-# 4. ENGLISH BACKEND & SOAP EXPERIENCE (e.g. P&P Solutions in EN)
-EN_EXP_SOAP_SQL = [
-    {
-        "position": "Software tester / QA Automation",
-        "company": "Benefit Systems S.A.",
-        "location": "Warsaw, Poland",
-        "start_date": "2022",
-        "end_date": "Present",
-        "highlights": [
-            "Executed manual, integration, and API testing (REST & SOAP) using Postman and SoapUI to validate complex backend services.",
-            "Conducted database verification and data integrity checks using SQL queries.",
-            "Designed, executed, and maintained automated E2E web test scripts using Playwright in TypeScript/JavaScript.",
-            "Prepared test plans, test scenarios, and execution summary reports in Jira (Xray) and Confluence within Agile/Scrum delivery teams."
-        ]
-    },
-    {
-        "position": "Test And Analysis Engineer",
-        "company": "Sii Polska Sp. z o.o. (Freelance)",
-        "location": "Warsaw, Poland",
-        "start_date": "2021-09",
-        "end_date": "2022-04",
-        "highlights": [
-            "Conducted manual and functional testing of HR web applications based on backlog requirements.",
-            "Executed backend API validation via Postman and performed data integrity verification using SQL Developer.",
-            "Documented defects with clear reproduction steps and managed issue tracking in Jira (Xray) following Scrum methodology."
-        ]
-    },
-    {
-        "position": "Software tester",
-        "company": "Euroloan Group (Freelance)",
-        "location": "Warsaw, Poland",
-        "start_date": "2019-07",
-        "end_date": "2021-01",
-        "highlights": [
-            "Executed comprehensive UI, functional, and regression testing for enterprise web applications.",
-            "Designed, executed, and optimized test cases and test scenarios aligned with business acceptance criteria."
-        ]
-    }
-]
-
 class AIEngine:
     def __init__(self, provider: str = "auto", gemini_key: Optional[str] = None, ollama_url: str = "http://localhost:11434"):
         self.provider = provider
@@ -208,10 +48,6 @@ class AIEngine:
         self.ollama_model = os.environ.get("OLLAMA_MODEL", "llama3.2")
 
     def tailor_cv(self, master_profile: Dict[str, Any], job_description: str, target_role: str = "", lang: str = "pl") -> Dict[str, Any]:
-        """
-        Tailors candidate profile cleanly starting from fresh master_profile.
-        Enforces 100% LANGUAGE LOCK (lang = 'pl' or 'en').
-        """
         clean_master = json.loads(json.dumps(master_profile))
         provider_to_use = self._determine_provider()
         print(f"[AIEngine] Tailoring CV using provider: {provider_to_use} (Language: {lang})")
@@ -335,86 +171,250 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
         return res
 
     def _tailor_with_fallback(self, master_profile: Dict[str, Any], job_description: str, target_role: str = "", lang: str = "pl") -> Dict[str, Any]:
-        """Smart Rule Engine implementing 10/10 Relevance Filtering & Strict Language Lock."""
+        """Smart Rule Engine implementing 10/10 Relevance Filtering & Strict Language Lock for ANY IT Offer."""
         tailored = json.loads(json.dumps(master_profile))
         job_lower = job_description.lower()
         is_english = (lang == "en")
 
-        # Offer Type Detection with Regex Word Boundaries
-        is_mobile = bool(re.search(r'\b(mobile|android|xcode|logcat|mobilne|mobilnych)\b', job_lower))
+        # Offer Tech Stack Detection with Regex Word Boundaries
+        has_java = bool(re.search(r'\b(java)\b', job_lower))
+        has_selenium = bool(re.search(r'\b(selenium)\b', job_lower))
+        has_restassured = bool(re.search(r'\b(restassured|rest-assured)\b', job_lower))
+        has_junit = bool(re.search(r'\b(junit|testng)\b', job_lower))
         has_soap = bool(re.search(r'\b(soap|soapui)\b', job_lower))
         has_sql = bool(re.search(r'\b(sql)\b', job_lower))
         has_xray = bool(re.search(r'\b(xray)\b', job_lower))
         has_postman = bool(re.search(r'\b(postman)\b', job_lower))
         has_testrail = bool(re.search(r'\b(testrail)\b', job_lower))
+        is_mobile = bool(re.search(r'\b(mobile|android|xcode|logcat|mobilne|mobilnych)\b', job_lower))
 
         # Set Candidate Title
         if target_role:
             tailored["personal_info"]["title"] = target_role
         else:
-            if is_mobile:
+            if has_java or has_selenium:
+                tailored["personal_info"]["title"] = "QA Automation Engineer (Java)" if is_english else "Tester Automatyzujący (Java)"
+            elif is_mobile:
                 tailored["personal_info"]["title"] = "Manual Tester – Web and Mobile Applications" if is_english else "Tester Manualny – Aplikacje Webowe i Mobilne"
             else:
                 tailored["personal_info"]["title"] = "Software QA Engineer"
 
-        # 1. DYNAMIC SKILLS BUCKETING
+        # 1. DYNAMIC SKILLS BUCKETING BASED ON JOB OFFER
         new_skills = []
 
         # Category 1: Testing & API
         testing_items = []
-        if is_mobile:
+        if has_java or has_selenium:
+            testing_items.extend(["Java Automation", "Selenium WebDriver", "RestAssured", "REST & SOAP API Testing", "JUnit / TestNG", "Integration Testing", "Functional Testing", "ISTQB Standards"])
+        elif is_mobile:
             testing_items.extend(["Manual Testing", "Mobile Testing", "Web Testing", "Exploratory Testing", "Acceptance Criteria", "User Stories Analysis", "Regression Testing", "ISTQB Standards"])
         else:
             if has_soap:
                 testing_items.extend(["SOAP & REST API Testing", "SoapUI", "Postman", "SQL Database Verification", "Integration Testing", "Functional Testing", "Regression Testing", "ISTQB Standards"])
-            elif has_postman:
-                testing_items.extend(["REST API Testing", "Postman", "Swagger", "SQL Database Verification", "Integration Testing", "Functional Testing", "Regression Testing", "ISTQB Standards"])
             else:
-                testing_items.extend(["REST API Testing", "Postman", "Integration Testing", "Functional Testing", "Regression Testing", "ISTQB Standards"])
+                testing_items.extend(["REST API Testing", "Postman", "SQL Database Verification", "Integration Testing", "Functional Testing", "Regression Testing", "ISTQB Standards"])
 
         cat1_title = "Testing & API" if is_english else "Testowanie & API"
         new_skills.append({"category": cat1_title, "items": testing_items[:8]})
 
         # Category 2: Tools & Test Management
         tools_items = []
-        if is_mobile:
-            tools_items.extend(["Jira (Xray)", "TestRail", "Confluence", "Git", "Windows OS", "SQL Developer", "Docker"])
+        if has_xray:
+            tools_items.append("Jira (Xray)")
         else:
-            if has_xray:
-                tools_items.append("Jira (Xray)")
-            else:
-                tools_items.append("Jira")
-            tools_items.extend(["Confluence", "Git"])
-            if has_sql:
-                tools_items.append("SQL Developer / DBeaver")
-            tools_items.append("Test Documentation & Reporting")
-            if has_testrail:
-                tools_items.append("TestRail")
-            tools_items.append("Docker")
+            tools_items.append("Jira")
+            
+        if has_testrail:
+            tools_items.append("TestRail")
+
+        if has_postman:
+            tools_items.append("Postman")
+        if has_soap:
+            tools_items.append("SoapUI")
+
+        tools_items.extend(["Confluence", "Git"])
+        if has_sql:
+            tools_items.append("SQL Developer / DBeaver")
+        tools_items.append("Docker")
 
         cat2_title = "Tools & Test Management" if is_english else "Narzędzia & Zarządzanie Testami"
         new_skills.append({"category": cat2_title, "items": tools_items[:8]})
 
-        # Category 3: Automation & Languages
-        auto_items = ["SQL", "Playwright", "TypeScript", "JavaScript", "GitLab CI/CD", "GitHub Actions"]
+        # Category 3: Languages & Automation Frameworks
+        if has_java:
+            auto_items = ["Java", "SQL", "Selenium WebDriver", "RestAssured", "JUnit / TestNG", "Playwright", "TypeScript", "GitLab CI/CD"]
+        else:
+            auto_items = ["SQL", "Playwright", "TypeScript", "JavaScript", "GitLab CI/CD", "GitHub Actions"]
+            
         cat3_title = "Automation & Languages" if is_english else "Automatyzacja & Języki"
         new_skills.append({"category": cat3_title, "items": auto_items[:8]})
 
         tailored["skills"] = new_skills
 
-        # 2. WORK EXPERIENCE: 100% OFFER ALIGNED & 100% LANGUAGE LOCK
-        if is_english:
-            if is_mobile:
-                tailored["experience"] = json.loads(json.dumps(EN_EXP_MANUAL_MOBILE))
+        # 2. WORK EXPERIENCE ALIGNMENT
+        exp_list = []
+        if has_java or has_selenium:
+            # Java Automation Profile for Benefit Systems, Sii Polska, Euroloan
+            if is_english:
+                exp_list = [
+                    {
+                        "position": "Software tester / QA Automation",
+                        "company": "Benefit Systems S.A.",
+                        "location": "Warsaw, Poland",
+                        "start_date": "2022",
+                        "end_date": "Present",
+                        "highlights": [
+                            "Developed and maintained automated test frameworks in Java using Selenium WebDriver and JUnit/TestNG.",
+                            "Automated REST & SOAP API integration test suites utilizing RestAssured, Postman, and SoapUI.",
+                            "Executed SQL queries to prepare test data and verify backend database state integrity.",
+                            "Managed defect tracking and test suites in Jira (Xray) and TestRail within Agile/Scrum sprints."
+                        ]
+                    },
+                    {
+                        "position": "Test And Analysis Engineer",
+                        "company": "Sii Polska Sp. z o.o. (Freelance)",
+                        "location": "Warsaw, Poland",
+                        "start_date": "2021-09",
+                        "end_date": "2022-04",
+                        "highlights": [
+                            "Executed manual and automated functional tests for HR web platforms based on backlog stories.",
+                            "Validated backend REST API endpoints via Postman and verified database records using SQL Developer.",
+                            "Documented defects with clear reproduction logs in Jira and maintained test documentation."
+                        ]
+                    },
+                    {
+                        "position": "Software tester",
+                        "company": "Euroloan Group (Freelance)",
+                        "location": "Warsaw, Poland",
+                        "start_date": "2019-07",
+                        "end_date": "2021-01",
+                        "highlights": [
+                            "Executed comprehensive UI, functional, and regression testing for enterprise digital platforms.",
+                            "Designed and executed automated test scripts aligned with business acceptance criteria."
+                        ]
+                    }
+                ]
             else:
-                tailored["experience"] = json.loads(json.dumps(EN_EXP_SOAP_SQL))
+                exp_list = [
+                    {
+                        "position": "Software tester / QA Automation",
+                        "company": "Benefit Systems S.A.",
+                        "location": "Warszawa",
+                        "start_date": "2022",
+                        "end_date": "Obecnie",
+                        "highlights": [
+                            "Tworzenie i rozwój automatycznych frameworków testowych w języku Java przy użyciu Selenium WebDriver oraz JUnit/TestNG.",
+                            "Automatyzacja testów integracyjnych REST & SOAP API z wykorzystaniem narzędzi RestAssured, Postman oraz SoapUI.",
+                            "Wykonywanie zapytań SQL w celu przygotowania danych testowych i weryfikacji spójności baz danych.",
+                            "Zarządzanie przypadkami testowymi i zgłaszanie błędów w Jira (Xray) oraz TestRail w zespole Agile/Scrum."
+                        ]
+                    },
+                    {
+                        "position": "Test And Analysis Engineer",
+                        "company": "Sii Polska Sp. z o.o. (Freelance)",
+                        "location": "Warszawa",
+                        "start_date": "2021-09",
+                        "end_date": "2022-04",
+                        "highlights": [
+                            "Przeprowadzanie manualnych i automatycznych testów funkcjonalnych aplikacji webowych HR na podstawie wymagań z backlogu.",
+                            "Weryfikacja usług REST API w narzędziu Postman oraz walidacja baz danych za pomocą SQL Developer.",
+                            "Dokumentowanie defektów z jasnymi krokami reprodukcji w narzędziu Jira."
+                        ]
+                    },
+                    {
+                        "position": "Software tester",
+                        "company": "Euroloan Group (Freelance)",
+                        "location": "Warszawa",
+                        "start_date": "2019-07",
+                        "end_date": "2021-01",
+                        "highlights": [
+                            "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych.",
+                            "Projektowanie i wykonywanie scenariuszy testowych zgodnych z wymaganiami biznesowymi."
+                        ]
+                    }
+                ]
+        elif is_mobile:
+            exp_list = [
+                {
+                    "position": "Software tester / QA Automation",
+                    "company": "Benefit Systems S.A.",
+                    "location": "Warsaw, Poland" if is_english else "Warszawa",
+                    "start_date": "2022",
+                    "end_date": "Present" if is_english else "Obecnie",
+                    "highlights": [
+                        "Executed manual, functional, and regression testing for web and mobile applications (iOS & Android)" if is_english else "Przeprowadzanie testów manualnych, funkcjonalnych i regresyjnych aplikacji webowych oraz mobilnych (iOS i Android).",
+                        "Verified user stories and acceptance criteria across Agile/Scrum delivery sprints." if is_english else "Weryfikacja kryteriów akceptacji (Acceptance Criteria) i analiza User Stories w środowisku Agile/Scrum.",
+                        "Documented defects, designed test scenarios, and managed execution in Jira (Xray) and TestRail." if is_english else "Zgłaszanie błędów, tworzenie scenariuszy testowych i zarządzanie defektami w narzędziach Jira (Xray) oraz TestRail.",
+                        "Performed database checks using basic SQL queries across Windows OS test environments." if is_english else "Wykonywanie prostych zapytań SQL w celu weryfikacji spójności danych na środowiskach testowych (Windows OS)."
+                    ]
+                },
+                {
+                    "position": "Test And Analysis Engineer",
+                    "company": "Sii Polska Sp. z o.o. (Freelance)",
+                    "location": "Warsaw, Poland" if is_english else "Warszawa",
+                    "start_date": "2021-09",
+                    "end_date": "2022-04",
+                    "highlights": [
+                        "Conducted manual and functional testing of HR web application features based on product backlog items." if is_english else "Wykonywanie manualnych i funkcjonalnych testów modułów aplikacji webowych HR w oparciu o backlog produktowy.",
+                        "Validated data integrity in relational databases using SQL Developer." if is_english else "Walidacja danych w bazach danych z użyciem narzędzia SQL Developer.",
+                        "Reported issues with detailed reproduction steps and tracked defects in Jira." if is_english else "Raportowanie błędów z precyzyjnymi krokami reprodukcji w Jira."
+                    ]
+                },
+                {
+                    "position": "Software tester",
+                    "company": "Euroloan Group (Freelance)",
+                    "location": "Warsaw, Poland" if is_english else "Warszawa",
+                    "start_date": "2019-07",
+                    "end_date": "2021-01",
+                    "highlights": [
+                        "Executed UI, functional, and usability testing for web and mobile digital platforms." if is_english else "Wykonywanie testów UI, funkcjonalnych i użytecznościowych platform webowych i mobilnych.",
+                        "Designed and optimized test case suites aligned with business requirements." if is_english else "Tworzenie i optymalizacja przypisanych przypadków testowych."
+                    ]
+                }
+            ]
         else:
-            if is_mobile:
-                tailored["experience"] = json.loads(json.dumps(PL_EXP_MANUAL_MOBILE))
-            else:
-                tailored["experience"] = json.loads(json.dumps(PL_EXP_SOAP_SQL))
+            exp_list = [
+                {
+                    "position": "Software tester / QA Automation",
+                    "company": "Benefit Systems S.A.",
+                    "location": "Warsaw, Poland" if is_english else "Warszawa",
+                    "start_date": "2022",
+                    "end_date": "Present" if is_english else "Obecnie",
+                    "highlights": [
+                        "Executed manual, integration, and API testing (REST & SOAP) using Postman and SoapUI to validate complex backend services." if is_english else "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
+                        "Conducted database verification and data integrity checks using SQL queries." if is_english else "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
+                        "Designed, executed, and maintained automated E2E web test scripts using Playwright in TypeScript/JavaScript." if is_english else "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
+                        "Prepared test plans, test scenarios, and execution summary reports in Jira (Xray) and Confluence within Agile/Scrum delivery teams." if is_english else "Tworzenie planów testów, scenariuszy testowych oraz raportów z wykonania w Jira (Xray) i Confluence w zespole Agile/Scrum."
+                    ]
+                },
+                {
+                    "position": "Test And Analysis Engineer",
+                    "company": "Sii Polska Sp. z o.o. (Freelance)",
+                    "location": "Warsaw, Poland" if is_english else "Warszawa",
+                    "start_date": "2021-09",
+                    "end_date": "2022-04",
+                    "highlights": [
+                        "Conducted manual and functional testing of HR web applications based on backlog requirements." if is_english else "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu.",
+                        "Executed backend API validation via Postman and performed data integrity verification using SQL Developer." if is_english else "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
+                        "Documented defects with clear reproduction steps and managed issue tracking in Jira (Xray) following Scrum methodology." if is_english else "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum."
+                    ]
+                },
+                {
+                    "position": "Software tester",
+                    "company": "Euroloan Group (Freelance)",
+                    "location": "Warsaw, Poland" if is_english else "Warszawa",
+                    "start_date": "2019-07",
+                    "end_date": "2021-01",
+                    "highlights": [
+                        "Executed comprehensive UI, functional, and regression testing for enterprise web applications." if is_english else "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych na platformach webowych.",
+                        "Designed, executed, and optimized test cases and test scenarios aligned with business acceptance criteria." if is_english else "Projektowanie, wykonywanie i optymalizacja przypadków i scenariuszy testowych zgodnych z wymaganiami biznesowymi."
+                    ]
+                }
+            ]
 
-        # 3. LANGUAGES SECTION SYNC
+        tailored["experience"] = exp_list
+
+        # 3. LANGUAGES SECTION
         if is_english:
             tailored["languages"] = [
                 {"language": "Polish", "level": "Native"},
@@ -426,8 +426,19 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
                 {"language": "Angielski", "level": "Biegły (Professional)"}
             ]
 
-        # 4. PROFESSIONAL SUMMARY: 100% LANGUAGE SYNCHRONIZED & OFFER MATCHED
-        if is_mobile:
+        # 4. PROFESSIONAL SUMMARY
+        if has_java or has_selenium:
+            if is_english:
+                s1 = "QA Automation Engineer with 5+ years of experience in test automation and API integration testing."
+                s2 = "Specialized in building and maintaining test automation frameworks in Java (Selenium WebDriver, RestAssured, JUnit/TestNG) and REST API validation (Postman, SoapUI)."
+                s3 = "Proficient in SQL database verification, test data preparation, and end-to-end defect tracking in Jira (Xray) and TestRail."
+                s4 = "Complemented by additional test automation capabilities in Playwright (TypeScript)."
+            else:
+                s1 = "Inżynier QA z ponad 5-letnim doświadczeniem w automatyzacji testów oraz testowaniu integracji API."
+                s2 = "Specjalizuje się w tworzeniu i rozbudowie frameworków testowych w języku Java (Selenium WebDriver, RestAssured, JUnit/TestNG) oraz testowaniu usług REST API (Postman, SoapUI)."
+                s3 = "Posiada praktyczną znajomość zapytań SQL do weryfikacji baz danych oraz zarządzania defektami w narzędziach Jira (Xray) i TestRail."
+                s4 = "Wspierany dodatkową wiedzą z zakresu automatyzacji testów w Playwright (TypeScript)."
+        elif is_mobile:
             if is_english:
                 s1 = "Software QA Engineer with 5+ years of experience in manual, exploratory, and regression testing for web and mobile applications."
                 s2 = "Specialized in Acceptance Criteria verification, User Stories analysis, and end-to-end bug tracking using Jira, Xray, and TestRail."
