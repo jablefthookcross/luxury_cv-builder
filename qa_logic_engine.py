@@ -1,7 +1,7 @@
 """
 VitaeCraft AI - QA Logic Engine & Anti-AI / ATS Verification Auditor
 Enforces strict QA-engineer logic, professional QA terminology, action verbs, and metrics.
-Includes automated Anti-AI Jargon Auditing, ATS Parser Compliance Checks, and Deterministic Bucket C Removal.
+Includes automated Anti-AI Jargon Auditing, ATS Parser Compliance Checks, and 100% Language Lock.
 """
 
 import json
@@ -17,7 +17,7 @@ PROHIBITED_AI_BUZZWORDS = [
 ]
 
 MOBILE_KEYWORDS = ["android studio", "xcode", "mobile device logs", "mobile testing", "logcat"]
-BACKEND_SOAP_KEYWORDS = ["soapui", "soap api testing", "soap & rest api testing", "sql database verification"]
+BACKEND_SOAP_KEYWORDS = ["soapui", "soap api testing", "soap & rest api testing"]
 
 class QALogicEngine:
     @staticmethod
@@ -58,7 +58,7 @@ class QALogicEngine:
     def audit_and_refine_profile(profile: Dict[str, Any], lang: str = "pl", job_text: str = "") -> Dict[str, Any]:
         """
         Audits candidate profile from a Senior QA Architect perspective.
-        Enforces candidate credentials and strips Bucket C items strictly per offer type.
+        Enforces candidate credentials, offer alignment, and 100% LANGUAGE LOCK.
         """
         refined = json_clone(profile)
         pinfo = refined.get("personal_info", {})
@@ -66,33 +66,70 @@ class QALogicEngine:
         if not pinfo.get("full_name") or pinfo["full_name"] == "Kandydat":
             pinfo["full_name"] = "Michał Kosowski"
 
-        if not pinfo.get("title"):
-            pinfo["title"] = "Software QA Engineer"
-
         job_lower = job_text.lower()
         is_mobile_offer = bool(re.search(r'\b(mobile|android|xcode|logcat|mobilne|mobilnych)\b', job_lower))
 
         if job_text:
             if not is_mobile_offer:
-                # 1. Strip mobile skills if NOT a mobile offer
                 for cat in refined.get("skills", []):
                     cat["items"] = [
                         item for item in cat.get("items", [])
                         if item.lower() not in MOBILE_KEYWORDS
                     ]
-                # 2. Clean summary if AI left mobile tools
                 summary = refined.get("summary", "")
                 summary = summary.replace(" (Android Studio / Xcode)", "").replace(" (Android Studio, Xcode)", "")
                 summary = summary.replace("using Android Studio and Xcode.", "using industry standard QA tools.")
                 summary = summary.replace("and mobile ", " ")
                 refined["summary"] = summary
             else:
-                # 1. Strip SoapUI / SOAP noise if it IS a mobile offer
                 for cat in refined.get("skills", []):
                     cat["items"] = [
                         item for item in cat.get("items", [])
                         if item.lower() not in BACKEND_SOAP_KEYWORDS
                     ]
+
+        # 100% STRICT LANGUAGE LOCK: If lang == 'pl', translate category titles & date keywords to Polish. If 'en', to English.
+        for cat in refined.get("skills", []):
+            title = cat.get("category", "")
+            if lang == "pl":
+                if title in ["Testing & API", "Testowanie & API"]:
+                    cat["category"] = "Testowanie & API"
+                elif title in ["Tools & Test Management", "Narzędzia & Zarządzanie Testami"]:
+                    cat["category"] = "Narzędzia & Zarządzanie Testami"
+                elif title in ["Automation & Languages", "Automatyzacja & Języki"]:
+                    cat["category"] = "Automatyzacja & Języki"
+            else:
+                if title in ["Testing & API", "Testowanie & API"]:
+                    cat["category"] = "Testing & API"
+                elif title in ["Tools & Test Management", "Narzędzia & Zarządzanie Testami"]:
+                    cat["category"] = "Tools & Test Management"
+                elif title in ["Automation & Languages", "Automatyzacja & Języki"]:
+                    cat["category"] = "Automation & Languages"
+
+        # Experience date & location sync
+        for job in refined.get("experience", []):
+            if lang == "en":
+                if job.get("end_date") == "Obecnie":
+                    job["end_date"] = "Present"
+                if "Warszaw" in job.get("location", ""):
+                    job["location"] = "Warsaw, Poland"
+            else:
+                if job.get("end_date") == "Present":
+                    job["end_date"] = "Obecnie"
+                if "Warsaw" in job.get("location", ""):
+                    job["location"] = "Warszawa"
+
+        # Languages section sync
+        if lang == "en":
+            refined["languages"] = [
+                {"language": "Polish", "level": "Native"},
+                {"language": "English", "level": "Full Professional (C2)"}
+            ]
+        else:
+            refined["languages"] = [
+                {"language": "Polski", "level": "Ojczysty (Native)"},
+                {"language": "Angielski", "level": "Biegły (Professional)"}
+            ]
 
         refined["certifications"] = []
         return refined

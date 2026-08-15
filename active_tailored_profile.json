@@ -9,15 +9,17 @@
     "linkedin": "https://linkedin.com/in/michal-kosowski",
     "github": "https://github.com"
   },
-  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym oraz eksploracyjnym aplikacji mobilnych i webowych. Specjalizuje się w weryfikacji kryteriów akceptacji (Acceptance Criteria), testach GUI & Usability oraz analizie logów urządzeń mobilnych (Android Studio, Xcode). Sprawnie zarządza błędami i dokumentacją testową w narzędziach Jira, Xray oraz TestRail w zespole Agile/Scrum. Posiada dodatkowe doświadczenie w walidacji REST API (Postman/Swagger) oraz automatyzacji w Playwright (TypeScript).",
+  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w testach manualnych, integracyjnych oraz testowaniu API (REST & SOAP). Specjalizuje się w weryfikacji baz danych za pomocą SQL, projektowaniu scenariuszy testowych oraz śledzeniu błędów w Jira (Xray) w zespole Agile/Scrum. Doświadczony w tworzeniu kompleksowej dokumentacji testowej, planów testów oraz raportów dla systemów rejestrów i platform cyfrowych. Wspierany praktyczną znajomością automatyzacji testów w Playwright (TypeScript).",
   "skills": [
     {
       "category": "Testowanie & API",
       "items": [
-        "Mobile Testing",
-        "Exploratory Testing",
-        "User Stories Analysis",
-        "Acceptance Criteria",
+        "SOAP & REST API Testing",
+        "SoapUI",
+        "Postman",
+        "SQL Database Verification",
+        "Integration Testing",
+        "Functional Testing",
         "Regression Testing",
         "ISTQB Standards"
       ]
@@ -25,13 +27,12 @@
     {
       "category": "Narzędzia & Zarządzanie Testami",
       "items": [
-        "Android Studio",
-        "Xcode",
-        "Mobile Device Logs",
-        "Jira",
-        "TestRail",
+        "Jira (Xray)",
         "Confluence",
         "Git",
+        "SQL Developer / DBeaver",
+        "Test Documentation & Reporting",
+        "TestRail",
         "Docker"
       ]
     },
@@ -55,10 +56,10 @@
       "start_date": "2022",
       "end_date": "Obecnie",
       "highlights": [
-        "Wykonywanie testów manualnych, eksploracyjnych i regresyjnych aplikacji mobilnych (iOS & Android) oraz webowych.",
-        "Analiza logów urządzeń mobilnych przy użyciu Android Studio oraz Xcode logcat w celu izolacji błędów klienta.",
-        "Weryfikacja User Stories oraz kryteriów akceptacji na poszczególnych buildach aplikacji mobilnych.",
-        "Zgłaszanie defektów i zarządzanie przypadkami testowymi w narzędziach Jira oraz TestRail w zespole Agile/Scrum."
+        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
+        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
+        "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
+        "Tworzenie planów testów, scenariuszy testowych oraz raportów z wykonania w Jira (Xray) i Confluence w zespole Agile/Scrum."
       ]
     },
     {
@@ -68,9 +69,9 @@
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Przeprowadzanie testów manualnych, funkcjonalnych i eksploracyjnych modułów aplikacji webowych i mobilnych.",
-        "Wykonywanie cykli testów regresyjnych oraz dokumentowanie kroków reprodukcji błędów w Jira.",
-        "Walidacja kryteriów akceptacji przed wdrożeniami produkcyjnymi."
+        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu.",
+        "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
+        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum."
       ]
     },
     {
@@ -80,8 +81,8 @@
       "start_date": "2019-07",
       "end_date": "2021-01",
       "highlights": [
-        "Przeprowadzanie kompleksowych testów funkcjonalnych i użytecznościowych aplikacji mobilnych i webowych.",
-        "Projektowanie i utrzymanie zestawów testowych dla wydań mobilnych."
+        "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych na platformach webowych.",
+        "Projektowanie, wykonywanie i optymalizacja przypadków i scenariuszy testowych zgodnych z wymaganiami biznesowymi."
       ]
     }
   ],

@@ -1,7 +1,7 @@
 """
 VitaeCraft AI - Intelligent Personal CV Generator & Tailor
 Author: MagicMike Development Team
-Version: 1.9.1
+Version: 2.0.0
 
 Web GUI and API server for VitaeCraft AI with Playwright 1:1 PDF exporter,
 QA Logic Engine, Anti-AI Auditor, ATS Compliance Safeguard, and Dynamic PDF State Persistence.
@@ -155,10 +155,11 @@ def tailor_api():
     gemini_key = settings.get("gemini_key") or os.environ.get("GEMINI_API_KEY", "")
     ollama_url = settings.get("ollama_url", "http://localhost:11434")
     
+    # ALWAYS load fresh master_profile baseline to prevent state contamination
     master_profile = load_json_file(DEFAULT_PROFILE_PATH, {})
     
     ai = AIEngine(provider=provider, gemini_key=gemini_key, ollama_url=ollama_url)
-    tailored_profile = ai.tailor_cv(master_profile, job_description, target_role)
+    tailored_profile = ai.tailor_cv(master_profile, job_description, target_role, lang=ACTIVE_LANGUAGE)
     tailored_profile = QALogicEngine.audit_and_refine_profile(tailored_profile, lang=ACTIVE_LANGUAGE, job_text=job_description)
     
     ats_analysis = JobAnalyzer.analyze(job_description, tailored_profile)
@@ -250,7 +251,7 @@ def main():
         print(f"✅ Wyeksportowano CV do: {out_file.resolve()}")
         sys.exit(0)
 
-    print(f"🚀 Uruchamianie VitaeCraft AI v1.9.1...")
+    print(f"🚀 Uruchamianie VitaeCraft AI v2.0...")
     print(f"📍 Serwer dostępny pod adresem: http://{args.host}:{args.port}")
     app.run(host=args.host, port=args.port, debug=True)
 
