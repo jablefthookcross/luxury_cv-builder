@@ -1,10 +1,10 @@
 """
 VitaeCraft AI - Intelligent Personal CV Generator & Tailor
 Author: MagicMike Development Team
-Version: 1.5.0
+Version: 1.7.0
 
 Web GUI and API server for VitaeCraft AI with Playwright 1:1 PDF exporter,
-QA Logic Engine, and instant PL/EN Language Switcher.
+QA Logic Engine, Anti-AI Auditor, and ATS Compliance Safeguard.
 """
 
 import os
@@ -143,12 +143,15 @@ def tailor_api():
     tailored_profile = QALogicEngine.audit_and_refine_profile(tailored_profile, lang=ACTIVE_LANGUAGE)
     
     ats_analysis = JobAnalyzer.analyze(job_description, tailored_profile)
+    audit_results = QALogicEngine.audit_anti_ai_and_ats(tailored_profile)
+    
     ACTIVE_TAILORED_PROFILE = tailored_profile
 
     return jsonify({
         "status": "success",
-        "message": "CV pomyślnie dopasowane z weryfikacją logiki QA!",
-        "ats_analysis": ats_analysis
+        "message": "CV pomyślnie dopasowane z audytem Anti-AI i ATS!",
+        "ats_analysis": ats_analysis,
+        "audit_results": audit_results
     })
 
 @app.route("/preview/current")
@@ -227,7 +230,7 @@ def main():
         print(f"✅ Wyeksportowano CV do: {out_file.resolve()}")
         sys.exit(0)
 
-    print(f"🚀 Uruchamianie VitaeCraft AI v1.5...")
+    print(f"🚀 Uruchamianie VitaeCraft AI v1.7...")
     print(f"📍 Serwer dostępny pod adresem: http://{args.host}:{args.port}")
     app.run(host=args.host, port=args.port, debug=True)
 

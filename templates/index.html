@@ -58,7 +58,7 @@
         <div class="brand">
             <div class="brand-icon">⚡</div>
             <span class="brand-title">VitaeCraft AI</span>
-            <span class="brand-tag">v1.6 QA Pro</span>
+            <span class="brand-tag">v1.7 QA Pro</span>
         </div>
         <nav class="nav-tabs">
             <button class="nav-btn active" onclick="switchTab('tailor', this)">⚡ Dopasuj CV (QA Focus)</button>
@@ -119,7 +119,7 @@
                     </button>
                 </div>
 
-                <!-- ATS Widget -->
+                <!-- ATS Match Score Widget -->
                 <div class="ats-widget" id="atsWidget">
                     <div class="score-circle" id="scoreCircle">
                         <div class="score-inner" id="scoreValue">92%</div>
@@ -132,6 +132,21 @@
                             <span class="kw-badge">TypeScript</span>
                             <span class="kw-badge">Postman</span>
                             <span class="kw-badge">REST API</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anti-AI & ATS Audit Card -->
+                <div class="ats-widget" style="margin-top: 1rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.95)); border: 1px solid rgba(16, 185, 129, 0.35);">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 700; font-size: 0.95rem; color: #34d399; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span>🛡️ Audyt Autentyczności & Bezpieczeństwa ATS</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #e2e8f0; margin-bottom: 0.35rem;">
+                            🤖 Anti-AI Score: <strong style="color: #34d399;" id="antiAiScoreVal">100% Autentyczny Inżynier</strong> (Brak zwrotów botów)
+                        </div>
+                        <div style="font-size: 0.85rem; color: #e2e8f0;">
+                            📄 ATS Compliance: <strong style="color: #60a5fa;" id="atsReadinessVal">100% Bezpieczny PDF</strong> (Liniowa struktura tekstu)
                         </div>
                     </div>
                 </div>
@@ -664,9 +679,7 @@
 
                 if (data.status === "success") {
                     updatePreview();
-                    if (data.ats_analysis) {
-                        updateAtsWidget(data.ats_analysis);
-                    }
+                    updateAtsWidget(data.ats_analysis, data.audit_results);
                 } else {
                     alert("Informacja: " + (data.message || "Ukończono w trybie awaryjnym."));
                 }
@@ -678,28 +691,51 @@
             }
         }
 
-        function updateAtsWidget(analysis) {
-            const scoreVal = document.getElementById('scoreValue');
-            const scoreCircle = document.getElementById('scoreCircle');
-            const matchedBadges = document.getElementById('matchedBadges');
+        function updateAtsWidget(analysis, audit) {
+            if (analysis) {
+                const scoreVal = document.getElementById('scoreValue');
+                const scoreCircle = document.getElementById('scoreCircle');
+                const matchedBadges = document.getElementById('matchedBadges');
 
-            const score = analysis.match_score || 0;
-            scoreVal.textContent = score + "%";
-            scoreCircle.style.setProperty('--score-deg', (score * 3.6) + 'deg');
+                const score = analysis.match_score || 0;
+                scoreVal.textContent = score + "%";
+                scoreCircle.style.setProperty('--score-deg', (score * 3.6) + 'deg');
 
-            matchedBadges.innerHTML = "";
-            (analysis.matched_keywords || []).forEach(kw => {
-                const span = document.createElement('span');
-                span.className = 'kw-badge';
-                span.textContent = kw;
-                matchedBadges.appendChild(span);
-            });
-            (analysis.missing_keywords || []).forEach(kw => {
-                const span = document.createElement('span');
-                span.className = 'kw-badge missing';
-                span.textContent = 'brakujące: ' + kw;
-                matchedBadges.appendChild(span);
-            });
+                matchedBadges.innerHTML = "";
+                (analysis.matched_keywords || []).forEach(kw => {
+                    const span = document.createElement('span');
+                    span.className = 'kw-badge';
+                    span.textContent = kw;
+                    matchedBadges.appendChild(span);
+                });
+                (analysis.missing_keywords || []).forEach(kw => {
+                    const span = document.createElement('span');
+                    span.className = 'kw-badge missing';
+                    span.textContent = 'brakujące: ' + kw;
+                    matchedBadges.appendChild(span);
+                });
+            }
+
+            if (audit) {
+                const antiAiScore = document.getElementById('antiAiScoreVal');
+                const atsReadiness = document.getElementById('atsReadinessVal');
+
+                if (audit.anti_ai_score === 100) {
+                    antiAiScore.textContent = "100% Autentyczny Inżynier (Brak śladów AI)";
+                    antiAiScore.style.color = "#34d399";
+                } else {
+                    antiAiScore.textContent = audit.anti_ai_status;
+                    antiAiScore.style.color = "#f87171";
+                }
+
+                if (audit.is_ats_safe) {
+                    atsReadiness.textContent = "100% Bezpieczny dla Skanerów Korporacyjnych";
+                    atsReadiness.style.color = "#60a5fa";
+                } else {
+                    atsReadiness.textContent = "Wymaga sprawdzenia nagłówków/danych kontaktowych";
+                    atsReadiness.style.color = "#f59e0b";
+                }
+            }
         }
 
         function updatePreview() {
