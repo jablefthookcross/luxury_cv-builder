@@ -9,47 +9,41 @@
     "linkedin": "https://linkedin.com/in/michal-kosowski",
     "github": "https://github.com"
   },
-  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w zapewnianiu jakości cyfrowych platform webowych i mobilnych poprzez testy manualne, eksploracyjne, API oraz automatyzację. Specjalista w analizie kryteriów akceptacji (Acceptance Criteria), weryfikacji logów urządzeń, testach funkcjonalnych i regresyjnych z wykorzystaniem narzędzi Jira, Xray oraz Postman, z praktycznym doświadczeniem w automatyzacji w Playwright (TypeScript).",
+  "summary": "QA Engineer with 5+ years of experience in manual, integration, and API testing (REST & SOAP). Proficient in backend verification and database testing using SQL, test scenario design, and end-to-end defect tracking in Jira and Xray within Agile/Scrum methodologies. Experienced in preparing comprehensive test documentation, plans, and summary reports for enterprise systems. Complemented by test automation experience using Playwright in TypeScript.",
   "skills": [
     {
-      "category": "Programowanie & Automatyzacja",
+      "category": "Testing & API",
       "items": [
-        "Playwright",
-        "TypeScript",
-        "JavaScript",
-        "SQL",
-        "Git",
-        "GitLab CI/CD",
-        "GitHub Actions"
-      ]
-    },
-    {
-      "category": "Testowanie & API",
-      "items": [
-        "Manual Testing",
-        "Mobile Testing",
-        "Exploratory Testing",
-        "User Stories Analysis",
-        "Regression Testing",
-        "REST API Testing",
+        "SOAP & REST API Testing",
+        "SoapUI",
         "Postman",
-        "Swagger",
+        "SQL Database Verification",
+        "Integration Testing",
+        "Functional Testing",
+        "Regression Testing",
         "ISTQB Standards"
       ]
     },
     {
-      "category": "Narzędzia & Mobilne Debugowanie",
+      "category": "Tools & Test Management",
       "items": [
-        "Android Studio",
-        "Xcode",
-        "Mobile Device Logs",
-        "TestRail",
-        "Jira (AIO / Xray)",
+        "Jira (Xray)",
         "Confluence",
-        "Kibana",
-        "Docker",
-        "WSL",
-        "Figma"
+        "Git",
+        "SQL Developer / DBeaver",
+        "Test Documentation & Reporting",
+        "Docker"
+      ]
+    },
+    {
+      "category": "Automation & Languages",
+      "items": [
+        "SQL",
+        "Playwright",
+        "TypeScript",
+        "JavaScript",
+        "GitLab CI/CD",
+        "GitHub Actions"
       ]
     }
   ],
@@ -61,12 +55,10 @@
       "start_date": "2022",
       "end_date": "Obecnie",
       "highlights": [
-        "Wykonywanie testów manualnych, eksploracyjnych i regresyjnych aplikacji webowych oraz mobilnych w oparciu o wymagania i User Stories.",
+        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
+        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
         "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
-        "Przeprowadzanie testów REST API oraz analiza dokumentacji w Postman i Swagger w celu walidacji integracji backendowych.",
-        "Analiza logów aplikacji mobilnych (Android Studio / Xcode logcat) i weryfikacja kryteriów akceptacji.",
-        "Aktywny udział w wydarzeniach Scrum i ścisła współpraca z programistami, PO i BA w zakresie jakości wydań.",
-        "Dokumentowanie błędów i scenariuszy testowych w Jira (AIO Tests/Xray) oraz Confluence."
+        "Tworzenie planów testów, scenariuszy testowych oraz raportów z wykonania w Jira (Xray) i Confluence w zespole Agile/Scrum."
       ]
     },
     {
@@ -78,7 +70,7 @@
       "highlights": [
         "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu.",
         "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
-        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira w metodologii Scrum."
+        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum."
       ]
     },
     {

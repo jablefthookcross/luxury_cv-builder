@@ -1,0 +1,109 @@
+{
+  "personal_info": {
+    "full_name": "Michał Kosowski",
+    "title": "Software QA Engineer",
+    "email": "mmkosowski94@gmail.com",
+    "phone": "518075716",
+    "location": "Warsaw, Poland",
+    "website": "",
+    "linkedin": "https://linkedin.com/in/michal-kosowski",
+    "github": "https://github.com"
+  },
+  "summary": "QA Engineer with 5+ years of experience delivering quality assurance for web and mobile applications through manual, exploratory, API, and automated testing. Skilled in acceptance criteria verification, mobile device log analysis (Android Studio / Xcode), REST API validation (Postman / Swagger), and defect tracking in Jira, Xray, and TestRail within Agile/Scrum environments. Hands-on experience developing test automation scripts using Playwright in TypeScript.",
+  "skills": [
+    {
+      "category": "Programming & Automation",
+      "items": [
+        "Playwright",
+        "TypeScript",
+        "JavaScript",
+        "SQL",
+        "Git",
+        "GitLab CI/CD",
+        "GitHub Actions"
+      ]
+    },
+    {
+      "category": "Testing & API",
+      "items": [
+        "Manual Testing",
+        "Mobile Testing",
+        "Exploratory Testing",
+        "Acceptance Criteria",
+        "Regression Testing",
+        "REST API Testing",
+        "Postman",
+        "Swagger",
+        "ISTQB Standards"
+      ]
+    },
+    {
+      "category": "Tools & Mobile Debugging",
+      "items": [
+        "Android Studio",
+        "Xcode",
+        "Mobile Device Logs",
+        "TestRail",
+        "Jira (AIO / Xray)",
+        "Confluence",
+        "Kibana",
+        "Docker",
+        "WSL",
+        "Figma"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "position": "Software tester / QA Automation",
+      "company": "Benefit Systems S.A.",
+      "location": "Warsaw",
+      "start_date": "2022",
+      "end_date": "Present",
+      "highlights": [
+        "Performed manual, exploratory, and regression testing for web and mobile applications based on user stories and requirements.",
+        "Designed, executed, and maintained automated E2E test scripts for web applications using Playwright (TypeScript/JavaScript).",
+        "Conducted REST API testing and documentation analysis using Postman and Swagger to validate backend integration.",
+        "Analyzed mobile application logs (Android Studio / Xcode logcat) and verified business acceptance criteria.",
+        "Active participation in Scrum ceremonies collaborating closely with developers, POs, and BAs.",
+        "Documented defects and test scenarios using Jira (AIO Tests/Xray) and Confluence."
+      ]
+    },
+    {
+      "position": "Test And Analysis Engineer",
+      "company": "Sii Polska Sp. z o.o. (Freelance)",
+      "location": "Warsaw",
+      "start_date": "2021-09",
+      "end_date": "2022-04",
+      "highlights": [
+        "Conducted manual and functional testing of HR web applications based on backlog requirements.",
+        "Executed backend and API tests using Postman and performed data validation using SQL Developer.",
+        "Reported bugs with clear reproduction steps and tracked defects in Jira within Scrum methodology."
+      ]
+    },
+    {
+      "position": "Software tester",
+      "company": "Euroloan Group (Freelance)",
+      "location": "Warsaw",
+      "start_date": "2019-07",
+      "end_date": "2021-01",
+      "highlights": [
+        "Conducted comprehensive UI, functional, and regression testing for digital systems across web and mobile platforms.",
+        "Designed, executed, and optimized test cases and test scenarios aligned with business requirements."
+      ]
+    }
+  ],
+  "education": [],
+  "projects": [],
+  "languages": [
+    {
+      "language": "Polish",
+      "level": "Native"
+    },
+    {
+      "language": "English",
+      "level": "Full Professional (C2)"
+    }
+  ],
+  "certifications": []
+}

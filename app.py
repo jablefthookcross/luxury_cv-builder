@@ -1,10 +1,10 @@
 """
 VitaeCraft AI - Intelligent Personal CV Generator & Tailor
 Author: MagicMike Development Team
-Version: 1.8.0
+Version: 1.9.0
 
 Web GUI and API server for VitaeCraft AI with Playwright 1:1 PDF exporter,
-QA Logic Engine, Anti-AI Auditor, ATS Compliance Safeguard, and Dynamic PDF State Sync.
+QA Logic Engine, Anti-AI Auditor, ATS Compliance Safeguard, and Dynamic PDF State Persistence.
 """
 
 import os
@@ -60,10 +60,12 @@ def get_settings() -> dict:
 
 def get_active_profile() -> dict:
     global ACTIVE_TAILORED_PROFILE
+    if TAILORED_PROFILE_PATH.exists():
+        loaded = load_json_file(TAILORED_PROFILE_PATH, {})
+        if loaded:
+            return loaded
     if ACTIVE_TAILORED_PROFILE:
         return ACTIVE_TAILORED_PROFILE
-    if TAILORED_PROFILE_PATH.exists():
-        return load_json_file(TAILORED_PROFILE_PATH, {})
     return load_json_file(DEFAULT_PROFILE_PATH, {})
 
 @app.route("/")
@@ -76,12 +78,8 @@ def master_profile_api():
     if request.method == "POST":
         new_data = request.get_json()
         if save_json_file(DEFAULT_PROFILE_PATH, new_data):
-            ACTIVE_TAILORED_PROFILE = None
-            if TAILORED_PROFILE_PATH.exists():
-                try:
-                    TAILORED_PROFILE_PATH.unlink()
-                except Exception:
-                    pass
+            ACTIVE_TAILORED_PROFILE = new_data
+            save_json_file(TAILORED_PROFILE_PATH, new_data)
             return jsonify({"status": "success", "message": "Główny profil pomyślnie zapisany!"})
         return jsonify({"status": "error", "message": "Błąd podczas zapisu profilu."}), 500
     
@@ -250,7 +248,7 @@ def main():
         print(f"✅ Wyeksportowano CV do: {out_file.resolve()}")
         sys.exit(0)
 
-    print(f"🚀 Uruchamianie VitaeCraft AI v1.8...")
+    print(f"🚀 Uruchamianie VitaeCraft AI v1.9...")
     print(f"📍 Serwer dostępny pod adresem: http://{args.host}:{args.port}")
     app.run(host=args.host, port=args.port, debug=True)
 

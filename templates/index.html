@@ -58,7 +58,7 @@
         <div class="brand">
             <div class="brand-icon">⚡</div>
             <span class="brand-title">VitaeCraft AI</span>
-            <span class="brand-tag">v1.7 QA Pro</span>
+            <span class="brand-tag">v1.9 QA Pro</span>
         </div>
         <nav class="nav-tabs">
             <button class="nav-btn active" onclick="switchTab('tailor', this)">⚡ Dopasuj CV (QA Focus)</button>
@@ -159,9 +159,9 @@
                         <span style="font-size: 0.72rem; background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500;">1:1 Pixel-Perfect</span>
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <a href="/api/export/pdf" download class="btn-secondary" style="text-decoration:none; background: var(--accent-blue); color: white; border: none;">📥 Pobierz PDF (1:1)</a>
+                        <a href="/api/export/pdf" id="btnDownloadPdf" download class="btn-secondary" style="text-decoration:none; background: var(--accent-blue); color: white; border: none;">📥 Pobierz PDF (1:1)</a>
                         <button class="btn-secondary" onclick="printPreviewIframe()">🖨️ Drukuj w Przeglądarce</button>
-                        <a href="/api/export/html" download class="btn-secondary" style="text-decoration:none;">💾 HTML</a>
+                        <a href="/api/export/html" id="btnDownloadHtml" download class="btn-secondary" style="text-decoration:none;">💾 HTML</a>
                     </div>
                 </div>
                 <div class="preview-frame-wrapper">
@@ -742,7 +742,15 @@
             const template = document.getElementById('cvTemplate').value;
             const lang = document.getElementById('cvLanguage').value;
             const iframe = document.getElementById('previewIframe');
-            iframe.src = '/preview/current?template=' + template + '&lang=' + lang + '&t=' + new Date().getTime();
+            const timestamp = new Date().getTime();
+            
+            iframe.src = '/preview/current?template=' + template + '&lang=' + lang + '&t=' + timestamp;
+            
+            // Dynamic PDF & HTML export button URL sync with fresh timestamp
+            const pdfBtn = document.getElementById('btnDownloadPdf');
+            const htmlBtn = document.getElementById('btnDownloadHtml');
+            if (pdfBtn) pdfBtn.href = '/api/export/pdf?template=' + template + '&lang=' + lang + '&t=' + timestamp;
+            if (htmlBtn) htmlBtn.href = '/api/export/html?template=' + template + '&lang=' + lang + '&t=' + timestamp;
         }
 
         function printPreviewIframe() {
