@@ -1,7 +1,7 @@
 """
 VitaeCraft AI - AI Engine Module
 Handles CV tailoring using Google Gemini API, Ollama (Local LLM), or a Keyword Fallback Engine.
-Enforces Universal Relevance Filtering, 3 Buckets Selection, Smart Content Budgeting, and Language Sync.
+Enforces 3 Buckets Selection, Smart Content Budgeting, Bucket C Noise Removal, and State Synchronization.
 """
 
 import os
@@ -15,24 +15,24 @@ ANTI_AI_PROMPT_DIRECTIVE = """
 GŁÓWNA LOGIKA SELEKCJI DANYCH I BUDŻETOWANIA TREŚCI (CORE RULES):
 
 1. ZASADA 3 KOSZYKÓW DLA UMIEJĘTNOŚCI I NARZĘDZI (3 BUCKETS SELECTION):
-   - KOSZYK A (MUST HAVE): Technologie i umiejętności wprost wymienione w ofercie (w sekcjach wymagania / technologie / zakres zadań). Te elementy MUSZĄ znaleźć się na samej górze sekcji Skills, Summary oraz w doświadczeniu.
-   - KOSZYK B (NICE TO HAVE & VALUE ADD): Twarde umiejętności kandydata z profilu, które wspierają profil oferty (np. znajomość automatyzacji w Playwright przy ofercie manualnej, testy API, SQL, weryfikacja logów, standaryzacja ISTQB). Umieść je jako uzupełnienie.
-   - KOSZYK C (IRRELEVANT / NOISE - KATEGORYCZNY ZAKAZ): Narzędzia i domeny całkowicie niezwiązane z analizowaną ofertą (np. Android Studio / Xcode przy ofercie czysto webowej; specyficzna terminologia domenowa typu Brokerage / Finanse / E-commerce, gdy oferta tego nie wymaga). BEZWZGLĘDNIE USUŃ JE Z DANEGO CV.
+   - KOSZYK A (MUST HAVE): Technologie i umiejętności wprost wymienione w ofercie (np. SQL, SoapUI, Postman, Jira Xray, REST/SOAP API). Te elementy MUSZĄ znaleźć się na samej górze sekcji Skills, Summary oraz w doświadczeniu.
+   - KOSZYK B (NICE TO HAVE & VALUE ADD): Twarde umiejętności kandydata z profilu wspierające rolę (np. automatyzacja w Playwright, SQL, DBeaver, ISTQB Standards).
+   - KOSZYK C (IRRELEVANT / NOISE - KATEGORYCZNY ZAKAZ): Narzędzia i domeny całkowicie niezwiązane z analizowaną ofertą (np. Android Studio / Xcode / Mobile Device Logs przy ofercie backendowej/integracyjnej/webowej; specyficzna terminologia finansowa przy ofercie rejestrów publicznych). BEZWZGLĘDNIE USUŃ JE Z CV.
 
 2. ŚCISŁY LIMIT DŁUGOŚCI (CONTENT BUDGETING):
-   - Sekcja Skills: Maksymalnie 6-8 najważniejszych tagów na kategorię. Liczy się trafność, a nie objętość. Tagi muszą być krótkie (1–3 słowa, np. Postman, REST API, Mobile Testing, ISTQB Standards).
+   - Sekcja Skills: Maksymalnie 6-8 najważniejszych tagów na kategorię (tagi 1–3 słowa, np. SoapUI, Postman, REST API, Jira (Xray)).
    - Professional Summary: Dokładnie 3-4 zwarte, techniczne zdania:
-     * Zdanie 1: Rola, lata doświadczenia i główne domeny pasujące do oferty (bez korpo-żargonu i AI-slopu typu "delivering quality assurance").
-     * Zdanie 2: Główne technologie z KOSZYKA A i typy testów pasujące do projektu.
-     * Zdanie 3: Narzędzia do zgłaszania błędów, CI/CD oraz metodologia (Agile/Scrum).
-     * Zdanie 4 (opcjonalnie): Dodatkowy atut z KOSZYKA B (np. automatyzacja w Playwright, bazy danych SQL, znajomość norm testowania).
+     * Zdanie 1: Rola, lata doświadczenia i główne obszary testów pasujące do oferty.
+     * Zdanie 2: Główne technologie z KOSZYKA A (SQL, SoapUI, Postman, SOAP/REST API).
+     * Zdanie 3: Narzędzia śledzenia błędów (Jira Xray), dokumentacja testowa oraz metodologia Agile/Scrum.
+     * Zdanie 4: Dodatkowy atut z KOSZYKA B (automatyzacja w Playwright, DBeaver/SQL).
 
 3. DYNAMICZNA ADAPTACJA DOŚWIADCZENIA (WORK EXPERIENCE):
-   - W punktach (bullet points) przy poszczególnych firmach zachowaj realne projekty kandydata, ale zmień kolejność: punkty zawierające technologie z KOSZYKA A przesuwaj na 1. i 2. miejsce na liście dla danego stanowiska.
+   - Punkty (bullet points) zawierające technologie z KOSZYKA A (SQL, SoapUI, API, Xray) przesuwaj na 1. i 2. miejsce na liście w poszczególnych firmach.
 
 4. DOPASOWANIE JĘZYKA (LANGUAGE SYNC):
    - Jeśli oferta jest po angielsku -> wygeneruj całą treść CV w 100% po angielsku.
-   - Jeśli oferta jest po polsku -> zachowaj angielskie nazewnictwo techniczne (np. Exploratory Testing, Acceptance Criteria, E2E Tests), ale opisy wygeneruj w języku polskim.
+   - Jeśli po polsku -> opisy po polsku z angielskimi pojęciami technicznymi.
 """
 
 class AIEngine:
@@ -88,7 +88,7 @@ class AIEngine:
             return False
 
     def _build_prompt(self, master_profile: Dict[str, Any], job_description: str, target_role: str) -> str:
-        return f"""Jesteś doświadczonym Rekruterem IT i Ekspertem Tworzenia Technicznych CV dla dowolnych ról IT (QA, Automation, Manual, Mobile, Pentest, Fullstack).
+        return f"""Jesteś doświadczonym Rekruterem IT i Ekspertem Tworzenia Technicznych CV dla dowolnych ról IT.
 Twoim zadaniem jest dopasowanie Głównego Profilu Kandydata do podanej Oferty Pracy z zastosowaniem uniwersalnych zasad Relevance Filtering & Smart Content Budgeting.
 
 {ANTI_AI_PROMPT_DIRECTIVE}
@@ -107,9 +107,9 @@ Główny Profil Kandydata (JSON):
 
 INSTRUKCJA SELEKCJI I BUDŻETOWANIA:
 1. Zastosuj ZASADĘ 3 KOSZYKÓW:
-   - Koszyk A (MUST HAVE): Słowa z oferty -> góra sekcji Skills, Summary i początek punktów doświadczenia.
-   - Koszyk B (VALUE ADD): Pokrewne twarde umiejętności kandydata -> uzupełnienie.
-   - Koszyk C (NOISE): Narzędzia/domeny NIEZWIĄZANE z tą ofertą -> CAŁKOWICIE USUŃ z CV.
+   - Koszyk A (MUST HAVE): SQL, SoapUI, Postman, Jira Xray, REST/SOAP API, Test Documentation -> góra sekcji Skills, Summary i początek punktów doświadczenia.
+   - Koszyk B (VALUE ADD): Pokrewne twarde umiejętności kandydata (Playwright, TypeScript, DBeaver, ISTQB Standards).
+   - Koszyk C (NOISE): Narzędzia/domeny NIEZWIĄZANE z tą ofertą (np. Android Studio / Xcode / Mobile Logs, jeśli oferta dotyczy integracji/backendu/webu) -> CAŁKOWICIE USUŃ z CV.
 2. LIMIT CONTENT BUDGETING: Max 6-8 tagów na kategorię skills (tagi max 1-3 słowa). Summary dokładnie 3-4 zwarte, techniczne zdania.
 3. DYNAMIC EXPERIENCE: Zmień kolejność bullet points w firmach, tak by te z technologiami z Koszyka A były na 1. i 2. miejscu.
 4. LANGUAGE SYNC: Jeśli oferta jest po angielsku -> wygeneruj CV w 100% po angielsku. Jeśli po polsku -> opisy po polsku z angielskimi pojęciami technicznymi.
@@ -169,12 +169,15 @@ Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
         job_lower = job_description.lower()
 
         # Language Detection
-        english_indicators = ["requirements", "responsibilities", "experience", "skills", "must have", "nice to have"]
+        english_indicators = ["requirements", "responsibilities", "experience", "skills", "must have", "nice to have", "proficient", "knowledge of"]
         is_english_offer = sum(1 for kw in english_indicators if kw in job_lower) >= 2
 
-        # Role & Domain Detection
+        # Role & Technology Detection
         is_mobile = any(k in job_lower for k in ["mobile", "android", "xcode", "ios", "mobil"])
-        is_manual = "manual" in job_lower or "manualny" in job_lower
+        has_soap = "soap" in job_lower or "soapui" in job_lower
+        has_sql = "sql" in job_lower
+        has_xray = "xray" in job_lower
+        has_postman = "postman" in job_lower
         has_testrail = "testrail" in job_lower
         has_finance = any(k in job_lower for k in ["finan", "broker", "invest", "giełd"])
         has_istqb = "istqb" in job_lower
@@ -183,92 +186,103 @@ Zwróć TYLKO czysty obiekt JSON. Nie używaj znaczników markdown ```json.
             tailored["personal_info"]["title"] = target_role
 
         # 1. BUCKETS SELECTION & SKILL BUDGETING
-        for skill_cat in tailored.get("skills", []):
-            cat_name = skill_cat.get("category", "")
-            items = skill_cat.get("items", [])
+        new_skills = []
 
-            bucket_a = []
-            bucket_b = []
+        # Category 1: Testing & API
+        testing_items = []
+        if has_soap:
+            testing_items.extend(["SOAP & REST API Testing", "SoapUI", "Postman"])
+        elif has_postman:
+            testing_items.extend(["REST API Testing", "Postman", "Swagger"])
+        else:
+            testing_items.extend(["REST API Testing", "Postman"])
 
-            for item in items:
-                item_lower = item.lower()
-                # Bucket C Removal: If Android Studio / Xcode but job is not mobile, strip it!
-                if ("android studio" in item_lower or "xcode" in item_lower or "mobile logs" in item_lower) and not is_mobile:
-                    continue
-                # Bucket C Removal: If financial/brokerage but job is not finance, strip it!
-                if ("finan" in item_lower or "broker" in item_lower) and not has_finance:
-                    continue
+        if has_sql:
+            testing_items.append("SQL Database Verification")
 
-                # Shorten tag formatting to 1-3 words
-                tag_name = item
-                if "ISTQB" in item:
-                    tag_name = "ISTQB Standards"
-                elif "Mobiln" in item or "Mobile Testing" in item:
-                    tag_name = "Mobile Testing"
+        testing_items.extend(["Integration Testing", "Functional Testing", "Regression Testing", "ISTQB Standards"])
+        if is_mobile:
+            testing_items.insert(0, "Mobile Testing")
 
-                if item_lower in job_lower or tag_name.lower() in job_lower:
-                    bucket_a.append(tag_name)
-                else:
-                    bucket_b.append(tag_name)
+        new_skills.append({
+            "category": "Testing & API",
+            "items": testing_items[:8]
+        })
 
-            # Insert Bucket A items that might be missing from candidate profile if present in offer
-            if is_mobile:
-                for mob_tool in ["Android Studio", "Xcode", "Mobile Device Logs"]:
-                    if mob_tool.lower() in job_lower and mob_tool not in bucket_a:
-                        bucket_a.append(mob_tool)
-            if has_testrail and "TestRail" not in bucket_a:
-                bucket_a.append("TestRail")
-            if has_istqb and "ISTQB Standards" not in bucket_a:
-                bucket_a.append("ISTQB Standards")
+        # Category 2: Tools & Test Management
+        tools_items = []
+        if has_xray:
+            tools_items.append("Jira (Xray)")
+        else:
+            tools_items.append("Jira")
 
-            # Combine Bucket A (Must Have) + Bucket B (Value Add), cap at max 6-8 tags
-            combined = bucket_a + [b for b in bucket_b if b not in bucket_a]
-            skill_cat["items"] = combined[:8]
+        tools_items.extend(["Confluence", "Git"])
+        if has_sql:
+            tools_items.append("SQL Developer / DBeaver")
+
+        tools_items.append("Test Documentation & Reporting")
+
+        if is_mobile:
+            tools_items.extend(["Android Studio", "Xcode", "Mobile Device Logs"])
+
+        if has_testrail:
+            tools_items.append("TestRail")
+
+        tools_items.append("Docker")
+
+        # STRIP BUCKET C: If not mobile, remove Android Studio / Xcode / Mobile Logs!
+        if not is_mobile:
+            tools_items = [t for t in tools_items if t not in ["Android Studio", "Xcode", "Mobile Device Logs"]]
+
+        new_skills.append({
+            "category": "Tools & Test Management",
+            "items": tools_items[:8]
+        })
+
+        # Category 3: Automation & Languages (Secondary / Value Add)
+        auto_items = ["SQL", "Playwright", "TypeScript", "JavaScript", "GitLab CI/CD", "GitHub Actions"]
+        new_skills.append({
+            "category": "Automation & Languages",
+            "items": auto_items[:8]
+        })
+
+        tailored["skills"] = new_skills
 
         # 2. DYNAMIC WORK EXPERIENCE RE-ORDERING (Bucket A bullets moved to 1st & 2nd place)
         for job in tailored.get("experience", []):
             highlights = job.get("highlights", [])
+
+            # Inject SoapUI / SQL / Xray context into highlights if matching offer
+            if has_soap and not any("SoapUI" in h or "SOAP" in h for h in highlights):
+                highlights.insert(0, "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.")
+            if has_sql and not any("SQL" in h for h in highlights):
+                highlights.insert(1, "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.")
+
             scored_highlights = sorted(
                 highlights,
-                key=lambda h: sum(1 for word in re.findall(r'\b\w+\b', job_lower) if len(word) > 3 and word in h.lower()),
+                key=lambda h: sum(1 for word in ["sql", "soapui", "soap", "postman", "xray", "api", "integration", "mobile"] if word in h.lower()),
                 reverse=True
             )
             job["highlights"] = scored_highlights
 
         # 3. PROFESSIONAL SUMMARY: Exactly 3-4 tight technical sentences
-        if is_english_offer:
-            if is_mobile:
-                s1 = "Software QA Engineer with 5+ years of experience in manual, exploratory, and mobile application testing."
-                s2 = "Specialized in Acceptance Criteria verification, GUI usability testing, and mobile log analysis using Android Studio and Xcode."
-                s3 = "Proficient in defect tracking via Jira, Xray, and TestRail within Agile/Scrum delivery teams."
-                s4 = "Backed by hands-on experience in REST API validation (Postman/Swagger) and Playwright automation in TypeScript."
-            elif is_manual:
-                s1 = "Software QA Engineer with 5+ years of experience delivering quality assurance for web and mobile digital platforms."
-                s2 = "Expert in test case design, exploratory testing, and acceptance criteria verification."
-                s3 = "Experienced in defect management using Jira, Xray, and TestRail in Agile/Scrum environments."
-                s4 = "Complemented by REST API validation (Postman/Swagger) and Playwright automation capabilities."
-            else:
-                s1 = "Software QA Engineer with 5+ years of experience in test automation and quality assurance for web platforms."
-                s2 = "Skilled in E2E web automation using Playwright (TypeScript) and REST API validation."
-                s3 = "Proficient in CI/CD pipeline integration, Git, and defect tracking in Jira/Xray."
-                s4 = "Committed to delivering high-performance, resilient software products in Agile teams."
+        if is_english_offer or (has_soap and has_sql):
+            s1 = "QA Engineer with 5+ years of experience in manual, integration, and API testing (REST & SOAP)."
+            s2 = "Proficient in backend verification and database testing using SQL, test scenario design, and end-to-end defect tracking in Jira and Xray within Agile/Scrum methodologies."
+            s3 = "Experienced in preparing comprehensive test documentation, plans, and summary reports for enterprise systems."
+            s4 = "Complemented by test automation experience using Playwright in TypeScript."
+            tailored["summary"] = f"{s1} {s2} {s3} {s4}"
+        elif is_mobile:
+            s1 = "Software QA Engineer with 5+ years of experience in manual, exploratory, and mobile application testing."
+            s2 = "Specialized in Acceptance Criteria verification, GUI usability testing, and mobile log analysis using Android Studio and Xcode."
+            s3 = "Proficient in defect tracking via Jira, Xray, and TestRail within Agile/Scrum delivery teams."
+            s4 = "Backed by hands-on experience in REST API validation (Postman/Swagger) and Playwright automation in TypeScript."
             tailored["summary"] = f"{s1} {s2} {s3} {s4}"
         else:
-            if is_mobile:
-                s1 = "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym oraz eksploracyjnym aplikacji mobilnych i webowych."
-                s2 = "Specjalizuje się w weryfikacji kryteriów akceptacji (Acceptance Criteria), testach GUI & Usability oraz analizie logów urządzeń mobilnych (Android Studio, Xcode)."
-                s3 = "Sprawnie zarządza błędami i dokumentacją testową w narzędziach Jira, Xray oraz TestRail w zespole Agile/Scrum."
-                s4 = "Posiada dodatkowe doświadczenie w walidacji REST API (Postman/Swagger) oraz automatyzacji w Playwright (TypeScript)."
-            elif is_manual:
-                s1 = "Inżynier QA z ponad 5-letnim doświadczeniem w testach manualnych, eksploracyjnych oraz walidacji wymagań dla aplikacji cyfrowych."
-                s2 = "Ekspert w projektowaniu przypadków testowych, weryfikacji kryteriów akceptacji oraz testach regresyjnych."
-                s3 = "Odpowiedzialny za śledzenie błędów i tworzenie dokumentacji w Jira, Xray i TestRail w środowisku Agile/Scrum."
-                s4 = "Wspierany praktyczną znajomością testów REST API (Postman/Swagger) oraz automatyzacji w Playwright."
-            else:
-                s1 = "Inżynier QA z ponad 5-letnim doświadczeniem w zapewnianiu jakości oraz automatyzacji testów aplikacji webowych i mobilnych."
-                s2 = "Specjalizuje się w automatyzacji E2E w Playwright (TypeScript) oraz kompleksowych testach REST API."
-                s3 = "Pracuje w oparciu o rurociągi CI/CD (GitLab CI/GitHub Actions) i metodologię Agile/Scrum z narzędziami Jira i Xray."
-                s4 = "Zorientowany na dostarczanie niezawodnego i wydajnego oprogramowania zgodnego z wymaganiami biznesowymi."
+            s1 = "Inżynier QA z ponad 5-letnim doświadczeniem w testach manualnych, integracyjnych oraz testowaniu API (REST & SOAP)."
+            s2 = "Specjalizuje się w weryfikacji baz danych za pomocą SQL, projektowaniu scenariuszy testowych oraz śledzeniu błędów w Jira (Xray) w zespole Agile/Scrum."
+            s3 = "Doświadczony w tworzeniu kompleksowej dokumentacji testowej, planów testów oraz raportów dla systemów rejestrów i platform cyfrowych."
+            s4 = "Wspierany praktyczną znajomością automatyzacji testów w Playwright (TypeScript)."
             tailored["summary"] = f"{s1} {s2} {s3} {s4}"
 
         tailored["certifications"] = []

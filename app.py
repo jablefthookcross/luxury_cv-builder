@@ -1,10 +1,10 @@
 """
 VitaeCraft AI - Intelligent Personal CV Generator & Tailor
 Author: MagicMike Development Team
-Version: 1.7.0
+Version: 1.8.0
 
 Web GUI and API server for VitaeCraft AI with Playwright 1:1 PDF exporter,
-QA Logic Engine, Anti-AI Auditor, and ATS Compliance Safeguard.
+QA Logic Engine, Anti-AI Auditor, ATS Compliance Safeguard, and Dynamic PDF State Sync.
 """
 
 import os
@@ -22,6 +22,7 @@ from qa_logic_engine import QALogicEngine
 
 APP_DIR = Path(__file__).parent
 DEFAULT_PROFILE_PATH = APP_DIR / "profile_data.json"
+TAILORED_PROFILE_PATH = APP_DIR / "active_tailored_profile.json"
 SETTINGS_PATH = APP_DIR / "settings.json"
 OUTPUT_DIR = APP_DIR / "output"
 
@@ -57,15 +58,30 @@ def get_settings() -> dict:
     }
     return load_json_file(SETTINGS_PATH, default_settings)
 
+def get_active_profile() -> dict:
+    global ACTIVE_TAILORED_PROFILE
+    if ACTIVE_TAILORED_PROFILE:
+        return ACTIVE_TAILORED_PROFILE
+    if TAILORED_PROFILE_PATH.exists():
+        return load_json_file(TAILORED_PROFILE_PATH, {})
+    return load_json_file(DEFAULT_PROFILE_PATH, {})
+
 @app.route("/")
 def index():
     return render_template("index.html")
 
 @app.route("/api/profile", methods=["GET", "POST"])
 def master_profile_api():
+    global ACTIVE_TAILORED_PROFILE
     if request.method == "POST":
         new_data = request.get_json()
         if save_json_file(DEFAULT_PROFILE_PATH, new_data):
+            ACTIVE_TAILORED_PROFILE = None
+            if TAILORED_PROFILE_PATH.exists():
+                try:
+                    TAILORED_PROFILE_PATH.unlink()
+                except Exception:
+                    pass
             return jsonify({"status": "success", "message": "Główny profil pomyślnie zapisany!"})
         return jsonify({"status": "error", "message": "Błąd podczas zapisu profilu."}), 500
     
@@ -98,6 +114,7 @@ def upload_pdf_api():
 
     save_json_file(DEFAULT_PROFILE_PATH, parsed_profile)
     ACTIVE_TAILORED_PROFILE = parsed_profile
+    save_json_file(TAILORED_PROFILE_PATH, parsed_profile)
 
     return jsonify({
         "status": "success",
@@ -145,23 +162,25 @@ def tailor_api():
     ats_analysis = JobAnalyzer.analyze(job_description, tailored_profile)
     audit_results = QALogicEngine.audit_anti_ai_and_ats(tailored_profile)
     
+    # Save active tailored state to disk and memory for PDF generator sync
     ACTIVE_TAILORED_PROFILE = tailored_profile
+    save_json_file(TAILORED_PROFILE_PATH, tailored_profile)
 
     return jsonify({
         "status": "success",
-        "message": "CV pomyślnie dopasowane z audytem Anti-AI i ATS!",
+        "message": "CV pomyślnie dopasowane i zsynchronizowane z plikiem PDF!",
         "ats_analysis": ats_analysis,
         "audit_results": audit_results
     })
 
 @app.route("/preview/current")
 def preview_current():
-    global ACTIVE_TAILORED_PROFILE, ACTIVE_LANGUAGE
+    global ACTIVE_LANGUAGE
     template_name = request.args.get("template", "pro_qa_sidebar")
     lang = request.args.get("lang", ACTIVE_LANGUAGE)
     ACTIVE_LANGUAGE = lang
     
-    data = ACTIVE_TAILORED_PROFILE or load_json_file(DEFAULT_PROFILE_PATH, {})
+    data = get_active_profile()
     data = QALogicEngine.audit_and_refine_profile(data, lang=lang)
     
     template_file = f"cv_templates/{template_name}.html"
@@ -172,11 +191,12 @@ def preview_current():
 
 @app.route("/api/export/pdf")
 def export_pdf():
-    global ACTIVE_TAILORED_PROFILE, ACTIVE_LANGUAGE
+    global ACTIVE_LANGUAGE
     template_name = request.args.get("template", "pro_qa_sidebar")
     lang = request.args.get("lang", ACTIVE_LANGUAGE)
     
-    data = ACTIVE_TAILORED_PROFILE or load_json_file(DEFAULT_PROFILE_PATH, {})
+    # Dynamically fetch the current tailored profile
+    data = get_active_profile()
     data = QALogicEngine.audit_and_refine_profile(data, lang=lang)
     
     rendered_html = render_template(f"cv_templates/{template_name}.html", data=data, lang=lang)
@@ -195,11 +215,11 @@ def export_pdf():
 
 @app.route("/api/export/html")
 def export_html():
-    global ACTIVE_TAILORED_PROFILE, ACTIVE_LANGUAGE
+    global ACTIVE_LANGUAGE
     template_name = request.args.get("template", "pro_qa_sidebar")
     lang = request.args.get("lang", ACTIVE_LANGUAGE)
     
-    data = ACTIVE_TAILORED_PROFILE or load_json_file(DEFAULT_PROFILE_PATH, {})
+    data = get_active_profile()
     data = QALogicEngine.audit_and_refine_profile(data, lang=lang)
     
     rendered = render_template(f"cv_templates/{template_name}.html", data=data, lang=lang)
@@ -230,7 +250,7 @@ def main():
         print(f"✅ Wyeksportowano CV do: {out_file.resolve()}")
         sys.exit(0)
 
-    print(f"🚀 Uruchamianie VitaeCraft AI v1.7...")
+    print(f"🚀 Uruchamianie VitaeCraft AI v1.8...")
     print(f"📍 Serwer dostępny pod adresem: http://{args.host}:{args.port}")
     app.run(host=args.host, port=args.port, debug=True)
 
