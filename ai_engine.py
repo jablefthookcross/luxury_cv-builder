@@ -50,11 +50,11 @@ ENGLISH_BASELINE_EXPERIENCE = [
         "start_date": "2022",
         "end_date": "Present",
         "highlights": [
+            "Executed manual, functional, and API testing (REST & SOAP) using Postman to validate web platforms and backend services.",
             "Prepared test plans, test scenarios, and comprehensive test documentation in Jira (Xray) and Confluence within Agile/Scrum delivery teams.",
-            "Executed manual, functional, and integration testing for core enterprise platforms aligned with business acceptance criteria.",
             "Conducted database verification and data integrity checks using complex SQL queries across Windows OS test environments.",
-            "Reported software defects with clear reproduction steps and collaborated with development teams on issue resolution.",
-            "Executed manual and API testing (REST & SOAP) using Postman and SoapUI to validate backend workflows."
+            "Reported software defects with clear reproduction steps and collaborated with development teams on GitLab for issue resolution.",
+            "Executed automated E2E regression suites for web application modules using Playwright and TypeScript."
         ]
     },
     {
@@ -64,7 +64,7 @@ ENGLISH_BASELINE_EXPERIENCE = [
         "start_date": "2021-09",
         "end_date": "2022-04",
         "highlights": [
-            "Conducted manual and functional testing of enterprise web application modules based on backlog user stories.",
+            "Conducted manual and functional testing of web application modules and customer portals based on backlog user stories.",
             "Documented defects with clear reproduction steps and managed issue tracking in Jira (Xray) and HP QC / ALM following Scrum methodology.",
             "Executed backend API validation via Postman and performed data integrity verification using SQL Developer."
         ]
@@ -76,7 +76,7 @@ ENGLISH_BASELINE_EXPERIENCE = [
         "start_date": "2019-07",
         "end_date": "2021-01",
         "highlights": [
-            "Executed comprehensive UI, functional, and regression testing for financial and digital platforms.",
+            "Executed comprehensive UI, functional, exploratory, and regression testing for web and digital platforms.",
             "Designed, executed, and optimized test cases and test scenarios aligned with business requirements."
         ]
     }
@@ -90,11 +90,11 @@ POLISH_BASELINE_EXPERIENCE = [
         "start_date": "2022",
         "end_date": "Obecnie",
         "highlights": [
+            "Przeprowadzanie testów manualnych, funkcjonalnych oraz walidacji API (REST & SOAP) z użyciem narzędzia Postman dla portali i systemów.",
             "Tworzenie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji projektowej w Jira (Xray) i Confluence w zespole Agile/Scrum.",
-            "Przeprowadzanie testów manualnych, funkcjonalnych i integracyjnych systemów informatycznych zgodnie z dokumentacją techniczną.",
             "Wykonywanie zapytań SQL w celu weryfikacji baz danych i spójności danych na środowiskach Windows OS.",
-            "Zgłaszanie błędów aplikacji, analiza wyników testów oraz współpraca z zespołem deweloperskim przy usuwaniu defektów.",
-            "Wykonywanie walidacji usług API (REST & SOAP) przy użyciu Postman oraz SoapUI."
+            "Zgłaszanie błędów aplikacji z jasnymi krokami reprodukcji, analiza wyników testów oraz współpraca z deweloperami w GitLab.",
+            "Wykonywanie automatycznych testów regresyjnych E2E dla modułów webowych w Playwright."
         ]
     },
     {
@@ -104,7 +104,7 @@ POLISH_BASELINE_EXPERIENCE = [
         "start_date": "2021-09",
         "end_date": "2022-04",
         "highlights": [
-            "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji biznesowych w oparciu o wymagania z backlogu.",
+            "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji webowych w oparciu o wymagania z backlogu.",
             "Dokumentowanie defektów z jasnymi krokami reprodukcji i zarządzanie błędami w narzędziach Jira (Xray) oraz HP QC / ALM.",
             "Weryfikacja danych w bazach danych z użyciem narzędzia SQL Developer."
         ]
@@ -116,7 +116,7 @@ POLISH_BASELINE_EXPERIENCE = [
         "start_date": "2019-07",
         "end_date": "2021-01",
         "highlights": [
-            "Przeprowadzanie kompleksowych testów funkcjonalnych, UI oraz regresyjnych dla platform finansowych i cyfrowych.",
+            "Przeprowadzanie kompleksowych testów funkcjonalnych, eksploatacyjnych, UI oraz regresyjnych dla platform cyfrowych.",
             "Projektowanie, wykonywanie i optymalizacja przypadków testowych zgodnych z kryteriami akceptacji."
         ]
     }
@@ -282,52 +282,28 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
 
         # 1. EXPANDED TECH CATALOG FOR ALL IT DOMAINS
         TECH_CATALOG = {
-            "java": "Java",
-            "selenium": "Selenium WebDriver",
-            "restassured": "RestAssured",
-            "rest-assured": "RestAssured",
-            "junit": "JUnit",
-            "testng": "TestNG",
+            "manual testing": "Manual Testing",
+            "manual": "Manual Testing",
+            "api testing": "API Testing (Postman)",
+            "bug reporting": "Bug Reporting (GitLab/Jira)",
+            "gitlab": "GitLab / GitLab CI",
+            "agile": "Agile / Scrum",
             "playwright": "Playwright",
-            "typescript": "TypeScript",
-            "javascript": "JavaScript",
-            "python": "Python",
-            "cypress": "Cypress",
             "postman": "Postman",
+            "swagger": "Swagger",
             "soapui": "SoapUI",
-            "soap": "SOAP API Testing",
-            "rest": "REST API Testing",
-            "api": "API Testing",
             "sql": "SQL Database Verification",
-            "jmeter": "JMeter",
+            "mysql": "MySQL",
+            "git": "Git",
             "jira": "Jira",
             "xray": "Jira (Xray)",
-            "testrail": "TestRail",
+            "confluence": "Confluence",
             "hp qc": "HP QC",
             "hpqc": "HP QC",
             "alm": "HP ALM",
-            "katalon": "Katalon Studio",
-            "utp": "UTP",
-            "bank": "Aplikacje Bankowe i Maklerskie" if not is_english else "Banking & Brokerage Systems",
-            "bankow": "Aplikacje Bankowe" if not is_english else "Banking Applications",
-            "makler": "Aplikacje Maklerskie" if not is_english else "Brokerage Systems",
             "windows": "Windows OS",
-            "docker": "Docker",
-            "git": "Git",
-            "gitlab": "GitLab CI/CD",
-            "github": "GitHub Actions",
-            "mobile": "Mobile Testing",
-            "android": "Android Testing",
-            "ios": "iOS Testing",
-            "xcode": "Xcode",
-            "logcat": "Mobile Device Logs",
-            "exploratory": "Exploratory Testing",
-            "acceptance": "Acceptance Criteria",
-            "user stories": "User Stories Analysis",
             "istqb": "ISTQB / ISEB Certification",
-            "iseb": "ISTQB / ISEB Certification",
-            "plan": "Test Plans & Documentation",
-            "dokumentac": "Dokumentacja Testowa" if not is_english else "Test Documentation"
+            "iseb": "ISTQB / ISEB Certification"
         }
 
         matched_techs = []
@@ -344,7 +320,7 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             title_found = ""
             for line in first_lines:
                 clean_line = line.strip()
-                if any(role_kw in clean_line.lower() for role_kw in ["tester", "qa", "engineer", "inżynier", "developer"]):
+                if any(role_kw in clean_line.lower() for role_kw in ["tester", "qa", "engineer", "specjalista"]):
                     if len(clean_line) < 60:
                         title_found = clean_line
                         break
@@ -352,14 +328,14 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             if title_found:
                 tailored["personal_info"]["title"] = title_found
             elif "manual" in job_lower:
-                tailored["personal_info"]["title"] = "Tester Manualny" if not is_english else "Manual Software Tester"
+                tailored["personal_info"]["title"] = "Manual Tester / Specjalista QA" if not is_english else "Manual Software Tester"
             else:
                 tailored["personal_info"]["title"] = "Software QA Engineer"
 
         # 3. DYNAMIC 3-BUCKETS SKILLS BUCKETING
-        cat1_items = [t for t in matched_techs if t in ["ISTQB / ISEB Certification", "Manual Testing", "Aplikacje Bankowe i Maklerskie", "Banking & Brokerage Systems", "Test Plans & Documentation", "Dokumentacja Testowa", "Exploratory Testing", "Acceptance Criteria", "User Stories Analysis", "SOAP API Testing", "REST API Testing", "Postman", "SoapUI", "Java", "Selenium WebDriver", "RestAssured", "JUnit", "TestNG", "Playwright", "Mobile Testing"]]
+        cat1_items = [t for t in matched_techs if t in ["Manual Testing", "API Testing (Postman)", "Bug Reporting (GitLab/Jira)", "Postman", "SoapUI", "REST API Testing", "ISTQB / ISEB Certification", "Playwright"]]
         if not cat1_items:
-            cat1_items = ["ISTQB / ISEB Certification", "Manual Testing", "Integration Testing", "Functional Testing", "Regression Testing"]
+            cat1_items = ["Manual Testing", "API Testing (Postman)", "Bug Reporting (GitLab/Jira)", "Integration Testing", "Functional Testing"]
         cat1_items.extend(["Integration Testing", "Functional Testing", "Regression Testing"])
         
         cat1_final = []
@@ -367,15 +343,15 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             if item not in cat1_final:
                 cat1_final.append(item)
 
-        cat2_items = [t for t in matched_techs if t in ["Jira (Xray)", "Jira", "HP QC", "HP ALM", "TestRail", "Katalon Studio", "UTP", "Windows OS", "SQL Database Verification", "Confluence", "Git", "Docker"]]
-        cat2_items.extend(["Jira (Xray)", "HP QC / ALM", "Windows OS", "Confluence", "Git", "SQL Developer / DBeaver", "Docker"])
+        cat2_items = [t for t in matched_techs if t in ["GitLab / GitLab CI", "Git", "Jira", "Jira (Xray)", "Confluence", "SQL Database Verification", "MySQL", "HP QC / ALM", "Windows OS"]]
+        cat2_items.extend(["GitLab / GitLab CI", "Git", "Jira", "Jira (Xray)", "Confluence", "SQL Database Verification", "Windows OS"])
         cat2_final = []
         for item in cat2_items:
             if item not in cat2_final:
                 cat2_final.append(item)
 
-        cat3_items = [t for t in matched_techs if t in ["SQL Database Verification", "SQL", "Windows OS", "Git", "Java", "Playwright", "TypeScript", "JavaScript", "GitLab CI/CD"]]
-        cat3_items.extend(["SQL", "Playwright", "TypeScript", "JavaScript", "GitLab CI/CD"])
+        cat3_items = [t for t in matched_techs if t in ["Playwright", "GitLab / GitLab CI", "SQL Database Verification", "SQL", "TypeScript", "JavaScript"]]
+        cat3_items.extend(["Playwright", "GitLab / GitLab CI", "SQL", "TypeScript", "JavaScript"])
         cat3_final = []
         for item in cat3_items:
             if item not in cat3_final:
@@ -391,7 +367,7 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
         # Compute 3 Buckets Breakdown for GUI Card
         bucket_a = matched_techs[:8]
         bucket_b = [item for item in cat1_final + cat2_final + cat3_final if item not in bucket_a][:8]
-        all_master_tools = ["Android Studio", "Xcode", "Mobile Device Logs", "Playwright", "TypeScript", "Docker", "SoapUI", "RestAssured"]
+        all_master_tools = ["Android Studio", "Xcode", "Mobile Device Logs", "Docker", "SoapUI"]
         bucket_c = [t for t in all_master_tools if t not in bucket_a and t not in bucket_b][:5]
         
         tailored["_buckets_breakdown"] = {
@@ -414,8 +390,6 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
                 for tech in matched_techs:
                     if tech.lower() in h_lower:
                         score += 3
-                if "manual" in job_lower and ("automatyzac" in h_lower or "automated" in h_lower):
-                    score -= 5
                 return score
 
             sorted_highlights = sorted(highlights, key=score_highlight, reverse=True)
@@ -437,17 +411,17 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             ]
 
         # 6. DYNAMIC PROFESSIONAL SUMMARY
-        top_tech_str = ", ".join(matched_techs[:4]) if matched_techs else "Jira, ISTQB, SQL"
+        top_tech_str = ", ".join(matched_techs[:4]) if matched_techs else "Manual Testing, API Testing, GitLab, Playwright"
         if is_english:
             s1 = f"Software QA Engineer with 5+ years of experience specializing in {top_tech_str}."
-            s2 = "Proficient in test plan creation, test scenario design, defect reporting, and database verification across Agile/Scrum delivery teams."
-            s3 = "Experienced in preparing comprehensive test documentation, execution summary reports, and quality metrics for enterprise applications."
-            s4 = "Complemented by test automation capabilities using Playwright and Java frameworks."
+            s2 = "Proficient in test plan creation, test scenario design, defect reporting on GitLab/Jira, and database verification across Agile delivery teams."
+            s3 = "Experienced in preparing comprehensive test documentation and quality metrics for web and hosting platforms."
+            s4 = "Complemented by test automation capabilities using Playwright and TypeScript."
         else:
             s1 = f"Inżynier QA z ponad 5-letnim doświadczeniem specjalizujący się w {top_tech_str}."
-            s2 = "Specjalizuje się w tworzeniu planów testów, przypadków testowych, raportowaniu błędów oraz weryfikacji baz danych SQL na środowiskach Windows OS."
-            s3 = "Doświadczony w tworzeniu dokumentacji projektowej, planów testów oraz raportów z wykonania dla systemów bankowych i biznesowych."
-            s4 = "Wspierany wiedzą z zakresu automatyzacji testów w Playwright oraz narzędziach Java."
+            s2 = "Specjalizuje się w tworzeniu planów testów, przypadków testowych, zgłaszaniu błędów w GitLab/Jira oraz weryfikacji baz danych SQL."
+            s3 = "Doświadczony w tworzeniu dokumentacji projektowej i zapewnianiu jakości serwisów oraz portali internetowych."
+            s4 = "Wspierany wiedzą z zakresu automatyzacji testów w Playwright oraz narzędziach JavaScript/TypeScript."
 
         tailored["summary"] = f"{s1} {s2} {s3} {s4}"
         tailored["certifications"] = []

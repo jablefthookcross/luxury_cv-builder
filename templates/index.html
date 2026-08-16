@@ -33,10 +33,15 @@
             background: rgba(239, 68, 68, 0.2);
             color: #f87171;
             border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 0.25rem 0.6rem;
+            height: 30px;
+            padding: 0 0.65rem;
             border-radius: 6px;
             font-size: 0.78rem;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-weight: 500;
         }
         .btn-danger-sm:hover { background: rgba(239, 68, 68, 0.4); }
 
@@ -44,11 +49,15 @@
             background: rgba(16, 185, 129, 0.15);
             color: #34d399;
             border: 1px solid rgba(16, 185, 129, 0.3);
-            padding: 0.3rem 0.7rem;
+            height: 32px;
+            padding: 0 0.8rem;
             border-radius: 6px;
             font-size: 0.82rem;
             cursor: pointer;
             font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
         }
         .btn-add-sm:hover { background: rgba(16, 185, 129, 0.3); }
 
@@ -127,7 +136,7 @@
                     <div class="form-group">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
                             <label class="form-label" style="margin-bottom: 0;">Treść Oferty Pracy / Wymagania</label>
-                            <button class="btn-secondary" onclick="cleanInputText()" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">🧹 Oczyść tekst ze śmieci WWW</button>
+                            <button class="btn-clean-micro" onclick="cleanInputText()">🧹 Oczyść tekst ze śmieci WWW</button>
                         </div>
                         <textarea id="jobDescription" class="form-textarea" placeholder="Wklej treść oferty pracy tutaj..."></textarea>
                     </div>
@@ -229,14 +238,14 @@
             </div>
 
             <div class="right-panel">
-                <div class="card" style="padding: 0.85rem 1.2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                <div class="card" style="padding: 0.75rem 1.2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
                     <div style="font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
                         <span>Podgląd DRAFT CV</span>
                         <span style="font-size: 0.72rem; background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500;">1:1 Pixel-Perfect</span>
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn-primary" onclick="openSaveModal()" style="background: #10b981; color: white; border: none;">💾 Zapisz do Moich CV</button>
-                        <a href="/api/export/pdf" id="btnDownloadPdf" download class="btn-secondary" style="text-decoration:none; background: var(--accent-blue); color: white; border: none;">📥 Pobierz PDF</a>
+                        <button class="btn-save-action" onclick="openSaveModal()">💾 Zapisz do Moich CV</button>
+                        <a href="/api/export/pdf" id="btnDownloadPdf" download class="btn-download-action">📥 Pobierz PDF</a>
                         <button class="btn-secondary" onclick="printPreviewIframe()">🖨️ Drukuj</button>
                     </div>
                 </div>
@@ -254,7 +263,7 @@
                         <h2 class="section-h2" style="margin-bottom: 0.2rem;">📚 Moje CV-ki (Archiwum Wygenerowanych Aplikacji)</h2>
                         <p style="font-size: 0.88rem; color: var(--text-secondary);">Tutaj znajdują się wszystkie zaakceptowane i zapisane przez Ciebie wersje CV wygenerowane dla konkretnych firm.</p>
                     </div>
-                    <button class="btn-primary" onclick="loadSavedCVsList()">🔄 Odśwież Listę</button>
+                    <button class="btn-primary" style="height: 38px; font-size: 0.84rem;" onclick="loadSavedCVsList()">🔄 Odśwież Listę</button>
                 </div>
 
                 <div id="savedCVsGrid" class="archive-grid">
@@ -273,7 +282,7 @@
                     </p>
                     <div style="display: flex; gap: 1rem; align-items: center;">
                         <input type="file" id="pdfFileInput" accept=".pdf" class="form-input" style="max-width: 400px; padding: 0.5rem;">
-                        <button class="btn-primary" onclick="uploadPdfCV()">
+                        <button class="btn-primary" style="height: 38px;" onclick="uploadPdfCV()">
                             <div class="spinner" id="pdfSpinner"></div>
                             <span id="pdfBtnText">🚀 Zaimportuj CV z PDF</span>
                         </button>
@@ -286,7 +295,7 @@
                         <div style="display: flex; gap: 0.5rem;">
                             <button class="btn-secondary" onclick="toggleEditorMode('form')" id="btnEditForm">📝 Formularz Wizualny</button>
                             <button class="btn-secondary" onclick="toggleEditorMode('json')" id="btnEditJson">💻 Kod JSON</button>
-                            <button class="btn-primary" onclick="saveProfileFromFormOrJson()">💾 Zapisz Profil Bazowy</button>
+                            <button class="btn-save-action" onclick="saveProfileFromFormOrJson()">💾 Zapisz Profil Bazowy</button>
                         </div>
                     </div>
 
@@ -400,7 +409,7 @@
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.2rem;">
                 <button class="btn-secondary" onclick="closeSaveModal()">Anuluj</button>
-                <button class="btn-primary" onclick="confirmSaveCV()">💾 Zapisz Aplikację</button>
+                <button class="btn-save-action" onclick="confirmSaveCV()">💾 Zapisz Aplikację</button>
             </div>
         </div>
     </div>
@@ -425,7 +434,7 @@
 
         async function cleanInputText() {
             const textarea = document.getElementById('jobDescription');
-            if (!textarea.value.strip()) return;
+            if (!textarea.value.trim()) return;
             try {
                 const res = await fetch('/api/clean-text', {
                     method: 'POST',
@@ -588,7 +597,7 @@
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem; margin-top: 0.8rem;">
-                            <a href="/api/saved-cvs/${cv.id}/export/pdf" download class="btn-primary" style="flex: 1; text-align: center; text-decoration: none; font-size: 0.82rem; padding: 0.4rem;">📥 Pobierz PDF</a>
+                            <a href="/api/saved-cvs/${cv.id}/export/pdf" download class="btn-download-action" style="flex: 1; text-align: center; justify-content: center;">📥 Pobierz PDF</a>
                             <button class="btn-danger-sm" onclick="deleteSavedCV('${cv.id}')">🗑️ Usuń</button>
                         </div>
                     `;

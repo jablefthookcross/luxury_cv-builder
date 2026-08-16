@@ -8,12 +8,12 @@
     "linkedin": "https://linkedin.com/in/michal-kosowski",
     "github": "https://github.com"
   },
-  "summary": "Software QA Engineer with 5+ years of experience specializing in Jira, HP QC, HP ALM, Katalon Studio. Proficient in test plan creation, test scenario design, defect reporting, and database verification across Agile/Scrum delivery teams. Experienced in preparing comprehensive test documentation, execution summary reports, and quality metrics for enterprise applications. Complemented by test automation capabilities using Playwright and Java frameworks.",
+  "summary": "Software QA Engineer with 5+ years of experience specializing in Postman, API Testing, SQL Database Verification, Playwright. Proficient in test plan creation, test scenario design, defect reporting, and database verification across Agile/Scrum delivery teams. Experienced in preparing comprehensive test documentation, execution summary reports, and quality metrics for enterprise applications. Complemented by test automation capabilities using Playwright and Java frameworks.",
   "skills": [
     {
       "category": "Testing & API",
       "items": [
-        "ISTQB / ISEB Certification",
+        "Postman",
         "Integration Testing",
         "Functional Testing",
         "Regression Testing"
@@ -22,25 +22,25 @@
     {
       "category": "Tools & Test Management",
       "items": [
+        "SQL Database Verification",
+        "Git",
         "Jira",
-        "HP QC",
-        "HP ALM",
-        "Katalon Studio",
-        "UTP",
-        "Windows OS",
         "Jira (Xray)",
-        "HP QC / ALM"
+        "HP QC / ALM",
+        "Windows OS",
+        "Confluence",
+        "SQL Developer / DBeaver"
       ]
     },
     {
       "category": "Automation & Languages",
       "items": [
-        "Windows OS",
-        "SQL",
+        "SQL Database Verification",
         "Playwright",
+        "GitLab CI/CD",
+        "SQL",
         "TypeScript",
-        "JavaScript",
-        "GitLab CI/CD"
+        "JavaScript"
       ]
     }
   ],
@@ -52,11 +52,11 @@
       "start_date": "2022",
       "end_date": "Present",
       "highlights": [
+        "Executed manual and API testing (REST & SOAP) using Postman and SoapUI to validate backend workflows.",
         "Prepared test plans, test scenarios, and comprehensive test documentation in Jira (Xray) and Confluence within Agile/Scrum delivery teams.",
-        "Conducted database verification and data integrity checks using complex SQL queries across Windows OS test environments.",
         "Executed manual, functional, and integration testing for core enterprise platforms aligned with business acceptance criteria.",
-        "Reported software defects with clear reproduction steps and collaborated with development teams on issue resolution.",
-        "Executed manual and API testing (REST & SOAP) using Postman and SoapUI to validate backend workflows."
+        "Conducted database verification and data integrity checks using complex SQL queries across Windows OS test environments.",
+        "Reported software defects with clear reproduction steps and collaborated with development teams on issue resolution."
       ]
     },
     {
@@ -66,9 +66,9 @@
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
+        "Executed backend API validation via Postman and performed data integrity verification using SQL Developer.",
         "Documented defects with clear reproduction steps and managed issue tracking in Jira (Xray) and HP QC / ALM following Scrum methodology.",
-        "Conducted manual and functional testing of enterprise web application modules based on backlog user stories.",
-        "Executed backend API validation via Postman and performed data integrity verification using SQL Developer."
+        "Conducted manual and functional testing of enterprise web application modules based on backlog user stories."
       ]
     },
     {
@@ -104,30 +104,29 @@
   "certifications": [],
   "_buckets_breakdown": {
     "bucket_a": [
-      "Jira",
-      "HP QC",
-      "HP ALM",
-      "Katalon Studio",
-      "UTP",
-      "Windows OS",
-      "ISTQB / ISEB Certification"
+      "Postman",
+      "API Testing",
+      "SQL Database Verification",
+      "Playwright",
+      "Git",
+      "GitLab CI/CD"
     ],
     "bucket_b": [
       "Integration Testing",
       "Functional Testing",
       "Regression Testing",
+      "Jira",
       "Jira (Xray)",
       "HP QC / ALM",
-      "Confluence",
-      "Git",
-      "SQL Developer / DBeaver"
+      "Windows OS",
+      "Confluence"
     ],
     "bucket_c": [
       "Android Studio",
       "Xcode",
       "Mobile Device Logs",
-      "Playwright",
-      "TypeScript"
+      "TypeScript",
+      "Docker"
     ]
   }
 }
