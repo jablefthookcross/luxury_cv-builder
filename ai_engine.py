@@ -2,11 +2,12 @@
 VitaeCraft AI - Universal 10/10 Dynamic QA Tailoring Engine
 Author: MagicMike Development Team
 
-Fully dynamic, universal AI & NLP tailoring engine with ZERO hardcoded offer checks.
+Fully dynamic, universal AI & NLP tailoring engine with Master IT Terms Catalog support.
 Includes:
-1. Smart Offer Text Pre-Processor (strips web scraping clutter & marketing noise).
-2. 3-Buckets Classification Breakdown (Must Have, Value Add, Noise Removal).
-3. 100% Single Language Lock (PL or EN) with zero state pollution.
+1. Master IT Terms Catalog loader (it_terms_catalog.json).
+2. Smart Offer Text Pre-Processor (strips web scraping clutter & marketing noise).
+3. 3-Buckets Classification Breakdown (Must Have, Value Add, Noise Removal).
+4. 100% Single Language Lock (PL or EN) with zero state pollution.
 """
 
 import os
@@ -14,7 +15,11 @@ import re
 import json
 import urllib.request
 import urllib.error
+from pathlib import Path
 from typing import Dict, Any, Optional, List, Set
+
+APP_DIR = Path(__file__).parent
+CATALOG_PATH = APP_DIR / "it_terms_catalog.json"
 
 PROMPT_UNIVERSAL_TAILORING_DIRECTIVE = """
 Jesteś Eksperckim Rekruterem IT i Test Architektem. Twój cel to stworzenie perfekcyjnego CV (10/10) dla Inżyniera QA na podstawie podanej oferty pracy i profilu kandydata (Michał Kosowski).
@@ -122,6 +127,32 @@ POLISH_BASELINE_EXPERIENCE = [
     }
 ]
 
+def load_master_it_catalog() -> Dict[str, str]:
+    """Loads master IT dictionary from it_terms_catalog.json."""
+    flattened_catalog = {}
+    if CATALOG_PATH.exists():
+        try:
+            with open(CATALOG_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                for domain, terms in data.items():
+                    if isinstance(terms, dict):
+                        for kw, label in terms.items():
+                            flattened_catalog[kw.lower()] = label
+            print(f"[AIEngine] Loaded Master IT Catalog with {len(flattened_catalog)} terms.")
+            return flattened_catalog
+        except Exception as e:
+            print(f"[AIEngine Error] Loading catalog failed: {e}")
+            
+    # Fallback default dictionary
+    return {
+        "manual testing": "Manual Testing", "manual": "Manual Testing", "api testing": "API Testing (Postman)",
+        "bug reporting": "Bug Reporting (GitLab/Jira)", "gitlab": "GitLab / GitLab CI", "agile": "Agile / Scrum",
+        "playwright": "Playwright", "postman": "Postman", "swagger": "Swagger", "soapui": "SoapUI",
+        "sql": "SQL Database Verification", "mysql": "MySQL", "git": "Git", "jira": "Jira", "xray": "Jira (Xray)",
+        "confluence": "Confluence", "hp qc": "HP QC", "alm": "HP ALM", "katalon": "Katalon Studio", "utp": "UTP",
+        "windows": "Windows OS", "istqb": "ISTQB / ISEB Certification"
+    }
+
 def clean_job_offer_text(raw_text: str) -> str:
     """Strips web scraping clutter (navigation items, revenue stats, Star Wars fluff, apply buttons)."""
     if not raw_text:
@@ -152,6 +183,7 @@ class AIEngine:
         self.gemini_key = gemini_key or os.environ.get("GEMINI_API_KEY", "")
         self.ollama_url = ollama_url
         self.ollama_model = os.environ.get("OLLAMA_MODEL", "llama3.2")
+        self.master_catalog = load_master_it_catalog()
 
     def tailor_cv(self, master_profile: Dict[str, Any], job_description: str, target_role: str = "", lang: str = "pl") -> Dict[str, Any]:
         clean_master = json.loads(json.dumps(master_profile))
@@ -280,34 +312,8 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
         job_lower = job_description.lower()
         is_english = (lang == "en")
 
-        # 1. EXPANDED TECH CATALOG FOR ALL IT DOMAINS
-        TECH_CATALOG = {
-            "manual testing": "Manual Testing",
-            "manual": "Manual Testing",
-            "api testing": "API Testing (Postman)",
-            "bug reporting": "Bug Reporting (GitLab/Jira)",
-            "gitlab": "GitLab / GitLab CI",
-            "agile": "Agile / Scrum",
-            "playwright": "Playwright",
-            "postman": "Postman",
-            "swagger": "Swagger",
-            "soapui": "SoapUI",
-            "sql": "SQL Database Verification",
-            "mysql": "MySQL",
-            "git": "Git",
-            "jira": "Jira",
-            "xray": "Jira (Xray)",
-            "confluence": "Confluence",
-            "hp qc": "HP QC",
-            "hpqc": "HP QC",
-            "alm": "HP ALM",
-            "windows": "Windows OS",
-            "istqb": "ISTQB / ISEB Certification",
-            "iseb": "ISTQB / ISEB Certification"
-        }
-
         matched_techs = []
-        for kw, display_name in TECH_CATALOG.items():
+        for kw, display_name in self.master_catalog.items():
             if re.search(r'\b' + re.escape(kw) + r'\b', job_lower):
                 if display_name not in matched_techs:
                     matched_techs.append(display_name)
@@ -320,7 +326,7 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             title_found = ""
             for line in first_lines:
                 clean_line = line.strip()
-                if any(role_kw in clean_line.lower() for role_kw in ["tester", "qa", "engineer", "specjalista"]):
+                if any(role_kw in clean_line.lower() for role_kw in ["tester", "qa", "engineer", "specjalista", "developer"]):
                     if len(clean_line) < 60:
                         title_found = clean_line
                         break
@@ -333,9 +339,9 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
                 tailored["personal_info"]["title"] = "Software QA Engineer"
 
         # 3. DYNAMIC 3-BUCKETS SKILLS BUCKETING
-        cat1_items = [t for t in matched_techs if t in ["Manual Testing", "API Testing (Postman)", "Bug Reporting (GitLab/Jira)", "Postman", "SoapUI", "REST API Testing", "ISTQB / ISEB Certification", "Playwright"]]
+        cat1_items = [t for t in matched_techs if any(k in t for k in ["Testing", "Postman", "SoapUI", "Swagger", "Kibana", "ISTQB", "Playwright", "Selenium", "API"])]
         if not cat1_items:
-            cat1_items = ["Manual Testing", "API Testing (Postman)", "Bug Reporting (GitLab/Jira)", "Integration Testing", "Functional Testing"]
+            cat1_items = ["Manual Testing", "API Testing", "Bug Reporting", "Integration Testing", "Functional Testing"]
         cat1_items.extend(["Integration Testing", "Functional Testing", "Regression Testing"])
         
         cat1_final = []
@@ -343,14 +349,14 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             if item not in cat1_final:
                 cat1_final.append(item)
 
-        cat2_items = [t for t in matched_techs if t in ["GitLab / GitLab CI", "Git", "Jira", "Jira (Xray)", "Confluence", "SQL Database Verification", "MySQL", "HP QC / ALM", "Windows OS"]]
+        cat2_items = [t for t in matched_techs if any(k in t for k in ["GitLab", "Git", "Jira", "Xray", "Confluence", "SQL", "MySQL", "HP QC", "ALM", "Windows", "Kibana"])]
         cat2_items.extend(["GitLab / GitLab CI", "Git", "Jira", "Jira (Xray)", "Confluence", "SQL Database Verification", "Windows OS"])
         cat2_final = []
         for item in cat2_items:
             if item not in cat2_final:
                 cat2_final.append(item)
 
-        cat3_items = [t for t in matched_techs if t in ["Playwright", "GitLab / GitLab CI", "SQL Database Verification", "SQL", "TypeScript", "JavaScript"]]
+        cat3_items = [t for t in matched_techs if any(k in t for k in ["Playwright", "TypeScript", "JavaScript", "SQL", "GitLab", "Python", "Java", "Docker"])]
         cat3_items.extend(["Playwright", "GitLab / GitLab CI", "SQL", "TypeScript", "JavaScript"])
         cat3_final = []
         for item in cat3_items:
