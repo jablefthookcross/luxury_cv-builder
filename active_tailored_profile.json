@@ -8,15 +8,12 @@
     "linkedin": "",
     "github": "https://github.com/jablefthookcross"
   },
-  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem specjalizujący się w Manual Testing, API Testing, Postman, Kibana. Specjalizuje się w tworzeniu planów testów, przypadków testowych, zgłaszaniu błędów w GitLab/Jira oraz weryfikacji baz danych SQL. Doświadczony w tworzeniu dokumentacji projektowej i zapewnianiu jakości serwisów oraz portali internetowych. Wspierany wiedzą z zakresu automatyzacji testów w Playwright oraz narzędziach JavaScript/TypeScript.",
+  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w obszarze Playwright, TypeScript, JavaScript, Jenkins. Posiada szerokie doświadczenie w tworzeniu planów testów, przypadków testowych, zgłaszaniu błędów w GitLab/Jira oraz weryfikacji baz danych SQL. Ekspert w tworzeniu dokumentacji projektowej i zapewnianiu jakości serwisów oraz portali internetowych. Wspierany wiedzą z zakresu automatyzacji testów w Playwright oraz narzędziach JavaScript/TypeScript.",
   "skills": [
     {
       "category": "Testowanie & API",
       "items": [
-        "Manual Testing",
-        "API Testing",
-        "Postman",
-        "Kibana",
+        "Playwright",
         "Integration Testing",
         "Functional Testing",
         "Regression Testing"
@@ -25,25 +22,23 @@
     {
       "category": "Narzędzia & Zarządzanie Testami",
       "items": [
-        "Kibana",
+        "GitLab / GitLab CI",
+        "Git",
         "Jira",
         "Jira (Xray)",
         "Confluence",
         "SQL Database Verification",
-        "GitLab / GitLab CI",
-        "Git",
         "Windows OS"
       ]
     },
     {
       "category": "Automatyzacja & Języki",
       "items": [
-        "SQL Database Verification",
         "Playwright",
-        "GitLab / GitLab CI",
-        "SQL",
         "TypeScript",
-        "JavaScript"
+        "JavaScript",
+        "GitLab / GitLab CI",
+        "SQL"
       ]
     }
   ],
@@ -55,11 +50,11 @@
       "start_date": "2022",
       "end_date": "Obecnie",
       "highlights": [
-        "Tworzenie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji projektowej w Jira (Xray) i Confluence w zespole Agile/Scrum.",
+        "Wykonywanie automatycznych testów regresyjnych E2E dla modułów webowych w Playwright.",
         "Przeprowadzanie testów manualnych, funkcjonalnych oraz walidacji API (REST & SOAP) z użyciem narzędzia Postman dla portali i systemów.",
+        "Tworzenie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji projektowej w Jira (Xray) i Confluence w zespole Agile/Scrum.",
         "Wykonywanie zapytań SQL w celu weryfikacji baz danych i spójności danych na środowiskach Windows OS.",
-        "Zgłaszanie błędów aplikacji z jasnymi krokami reprodukcji, analiza wyników testów oraz współpraca z deweloperami w GitLab.",
-        "Wykonywanie automatycznych testów regresyjnych E2E dla modułów webowych w Playwright."
+        "Zgłaszanie błędów aplikacji z jasnymi krokami reprodukcji, analiza wyników testów oraz współpraca z deweloperami w GitLab."
       ]
     },
     {
@@ -69,8 +64,8 @@
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Dokumentowanie defektów z jasnymi krokami reprodukcji i zarządzanie błędami w narzędziach Jira (Xray) oraz HP QC / ALM.",
         "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji webowych w oparciu o wymagania z backlogu.",
+        "Dokumentowanie defektów z jasnymi krokami reprodukcji i zarządzanie błędami w narzędziach Jira (Xray) oraz HP QC / ALM.",
         "Weryfikacja danych w bazach danych z użyciem narzędzia SQL Developer."
       ]
     },
@@ -107,23 +102,20 @@
   "certifications": [],
   "_buckets_breakdown": {
     "bucket_a": [
-      "Manual Testing",
-      "API Testing",
-      "Postman",
-      "Kibana",
-      "Jira",
-      "Jira (Xray)",
-      "Confluence",
-      "Test Cases & Scenarios"
+      "Playwright",
+      "TypeScript",
+      "JavaScript",
+      "Jenkins",
+      "GitLab / GitLab CI"
     ],
     "bucket_b": [
       "Integration Testing",
       "Functional Testing",
       "Regression Testing",
-      "SQL Database Verification",
-      "GitLab / GitLab CI",
       "Git",
-      "Windows OS",
+      "Jira",
+      "Jira (Xray)",
+      "Confluence",
       "SQL Database Verification"
     ],
     "bucket_c": [

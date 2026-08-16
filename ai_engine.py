@@ -7,7 +7,9 @@ Includes:
 1. Master IT Terms Catalog loader (it_terms_catalog.json).
 2. Smart Offer Text Pre-Processor (strips web scraping clutter & marketing noise).
 3. 3-Buckets Classification Breakdown (Must Have, Value Add, Noise Removal).
-4. 100% Single Language Lock (PL or EN) with zero state pollution.
+4. Cross-Category Skill Deduplication (Zero duplicated badges).
+5. Fluent Professional Summary Generator (Native IT recruitment phrasing).
+6. 100% Single Language Lock (PL or EN) with zero state pollution.
 """
 
 import os
@@ -42,9 +44,9 @@ ZASADY UNIWERSALNEGO DOSTOSOWANIA DLA DOWOLNEJ OFERTY:
    - Zachowaj autentyczność 3 pracodawców kandydata (Benefit Systems S.A., Sii Polska, Euroloan Group).
    - Nie powielaj tych samych zdań między pracodawcami! Przeredaguj i ułóż punkty dla każdego pracodawcy tak, aby uwypuklić zadania pasujące do wymagań analizowanej oferty.
 
-5. CONTENT BUDGETING:
-   - Sekcja Skills: Max 6-8 tagów na kategorię (tagi 1-3 słowa).
-   - Professional Summary: Dokładnie 3-4 zwarte, bardzo techniczne zdania.
+5. CONTENT BUDGETING & DEDUPLICATION:
+   - Sekcja Skills: Max 6-8 tagów na kategorię (tagi 1-3 słowa). Każdą umiejętność umieszczaj TYLKO W JEDNEJ KATEGORII (brak duplikatów w panelu bocznym).
+   - Professional Summary: Dokładnie 3-4 zwarte, płynne, techniczne zdania.
 """
 
 ENGLISH_BASELINE_EXPERIENCE = [
@@ -55,11 +57,11 @@ ENGLISH_BASELINE_EXPERIENCE = [
         "start_date": "2022",
         "end_date": "Present",
         "highlights": [
+            "Executed automated E2E regression suites for web application modules using Playwright and TypeScript.",
             "Executed manual, functional, and API testing (REST & SOAP) using Postman to validate web platforms and backend services.",
             "Prepared test plans, test scenarios, and comprehensive test documentation in Jira (Xray) and Confluence within Agile/Scrum delivery teams.",
             "Conducted database verification and data integrity checks using complex SQL queries across Windows OS test environments.",
-            "Reported software defects with clear reproduction steps and collaborated with development teams on GitLab for issue resolution.",
-            "Executed automated E2E regression suites for web application modules using Playwright and TypeScript."
+            "Reported software defects with clear reproduction steps and collaborated with development teams on GitLab for issue resolution."
         ]
     },
     {
@@ -95,11 +97,11 @@ POLISH_BASELINE_EXPERIENCE = [
         "start_date": "2022",
         "end_date": "Obecnie",
         "highlights": [
+            "Wykonywanie automatycznych testów regresyjnych E2E dla modułów webowych w Playwright.",
             "Przeprowadzanie testów manualnych, funkcjonalnych oraz walidacji API (REST & SOAP) z użyciem narzędzia Postman dla portali i systemów.",
             "Tworzenie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji projektowej w Jira (Xray) i Confluence w zespole Agile/Scrum.",
             "Wykonywanie zapytań SQL w celu weryfikacji baz danych i spójności danych na środowiskach Windows OS.",
-            "Zgłaszanie błędów aplikacji z jasnymi krokami reprodukcji, analiza wyników testów oraz współpraca z deweloperami w GitLab.",
-            "Wykonywanie automatycznych testów regresyjnych E2E dla modułów webowych w Playwright."
+            "Zgłaszanie błędów aplikacji z jasnymi krokami reprodukcji, analiza wyników testów oraz współpraca z deweloperami w GitLab."
         ]
     },
     {
@@ -331,9 +333,9 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             elif "manual" in job_lower:
                 tailored["personal_info"]["title"] = "Manual Tester / Specjalista QA" if not is_english else "Manual Software Tester"
             else:
-                tailored["personal_info"]["title"] = "Software QA Engineer"
+                tailored["personal_info"]["title"] = "Senior QA Automation Engineer"
 
-        # 3. DYNAMIC 3-BUCKETS SKILLS BUCKETING
+        # 3. DYNAMIC 3-BUCKETS SKILLS BUCKETING WITH STRICT DEDUPLICATION Across Categories
         cat1_items = [t for t in matched_techs if any(k in t for k in ["Testing", "Postman", "SoapUI", "Swagger", "Kibana", "ISTQB", "Playwright", "Selenium", "API"])]
         if not cat1_items:
             cat1_items = ["Manual Testing", "API Testing", "Bug Reporting", "Integration Testing", "Functional Testing"]
@@ -346,16 +348,20 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
 
         cat2_items = [t for t in matched_techs if any(k in t for k in ["GitLab", "Git", "Jira", "Xray", "Confluence", "SQL", "MySQL", "HP QC", "ALM", "Windows", "Kibana"])]
         cat2_items.extend(["GitLab / GitLab CI", "Git", "Jira", "Jira (Xray)", "Confluence", "SQL Database Verification", "Windows OS"])
+        
+        # Deduplicate Cat2 against Cat1
         cat2_final = []
         for item in cat2_items:
-            if item not in cat2_final:
+            if item not in cat1_final and item not in cat2_final:
                 cat2_final.append(item)
 
-        cat3_items = [t for t in matched_techs if any(k in t for k in ["Playwright", "TypeScript", "JavaScript", "SQL", "GitLab", "Python", "Java", "Docker"])]
+        cat3_items = [t for t in matched_techs if any(k in t for k in ["Playwright", "TypeScript", "JavaScript", "SQL", "GitLab", "Python", "Java", "Docker", "Jenkins"])]
         cat3_items.extend(["Playwright", "GitLab / GitLab CI", "SQL", "TypeScript", "JavaScript"])
+        
+        # Deduplicate Cat3 against Cat1 and Cat2
         cat3_final = []
         for item in cat3_items:
-            if item not in cat3_final:
+            if item not in cat1_final and item not in cat2_final and item not in cat3_final:
                 cat3_final.append(item)
 
         new_skills = [
@@ -411,15 +417,23 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
                 {"language": "Angielski", "level": "Biegły (Professional)"}
             ]
 
-        # 6. DYNAMIC PROFESSIONAL SUMMARY (STYLISTICALLY REFINED)
-        top_tech_str = ", ".join(matched_techs[:4]) if matched_techs else "Manual Testing, API Testing, GitLab, Playwright"
+        # 6. FLUENT DYNAMIC PROFESSIONAL SUMMARY (NATIVE RECRUITMENT PHRASING)
+        has_automation = any(k in job_lower for k in ["playwright", "typescript", "javascript", "automation", "automatyzac"])
+        top_tech_str = ", ".join(matched_techs[:4]) if matched_techs else "Playwright, TypeScript, JavaScript, GitLab CI"
+        
         if is_english:
-            s1 = f"Software QA Engineer with 5+ years of experience specializing in {top_tech_str}."
+            if has_automation:
+                s1 = f"Senior QA Automation Engineer with 5+ years of experience specializing in automated E2E and API testing using {top_tech_str} within CI/CD pipelines."
+            else:
+                s1 = f"Software QA Engineer with 5+ years of experience specializing in manual, functional, and API testing using {top_tech_str}."
             s2 = "Proficient in test plan creation, test scenario design, defect reporting on GitLab/Jira, and database verification across Agile delivery teams."
-            s3 = "Experienced in preparing comprehensive test documentation and quality metrics for web and hosting platforms."
+            s3 = "Experienced in preparing comprehensive test documentation, execution summary reports, and quality metrics for enterprise applications."
             s4 = "Complemented by test automation capabilities using Playwright and TypeScript."
         else:
-            s1 = f"Inżynier QA z ponad 5-letnim doświadczeniem w obszarze {top_tech_str}."
+            if has_automation:
+                s1 = f"Senior QA Automation Engineer z ponad 5-letnim doświadczeniem w automatyzacji testów E2E i API z użyciem {top_tech_str} w środowiskach CI/CD."
+            else:
+                s1 = f"Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym, funkcjonalnym oraz API z użyciem {top_tech_str}."
             s2 = "Posiada szerokie doświadczenie w tworzeniu planów testów, przypadków testowych, zgłaszaniu błędów w GitLab/Jira oraz weryfikacji baz danych SQL."
             s3 = "Ekspert w tworzeniu dokumentacji projektowej i zapewnianiu jakości serwisów oraz portali internetowych."
             s4 = "Wspierany wiedzą z zakresu automatyzacji testów w Playwright oraz narzędziach JavaScript/TypeScript."
