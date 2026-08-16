@@ -58,7 +58,7 @@ class QALogicEngine:
     def audit_and_refine_profile(profile: Dict[str, Any], lang: str = "pl", job_text: str = "") -> Dict[str, Any]:
         """
         Audits candidate profile from a Senior QA Architect perspective.
-        Enforces candidate credentials, offer alignment, and 100% LANGUAGE LOCK.
+        Enforces candidate credentials, offer alignment, 100% EDUCATION LOCK, and 100% LANGUAGE LOCK.
         """
         refined = json_clone(profile)
         pinfo = refined.get("personal_info", {})

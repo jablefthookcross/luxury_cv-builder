@@ -138,12 +138,10 @@ def load_master_it_catalog() -> Dict[str, str]:
                     if isinstance(terms, dict):
                         for kw, label in terms.items():
                             flattened_catalog[kw.lower()] = label
-            print(f"[AIEngine] Loaded Master IT Catalog with {len(flattened_catalog)} terms.")
             return flattened_catalog
         except Exception as e:
             print(f"[AIEngine Error] Loading catalog failed: {e}")
             
-    # Fallback default dictionary
     return {
         "manual testing": "Manual Testing", "manual": "Manual Testing", "api testing": "API Testing (Postman)",
         "bug reporting": "Bug Reporting (GitLab/Jira)", "gitlab": "GitLab / GitLab CI", "agile": "Agile / Scrum",
@@ -189,14 +187,12 @@ class AIEngine:
         clean_master = json.loads(json.dumps(master_profile))
         cleaned_job_text = clean_job_offer_text(job_description)
         provider_to_use = self._determine_provider()
-        print(f"[AIEngine] Tailoring CV using provider: {provider_to_use} (Language: {lang})")
 
         if provider_to_use == "gemini":
             try:
                 result = self._tailor_with_gemini(clean_master, cleaned_job_text, target_role, lang=lang)
                 return self._post_process_tailored(result, cleaned_job_text, clean_master, lang=lang)
             except Exception as e:
-                print(f"[AIEngine Warning] Gemini call failed ({e}). Falling back to Universal Dynamic Engine.")
                 return self._tailor_with_dynamic_nlp(clean_master, cleaned_job_text, target_role, lang=lang)
 
         elif provider_to_use == "ollama":
@@ -204,7 +200,6 @@ class AIEngine:
                 result = self._tailor_with_ollama(clean_master, cleaned_job_text, target_role, lang=lang)
                 return self._post_process_tailored(result, cleaned_job_text, clean_master, lang=lang)
             except Exception as e:
-                print(f"[AIEngine Warning] Ollama call failed ({e}). Falling back to Universal Dynamic Engine.")
                 return self._tailor_with_dynamic_nlp(clean_master, cleaned_job_text, target_role, lang=lang)
 
         else:
@@ -301,8 +296,8 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
         pinfo["full_name"] = master_info.get("full_name", "Michał Kosowski")
         pinfo["email"] = master_info.get("email", "mmkosowski94@gmail.com")
         pinfo["phone"] = master_info.get("phone", "518075716")
-        pinfo["linkedin"] = master_info.get("linkedin", "https://linkedin.com/in/michal-kosowski")
-        pinfo["github"] = master_info.get("github", "https://github.com")
+        pinfo["linkedin"] = master_info.get("linkedin", "")
+        pinfo["github"] = master_info.get("github", "https://github.com/jablefthookcross")
         res["personal_info"] = pinfo
         res["certifications"] = []
         return res
@@ -416,7 +411,7 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
                 {"language": "Angielski", "level": "Biegły (Professional)"}
             ]
 
-        # 6. DYNAMIC PROFESSIONAL SUMMARY
+        # 6. DYNAMIC PROFESSIONAL SUMMARY (STYLISTICALLY REFINED)
         top_tech_str = ", ".join(matched_techs[:4]) if matched_techs else "Manual Testing, API Testing, GitLab, Playwright"
         if is_english:
             s1 = f"Software QA Engineer with 5+ years of experience specializing in {top_tech_str}."
@@ -424,9 +419,9 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             s3 = "Experienced in preparing comprehensive test documentation and quality metrics for web and hosting platforms."
             s4 = "Complemented by test automation capabilities using Playwright and TypeScript."
         else:
-            s1 = f"Inżynier QA z ponad 5-letnim doświadczeniem specjalizujący się w {top_tech_str}."
-            s2 = "Specjalizuje się w tworzeniu planów testów, przypadków testowych, zgłaszaniu błędów w GitLab/Jira oraz weryfikacji baz danych SQL."
-            s3 = "Doświadczony w tworzeniu dokumentacji projektowej i zapewnianiu jakości serwisów oraz portali internetowych."
+            s1 = f"Inżynier QA z ponad 5-letnim doświadczeniem w obszarze {top_tech_str}."
+            s2 = "Posiada szerokie doświadczenie w tworzeniu planów testów, przypadków testowych, zgłaszaniu błędów w GitLab/Jira oraz weryfikacji baz danych SQL."
+            s3 = "Ekspert w tworzeniu dokumentacji projektowej i zapewnianiu jakości serwisów oraz portali internetowych."
             s4 = "Wspierany wiedzą z zakresu automatyzacji testów w Playwright oraz narzędziach JavaScript/TypeScript."
 
         tailored["summary"] = f"{s1} {s2} {s3} {s4}"

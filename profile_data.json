@@ -5,8 +5,8 @@
     "email": "mmkosowski94@gmail.com",
     "phone": "518075716",
     "location": "Warszawa",
-    "linkedin": "https://linkedin.com/in/michal-kosowski",
-    "github": "https://github.com"
+    "linkedin": "",
+    "github": "https://github.com/jablefthookcross"
   },
   "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym, integracyjnym, API (REST & SOAP) oraz automatyzacji testów. Specjalizuje się w weryfikacji baz danych za pomocą zapytań SQL, projektowaniu scenariuszy testowych i planów testów oraz śledzeniu defektów w narzędziach Jira (Xray), HP QC / ALM i TestRail. Posiada wiedzę z zakresu norm ISTQB, automatyzacji w Playwright (TypeScript) oraz Selenium WebDriver (Java).",
   "skills": [
