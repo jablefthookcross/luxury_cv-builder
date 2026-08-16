@@ -1,49 +1,52 @@
 {
   "personal_info": {
     "full_name": "Michał Kosowski",
-    "title": "Software QA Engineer",
+    "title": "Software QA Engineer / Test Automation Engineer",
     "email": "mmkosowski94@gmail.com",
     "phone": "518075716",
-    "location": "Warsaw, Poland",
-    "website": "",
+    "location": "Warszawa",
     "linkedin": "https://linkedin.com/in/michal-kosowski",
     "github": "https://github.com"
   },
-  "summary": "QA Engineer with 5+ years of experience in manual, integration, and API testing (REST & SOAP). Proficient in backend verification and database testing using SQL, test scenario design, and end-to-end defect tracking in Jira and Xray within Agile/Scrum methodologies. Experienced in preparing comprehensive test documentation, plans, and summary reports for enterprise systems. Complemented by test automation experience using Playwright in TypeScript.",
+  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym, integracyjnym, API (REST & SOAP) oraz automatyzacji testów. Specjalizuje się w weryfikacji baz danych za pomocą zapytań SQL, projektowaniu scenariuszy testowych i planów testów oraz śledzeniu defektów w narzędziach Jira (Xray), HP QC / ALM i TestRail. Posiada wiedzę z zakresu norm ISTQB, automatyzacji w Playwright (TypeScript) oraz Selenium WebDriver (Java).",
   "skills": [
     {
-      "category": "Testing & API",
+      "category": "Testowanie & API",
       "items": [
+        "ISTQB / ISEB Standards",
         "SOAP & REST API Testing",
-        "SoapUI",
         "Postman",
+        "SoapUI",
         "SQL Database Verification",
         "Integration Testing",
         "Functional Testing",
-        "Regression Testing",
-        "ISTQB Standards"
+        "Regression Testing"
       ]
     },
     {
-      "category": "Tools & Test Management",
+      "category": "Narzędzia & Zarządzanie Testami",
       "items": [
         "Jira (Xray)",
+        "HP QC / ALM",
+        "TestRail",
+        "Katalon Studio",
         "Confluence",
         "Git",
         "SQL Developer / DBeaver",
-        "Test Documentation & Reporting",
-        "Docker"
+        "Windows OS"
       ]
     },
     {
-      "category": "Automation & Languages",
+      "category": "Automatyzacja & Języki",
       "items": [
         "SQL",
         "Playwright",
         "TypeScript",
         "JavaScript",
-        "GitLab CI/CD",
-        "GitHub Actions"
+        "Java",
+        "Selenium WebDriver",
+        "RestAssured",
+        "GitLab CI/CD"
       ]
     }
   ],
@@ -51,42 +54,41 @@
     {
       "position": "Software tester / QA Automation",
       "company": "Benefit Systems S.A.",
-      "location": "Warsaw",
+      "location": "Warszawa",
       "start_date": "2022",
       "end_date": "Obecnie",
       "highlights": [
+        "Tworzenie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji projektowej w Jira (Xray) i Confluence w zespole Agile/Scrum.",
         "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
-        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
+        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji spójności danych na środowiskach testowych.",
         "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
-        "Tworzenie planów testów, scenariuszy testowych oraz raportów z wykonania w Jira (Xray) i Confluence w zespole Agile/Scrum."
+        "Zgłaszanie błędów aplikacji, analiza wyników testów oraz współpraca z zespołem deweloperskim i biznesowym przy usuwaniu defektów."
       ]
     },
     {
       "position": "Test And Analysis Engineer",
       "company": "Sii Polska Sp. z o.o. (Freelance)",
-      "location": "Warsaw",
+      "location": "Warszawa",
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu.",
+        "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji biznesowych oraz HR w oparciu o wymagania z backlogu.",
         "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
-        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum."
+        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w narzędziach Jira (Xray) oraz HP QC / ALM."
       ]
     },
     {
       "position": "Software tester",
       "company": "Euroloan Group (Freelance)",
-      "location": "Warsaw",
+      "location": "Warszawa",
       "start_date": "2019-07",
       "end_date": "2021-01",
       "highlights": [
-        "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych na platformach webowych i mobilnych.",
-        "Projektowanie, wykonywanie i optymalizacja przypadków i scenariuszy testowych zgodnych z wymaganiami biznesowymi."
+        "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych oraz finansowych.",
+        "Projektowanie, wykonywanie i optymalizacja przypadków testowych zgodnych z kryteriami akceptacji (Acceptance Criteria)."
       ]
     }
   ],
-  "education": [],
-  "projects": [],
   "languages": [
     {
       "language": "Polski",
@@ -95,6 +97,14 @@
     {
       "language": "Angielski",
       "level": "Biegły (Professional)"
+    }
+  ],
+  "education": [
+    {
+      "degree": "Inżynieria Oprogramowania / Informatyka",
+      "institution": "Uczelnia Wyższa",
+      "location": "Warszawa",
+      "graduation_year": "2019"
     }
   ],
   "certifications": []

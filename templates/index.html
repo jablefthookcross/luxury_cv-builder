@@ -51,6 +51,52 @@
             font-weight: 600;
         }
         .btn-add-sm:hover { background: rgba(16, 185, 129, 0.3); }
+
+        .bucket-badge-a { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .bucket-badge-b { background: rgba(59, 130, 246, 0.18); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .bucket-badge-c { background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); line-through; }
+
+        .archive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1rem;
+        }
+
+        .archive-card {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1rem;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .archive-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-card {
+            background: #0f172a;
+            border: 1px solid var(--accent-blue);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -58,28 +104,32 @@
         <div class="brand">
             <div class="brand-icon">⚡</div>
             <span class="brand-title">VitaeCraft AI</span>
-            <span class="brand-tag">v1.9 QA Pro</span>
+            <span class="brand-tag">v2.1 QA Architecture</span>
         </div>
         <nav class="nav-tabs">
-            <button class="nav-btn active" onclick="switchTab('tailor', this)">⚡ Dopasuj CV (QA Focus)</button>
-            <button class="nav-btn" onclick="switchTab('profile', this)">📋 Główny Profil & PDF</button>
+            <button class="nav-btn active" onclick="switchTab('tailor', this)">⚡ Dopasowanie & Draft</button>
+            <button class="nav-btn" onclick="switchTab('saved', this)">📚 Moje CV-ki (Archiwum)</button>
+            <button class="nav-btn" onclick="switchTab('profile', this)">📋 Profil Bazowy</button>
             <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Ustawienia AI</button>
         </nav>
     </header>
 
     <main class="main-container">
-        <!-- TAB 1: DOPASUJ CV -->
+        <!-- TAB 1: DOPASOWANIE & DRAFT -->
         <div id="tab-tailor" class="tab-content active">
             <div class="left-panel">
                 <div class="card">
                     <h2 class="section-h2">🎯 Oferta Pracy i Personalizacja</h2>
                     <div class="form-group">
-                        <label class="form-label">Docelowe Stanowisko / Firma</label>
-                        <input type="text" id="targetRole" class="form-input" placeholder="np. Senior QA Engineer / QA Automation w Benefit Systems">
+                        <label class="form-label">Docelowa Firma / Stanowisko (Opcjonalnie)</label>
+                        <input type="text" id="targetRole" class="form-input" placeholder="np. ASTEK Polska / Tester manualny">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Treść Oferty Pracy / Wymagania</label>
-                        <textarea id="jobDescription" class="form-textarea" placeholder="Wklej treść oferty pracy lub wymagania stanowiska tutaj..."></textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                            <label class="form-label" style="margin-bottom: 0;">Treść Oferty Pracy / Wymagania</label>
+                            <button class="btn-secondary" onclick="cleanInputText()" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">🧹 Oczyść tekst ze śmieci WWW</button>
+                        </div>
+                        <textarea id="jobDescription" class="form-textarea" placeholder="Wklej treść oferty pracy tutaj..."></textarea>
                     </div>
                     
                     <!-- Row 1: Język & Szablon -->
@@ -96,8 +146,6 @@
                             <select id="cvTemplate" class="form-select" onchange="updatePreview()">
                                 <option value="pro_qa_sidebar">⭐ Ultra Pro Sidebar (2-Kolumny)</option>
                                 <option value="ats_single_column">🎯 ATS-Proof Standard (100% Skaner ATS)</option>
-                                <option value="modern_tech">Nowoczesny Tech</option>
-                                <option value="executive">Elegancki Biznes</option>
                             </select>
                         </div>
                     </div>
@@ -109,29 +157,57 @@
                             <option value="auto">Auto (Gemini / Ollama / Reguły)</option>
                             <option value="gemini">Google Gemini API (Darmowy Tier)</option>
                             <option value="ollama">Ollama (Lokalny LLM)</option>
-                            <option value="fallback">Silnik Regułowy (Bez AI)</option>
+                            <option value="fallback">Silnik Dynamiczny (Bez API Key)</option>
                         </select>
                     </div>
 
                     <button class="btn-primary" onclick="runTailorProcess()" style="width: 100%; margin-top: 0.5rem;">
                         <div class="spinner" id="tailorSpinner"></div>
-                        <span id="tailorBtnText">✨ Dopasuj CV (Weryfikacja Logiki QA)</span>
+                        <span id="tailorBtnText">✨ Generuj DRAFT CV pod tę Ofertę</span>
                     </button>
                 </div>
 
                 <!-- ATS Match Score Widget -->
                 <div class="ats-widget" id="atsWidget">
                     <div class="score-circle" id="scoreCircle">
-                        <div class="score-inner" id="scoreValue">92%</div>
+                        <div class="score-inner" id="scoreValue">100%</div>
                     </div>
                     <div class="score-info">
                         <div class="score-title">QA & ATS Match Score</div>
-                        <div class="form-label" style="font-size: 0.8rem;">Weryfikacja Kompetencji Testera:</div>
+                        <div class="form-label" style="font-size: 0.8rem;">Dopasowane Słowa Klucze:</div>
                         <div class="kw-badges" id="matchedBadges">
-                            <span class="kw-badge">Playwright</span>
-                            <span class="kw-badge">TypeScript</span>
-                            <span class="kw-badge">Postman</span>
-                            <span class="kw-badge">REST API</span>
+                            <span class="kw-badge">SQL</span>
+                            <span class="kw-badge">Jira</span>
+                            <span class="kw-badge">ISTQB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3-Buckets Breakdown Widget -->
+                <div class="ats-widget" id="bucketsWidget" style="margin-top: 1rem; background: #0f172a; border: 1px solid var(--border-color); display: block;">
+                    <div style="font-weight: 700; font-size: 0.92rem; color: #60a5fa; margin-bottom: 0.6rem;">
+                        📦 Analiza Selekcji (3 Koszyki)
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.78rem; color: #34d399; font-weight: 600;">🟢 Koszyk A (Wyeksponowane z Oferty):</div>
+                        <div id="bucketABadges" class="kw-badges" style="margin-top: 0.2rem;">
+                            <span class="kw-badge bucket-badge-a">ISTQB</span>
+                            <span class="kw-badge bucket-badge-a">Jira</span>
+                            <span class="kw-badge bucket-badge-a">SQL</span>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.78rem; color: #60a5fa; font-weight: 600;">🟡 Koszyk B (Tło / Wsparcie):</div>
+                        <div id="bucketBBadges" class="kw-badges" style="margin-top: 0.2rem;">
+                            <span class="kw-badge bucket-badge-b">Confluence</span>
+                            <span class="kw-badge bucket-badge-b">Docker</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.78rem; color: #f87171; font-weight: 600;">🔴 Koszyk C (Wycięty Szum):</div>
+                        <div id="bucketCBadges" class="kw-badges" style="margin-top: 0.2rem;">
+                            <span class="kw-badge bucket-badge-c">Android Studio</span>
+                            <span class="kw-badge bucket-badge-c">Xcode</span>
                         </div>
                     </div>
                 </div>
@@ -155,13 +231,13 @@
             <div class="right-panel">
                 <div class="card" style="padding: 0.85rem 1.2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
                     <div style="font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
-                        <span>Podgląd CV na Żywo</span>
+                        <span>Podgląd DRAFT CV</span>
                         <span style="font-size: 0.72rem; background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500;">1:1 Pixel-Perfect</span>
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <a href="/api/export/pdf" id="btnDownloadPdf" download class="btn-secondary" style="text-decoration:none; background: var(--accent-blue); color: white; border: none;">📥 Pobierz PDF (1:1)</a>
-                        <button class="btn-secondary" onclick="printPreviewIframe()">🖨️ Drukuj w Przeglądarce</button>
-                        <a href="/api/export/html" id="btnDownloadHtml" download class="btn-secondary" style="text-decoration:none;">💾 HTML</a>
+                        <button class="btn-primary" onclick="openSaveModal()" style="background: #10b981; color: white; border: none;">💾 Zapisz do Moich CV</button>
+                        <a href="/api/export/pdf" id="btnDownloadPdf" download class="btn-secondary" style="text-decoration:none; background: var(--accent-blue); color: white; border: none;">📥 Pobierz PDF</a>
+                        <button class="btn-secondary" onclick="printPreviewIframe()">🖨️ Drukuj</button>
                     </div>
                 </div>
                 <div class="preview-frame-wrapper">
@@ -170,15 +246,30 @@
             </div>
         </div>
 
-        <!-- TAB 2: GŁÓWNY PROFIL & PDF UPLOAD -->
+        <!-- TAB 2: MOJE CV-KI (ARCHIWUM ZAPISANYCH APLIKACJI) -->
+        <div id="tab-saved" class="tab-content">
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 1rem;">
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 class="section-h2" style="margin-bottom: 0.2rem;">📚 Moje CV-ki (Archiwum Wygenerowanych Aplikacji)</h2>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary);">Tutaj znajdują się wszystkie zaakceptowane i zapisane przez Ciebie wersje CV wygenerowane dla konkretnych firm.</p>
+                    </div>
+                    <button class="btn-primary" onclick="loadSavedCVsList()">🔄 Odśwież Listę</button>
+                </div>
+
+                <div id="savedCVsGrid" class="archive-grid">
+                    <!-- Dynamic Saved CV Cards rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: GŁÓWNY PROFIL BAZOWY -->
         <div id="tab-profile" class="tab-content">
             <div style="width: 100%; display: flex; flex-direction: column; gap: 1.5rem;">
-                
-                <!-- PDF Upload Card -->
                 <div class="card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border: 1px dashed var(--accent-blue);">
-                    <h2 class="section-h2">📥 Importuj Swoje Obecne CV z Pliku PDF</h2>
+                    <h2 class="section-h2">📥 Importuj Profil Bazowy z Pliku PDF</h2>
                     <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                        Wybierz plik PDF ze swoim dotychczasowym CV. Aplikacja automatycznie odczyta tekst i przetworzy go na Twój Główny Profil Kandydata!
+                        Wybierz plik PDF ze swoim CV. Aplikacja przeanalizuje tekst i utworzy z niego Główny Profil Bazowy!
                     </p>
                     <div style="display: flex; gap: 1rem; align-items: center;">
                         <input type="file" id="pdfFileInput" accept=".pdf" class="form-input" style="max-width: 400px; padding: 0.5rem;">
@@ -189,20 +280,17 @@
                     </div>
                 </div>
 
-                <!-- Visual Profile Editor Card -->
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
-                        <h2 class="section-h2">📋 Edytor Głównego Profilu Kandydata</h2>
+                        <h2 class="section-h2">📋 Edytor Głównego Profilu Bazowego</h2>
                         <div style="display: flex; gap: 0.5rem;">
                             <button class="btn-secondary" onclick="toggleEditorMode('form')" id="btnEditForm">📝 Formularz Wizualny</button>
                             <button class="btn-secondary" onclick="toggleEditorMode('json')" id="btnEditJson">💻 Kod JSON</button>
-                            <button class="btn-primary" onclick="saveProfileFromFormOrJson()">💾 Zapisz Profil Główny</button>
+                            <button class="btn-primary" onclick="saveProfileFromFormOrJson()">💾 Zapisz Profil Bazowy</button>
                         </div>
                     </div>
 
-                    <!-- Visual Form Editor -->
                     <div id="editorFormContainer">
-                        <!-- Dane Podstawowe -->
                         <div class="editor-section-title">
                             <span>👤 Dane Podstawowe i Kontaktowe</span>
                         </div>
@@ -228,18 +316,18 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Lokalizacja</label>
-                                <input type="text" id="formLocation" class="form-input" placeholder="Warsaw, Poland">
+                                <input type="text" id="formLocation" class="form-input" placeholder="Warszawa">
                             </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                             <div class="form-group">
                                 <label class="form-label">LinkedIn URL</label>
-                                <input type="text" id="formLinkedin" class="form-input" placeholder="https://linkedin.com/in/michal-kosowski">
+                                <input type="text" id="formLinkedin" class="form-input">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">GitHub URL</label>
-                                <input type="text" id="formGithub" class="form-input" placeholder="https://github.com">
+                                <input type="text" id="formGithub" class="form-input">
                             </div>
                         </div>
 
@@ -248,21 +336,18 @@
                             <textarea id="formSummary" class="form-textarea" style="min-height: 110px;"></textarea>
                         </div>
 
-                        <!-- Doświadczenie Zawodowe -->
                         <div class="editor-section-title">
                             <span>💼 Doświadczenie Zawodowe</span>
                             <button class="btn-add-sm" onclick="addExperienceCard()">➕ Dodaj Stanowisko</button>
                         </div>
                         <div id="experienceCardsList"></div>
 
-                        <!-- Umiejętności -->
                         <div class="editor-section-title">
                             <span>🛠️ Umiejętności i Technologie</span>
                             <button class="btn-add-sm" onclick="addSkillCard()">➕ Dodaj Kategorię Umiejętności</button>
                         </div>
                         <div id="skillsCardsList"></div>
 
-                        <!-- Języki Obce -->
                         <div class="editor-section-title">
                             <span>🌐 Języki Obce</span>
                             <button class="btn-add-sm" onclick="addLanguageCard()">➕ Dodaj Język</button>
@@ -270,10 +355,9 @@
                         <div id="languagesCardsList"></div>
                     </div>
 
-                    <!-- Raw JSON Textarea (Hidden by default) -->
                     <div id="editorJsonContainer" style="display: none;">
                         <div class="form-group">
-                            <label class="form-label">Kod JSON (źródło prawdy dla AI):</label>
+                            <label class="form-label">Kod JSON Profilu Bazowego:</label>
                             <textarea id="profileJsonEditor" class="form-textarea" style="min-height: 520px; font-family: monospace; font-size: 0.9rem; line-height: 1.5;"></textarea>
                         </div>
                     </div>
@@ -281,16 +365,13 @@
             </div>
         </div>
 
-        <!-- TAB 3: USTAWIENIA AI -->
+        <!-- TAB 4: USTAWIENIA AI -->
         <div id="tab-settings" class="tab-content">
             <div class="card" style="max-width: 650px; width: 100%; margin: 0 auto;">
                 <h2 class="section-h2">⚙️ Konfiguracja Dostawców AI</h2>
                 <div class="form-group">
-                    <label class="form-label">Klucz API Google Gemini (100% Darmowy)</label>
+                    <label class="form-label">Klucz API Google Gemini</label>
                     <input type="password" id="geminiApiKey" class="form-input" placeholder="AIzaSy...">
-                    <small style="color: var(--text-muted); font-size: 0.78rem; margin-top: 0.2rem;">
-                        Pobierz darmowy klucz w <a href="https://aistudio.google.com/" target="_blank" style="color: var(--accent-blue);">Google AI Studio</a>.
-                    </small>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Adres URL Ollama (Lokalny LLM)</label>
@@ -305,8 +386,29 @@
         </div>
     </main>
 
+    <!-- Modal do Zapisywania CV w Archiwum -->
+    <div id="saveCvModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <h3 style="color: white; font-family: 'Outfit', sans-serif; font-size: 1.2rem; margin-bottom: 1rem;">💾 Zapisz CV do Moich CV-ek</h3>
+            <div class="form-group">
+                <label class="form-label">Nazwa Pracodawcy / Ogłoszenia</label>
+                <input type="text" id="modalCompanyName" class="form-input" placeholder="np. ASTEK Polska / Lumicode">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nazwa Stanowiska</label>
+                <input type="text" id="modalTargetTitle" class="form-input" placeholder="np. Tester manualny">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.2rem;">
+                <button class="btn-secondary" onclick="closeSaveModal()">Anuluj</button>
+                <button class="btn-primary" onclick="confirmSaveCV()">💾 Zapisz Aplikację</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentProfileData = {};
+        let currentDraftProfile = null;
+        let lastMatchScore = 100;
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -316,6 +418,196 @@
 
             if (tabId === 'profile') {
                 loadMasterProfileData();
+            } else if (tabId === 'saved') {
+                loadSavedCVsList();
+            }
+        }
+
+        async function cleanInputText() {
+            const textarea = document.getElementById('jobDescription');
+            if (!textarea.value.strip()) return;
+            try {
+                const res = await fetch('/api/clean-text', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: textarea.value })
+                });
+                const data = await res.json();
+                if (data.cleaned_text) {
+                    textarea.value = data.cleaned_text;
+                }
+            } catch (err) {}
+        }
+
+        async function runTailorProcess() {
+            const btnText = document.getElementById('tailorBtnText');
+            const spinner = document.getElementById('tailorSpinner');
+            btnText.textContent = "Analizowanie Oferty i Generowanie DRAFT-u...";
+            spinner.style.display = "block";
+
+            const jobDescription = document.getElementById('jobDescription').value;
+            const targetRole = document.getElementById('targetRole').value;
+            const provider = document.getElementById('aiProvider').value;
+            const template = document.getElementById('cvTemplate').value;
+            const lang = document.getElementById('cvLanguage').value;
+
+            try {
+                const res = await fetch('/api/tailor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        job_description: jobDescription,
+                        target_role: targetRole,
+                        provider: provider,
+                        template: template,
+                        lang: lang
+                    })
+                });
+                const data = await res.json();
+
+                if (data.status === "success") {
+                    currentDraftProfile = data.profile;
+                    lastMatchScore = data.ats_analysis ? data.ats_analysis.match_score : 100;
+                    updatePreview();
+                    updateAtsWidget(data.ats_analysis, data.audit_results);
+                    renderBucketsWidget(data.buckets_breakdown);
+                } else {
+                    alert("Informacja: " + (data.message || "Ukończono generowanie DRAFT-u."));
+                }
+            } catch (err) {
+                alert("Błąd podczas dopasowywania: " + err.message);
+            } finally {
+                btnText.textContent = "✨ Generuj DRAFT CV pod tę Ofertę";
+                spinner.style.display = "none";
+            }
+        }
+
+        function renderBucketsWidget(buckets) {
+            if (!buckets) return;
+            const bA = document.getElementById('bucketABadges');
+            const bB = document.getElementById('bucketBBadges');
+            const bC = document.getElementById('bucketCBadges');
+
+            bA.innerHTML = "";
+            (buckets.bucket_a || []).forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'kw-badge bucket-badge-a';
+                span.textContent = item;
+                bA.appendChild(span);
+            });
+
+            bB.innerHTML = "";
+            (buckets.bucket_b || []).forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'kw-badge bucket-badge-b';
+                span.textContent = item;
+                bB.appendChild(span);
+            });
+
+            bC.innerHTML = "";
+            (buckets.bucket_c || []).forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'kw-badge bucket-badge-c';
+                span.textContent = item;
+                bC.appendChild(span);
+            });
+        }
+
+        function openSaveModal() {
+            const targetRole = document.getElementById('targetRole').value;
+            if (targetRole) {
+                document.getElementById('modalCompanyName').value = targetRole;
+            }
+            document.getElementById('saveCvModal').style.display = 'flex';
+        }
+
+        function closeSaveModal() {
+            document.getElementById('saveCvModal').style.display = 'none';
+        }
+
+        async function confirmSaveCV() {
+            const companyName = document.getElementById('modalCompanyName').value || "Moja Aplikacja";
+            const targetTitle = document.getElementById('modalTargetTitle').value || "Software QA Engineer";
+            const lang = document.getElementById('cvLanguage').value;
+            const jobText = document.getElementById('jobDescription').value;
+
+            try {
+                const res = await fetch('/api/saved-cvs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        company_name: companyName,
+                        target_title: targetTitle,
+                        lang: lang,
+                        match_score: lastMatchScore,
+                        profile_data: currentDraftProfile,
+                        job_text: jobText
+                    })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    alert("🎉 " + data.message);
+                    closeSaveModal();
+                } else {
+                    alert("Błąd zapisu: " + data.message);
+                }
+            } catch (err) {
+                alert("Błąd: " + err.message);
+            }
+        }
+
+        async function loadSavedCVsList() {
+            const grid = document.getElementById('savedCVsGrid');
+            grid.innerHTML = "<p style='color: var(--text-muted);'>Ładowanie zapisanego archiwum...</p>";
+
+            try {
+                const res = await fetch('/api/saved-cvs');
+                const data = await res.json();
+                const cvs = data.cvs || [];
+
+                if (cvs.length === 0) {
+                    grid.innerHTML = "<p style='color: var(--text-muted); font-style: italic;'>Brak zapisanych CV w archiwum. Wygeneruj DRAFT i kliknij '💾 Zapisz do Moich CV'!</p>";
+                    return;
+                }
+
+                grid.innerHTML = "";
+                cvs.forEach(cv => {
+                    const card = document.createElement('div');
+                    card.className = 'archive-card';
+                    const langBadge = cv.lang === 'en' ? '🇬🇧 English' : '🇵🇱 Polski';
+                    card.innerHTML = `
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+                                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: white;">${escapeHtml(cv.company_name)}</h3>
+                                <span class="kw-badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4);">${cv.match_score}% Match</span>
+                            </div>
+                            <div style="font-size: 0.88rem; color: #94a3b8; margin-bottom: 0.4rem;">${escapeHtml(cv.target_title)}</div>
+                            <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; gap: 0.8rem;">
+                                <span>📅 ${cv.created_at}</span>
+                                <span>${langBadge}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.8rem;">
+                            <a href="/api/saved-cvs/${cv.id}/export/pdf" download class="btn-primary" style="flex: 1; text-align: center; text-decoration: none; font-size: 0.82rem; padding: 0.4rem;">📥 Pobierz PDF</a>
+                            <button class="btn-danger-sm" onclick="deleteSavedCV('${cv.id}')">🗑️ Usuń</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                grid.innerHTML = "<p style='color: #f87171;'>Błąd ładowania archiwum: " + err.message + "</p>";
+            }
+        }
+
+        async function deleteSavedCV(cvId) {
+            if (!confirm("Czy na pewno chcesz usunąć to zapisane CV z archiwum?")) return;
+            try {
+                const res = await fetch('/api/saved-cvs/' + cvId, { method: 'DELETE' });
+                const data = await res.json();
+                alert(data.message || "Usunięto.");
+                loadSavedCVsList();
+            } catch (err) {
+                alert("Błąd: " + err.message);
             }
         }
 
@@ -344,34 +636,29 @@
                 const data = await res.json();
                 currentProfileData = data;
                 
-                // Base Info
                 const pinfo = data.personal_info || {};
                 document.getElementById('formFullName').value = pinfo.full_name || "Michał Kosowski";
                 document.getElementById('formTitle').value = pinfo.title || "Software QA Engineer";
                 document.getElementById('formEmail').value = pinfo.email || "mmkosowski94@gmail.com";
                 document.getElementById('formPhone').value = pinfo.phone || "518075716";
-                document.getElementById('formLocation').value = pinfo.location || "Warsaw, Poland";
+                document.getElementById('formLocation').value = pinfo.location || "Warszawa";
                 document.getElementById('formLinkedin').value = pinfo.linkedin || "";
                 document.getElementById('formGithub').value = pinfo.github || "";
                 document.getElementById('formSummary').value = data.summary || "";
 
-                // Render Dynamic Lists
                 renderExperienceList(data.experience || []);
                 renderSkillsList(data.skills || []);
                 renderLanguagesList(data.languages || []);
 
-                // Populate JSON Textarea
                 document.getElementById('profileJsonEditor').value = JSON.stringify(data, null, 2);
             } catch (err) {
-                console.error("Błąd ładowania danych profilu", err);
+                console.error("Błąd ładowania profilu", err);
             }
         }
 
-        /* Experience Dynamic Cards */
         function renderExperienceList(expArray) {
             const container = document.getElementById('experienceCardsList');
             container.innerHTML = "";
-
             expArray.forEach((job, index) => {
                 const card = document.createElement('div');
                 card.className = 'editor-card-item';
@@ -405,7 +692,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Obowiązki / Osiągnięcia (Każdy punkt w nowej linii)</label>
+                        <label class="form-label">Obowiązki (Każdy punkt w nowej linii)</label>
                         <textarea class="form-textarea exp-highlights" style="min-height: 90px;">${(job.highlights || []).join('\n')}</textarea>
                     </div>
                 `;
@@ -420,8 +707,8 @@
                 company: "Nowa Firma S.A.",
                 start_date: "2023",
                 end_date: "Obecnie",
-                location: "Warsaw",
-                highlights: ["Wykonywanie testów automatycznych w Playwright i walidacja API."]
+                location: "Warszawa",
+                highlights: ["Wykonywanie testów automatycznych i manualnych."]
             });
             renderExperienceList(currentProfileData.experience);
         }
@@ -431,11 +718,9 @@
             renderExperienceList(currentProfileData.experience);
         }
 
-        /* Skills Dynamic Cards */
         function renderSkillsList(skillsArray) {
             const container = document.getElementById('skillsCardsList');
             container.innerHTML = "";
-
             skillsArray.forEach((cat, index) => {
                 const card = document.createElement('div');
                 card.className = 'editor-card-item';
@@ -462,10 +747,7 @@
 
         function addSkillCard() {
             if (!currentProfileData.skills) currentProfileData.skills = [];
-            currentProfileData.skills.push({
-                category: "Nowa Kategoria",
-                items: ["Narzędzie 1", "Narzędzie 2"]
-            });
+            currentProfileData.skills.push({ category: "Nowa Kategoria", items: ["Narzędzie 1", "Narzędzie 2"] });
             renderSkillsList(currentProfileData.skills);
         }
 
@@ -474,11 +756,9 @@
             renderSkillsList(currentProfileData.skills);
         }
 
-        /* Languages Dynamic Cards */
         function renderLanguagesList(langArray) {
             const container = document.getElementById('languagesCardsList');
             container.innerHTML = "";
-
             langArray.forEach((l, index) => {
                 const card = document.createElement('div');
                 card.className = 'editor-card-item';
@@ -504,10 +784,7 @@
 
         function addLanguageCard() {
             if (!currentProfileData.languages) currentProfileData.languages = [];
-            currentProfileData.languages.push({
-                language: "Hiszpański",
-                level: "Podstawowy (A2)"
-            });
+            currentProfileData.languages.push({ language: "Niemiecki", level: "Podstawowy (A2)" });
             renderLanguagesList(currentProfileData.languages);
         }
 
@@ -517,7 +794,7 @@
         }
 
         function escapeHtml(str) {
-            return String(str).replace(/"/g, '&quot;');
+            return String(str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
         async function saveProfileFromFormOrJson() {
@@ -532,7 +809,7 @@
                     return;
                 }
             } else {
-                profileToSave = jsonClone(currentProfileData);
+                profileToSave = JSON.parse(JSON.stringify(currentProfileData || {}));
                 if (!profileToSave.personal_info) profileToSave.personal_info = {};
 
                 profileToSave.personal_info.full_name = document.getElementById('formFullName').value || "Michał Kosowski";
@@ -544,7 +821,6 @@
                 profileToSave.personal_info.github = document.getElementById('formGithub').value || "";
                 profileToSave.summary = document.getElementById('formSummary').value || "";
 
-                // Collect Experience
                 const expCards = document.querySelectorAll('#experienceCardsList .editor-card-item');
                 const newExp = [];
                 expCards.forEach(card => {
@@ -556,41 +832,26 @@
                     const hlText = card.querySelector('.exp-highlights').value;
                     const hls = hlText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
 
-                    newExp.push({
-                        position: pos,
-                        company: comp,
-                        start_date: start,
-                        end_date: end,
-                        location: loc,
-                        highlights: hls
-                    });
+                    newExp.push({ position: pos, company: comp, start_date: start, end_date: end, location: loc, highlights: hls });
                 });
                 profileToSave.experience = newExp;
 
-                // Collect Skills
                 const skillCards = document.querySelectorAll('#skillsCardsList .editor-card-item');
                 const newSkills = [];
                 skillCards.forEach(card => {
                     const catName = card.querySelector('.skill-cat-name').value;
                     const itemsText = card.querySelector('.skill-items').value;
                     const items = itemsText.split(',').map(s => s.trim()).filter(s => s.length > 0);
-
-                    newSkills.push({
-                        category: catName,
-                        items: items
-                    });
+                    newSkills.push({ category: catName, items: items });
                 });
                 profileToSave.skills = newSkills;
 
-                // Collect Languages
                 const langCards = document.querySelectorAll('#languagesCardsList .editor-card-item');
                 const newLangs = [];
                 langCards.forEach(card => {
                     const lname = card.querySelector('.lang-name').value;
                     const llevel = card.querySelector('.lang-level').value;
-                    if (lname) {
-                        newLangs.push({ language: lname, level: llevel });
-                    }
+                    if (lname) newLangs.push({ language: lname, level: llevel });
                 });
                 profileToSave.languages = newLangs;
             }
@@ -602,7 +863,7 @@
                     body: JSON.stringify(profileToSave)
                 });
                 const result = await res.json();
-                alert(result.message || "Profil główny został pomyślnie zapisany!");
+                alert(result.message || "Profil główny zapisany!");
                 currentProfileData = profileToSave;
                 updatePreview();
             } catch (err) {
@@ -610,83 +871,35 @@
             }
         }
 
-        function jsonClone(obj) {
-            return JSON.parse(JSON.stringify(obj || {}));
-        }
-
         async function uploadPdfCV() {
             const fileInput = document.getElementById('pdfFileInput');
             if (!fileInput.files || fileInput.files.length === 0) {
-                alert("Wybierz plik PDF ze swoim CV przed kliknięciem przycisku.");
+                alert("Wybierz plik PDF ze swoim CV.");
                 return;
             }
 
             const btnText = document.getElementById('pdfBtnText');
             const spinner = document.getElementById('pdfSpinner');
-            btnText.textContent = "Przetwarzanie pliku PDF...";
+            btnText.textContent = "Przetwarzanie PDF...";
             spinner.style.display = "block";
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
             try {
-                const res = await fetch('/api/upload-pdf', {
-                    method: 'POST',
-                    body: formData
-                });
+                const res = await fetch('/api/upload-pdf', { method: 'POST', body: formData });
                 const data = await res.json();
-
                 if (data.status === "success") {
                     alert("🎉 " + data.message);
                     loadMasterProfileData();
                     updatePreview();
                 } else {
-                    alert("Błąd: " + (data.message || "Nie udało się przetworzyć pliku PDF."));
+                    alert("Błąd: " + (data.message || "Błąd odczytu PDF."));
                 }
             } catch (err) {
-                alert("Błąd wysyłania pliku: " + err.message);
+                alert("Błąd: " + err.message);
             } finally {
                 btnText.textContent = "🚀 Zaimportuj CV z PDF";
-                spinner.style.display = "none";
-            }
-        }
-
-        async function runTailorProcess() {
-            const btnText = document.getElementById('tailorBtnText');
-            const spinner = document.getElementById('tailorSpinner');
-            btnText.textContent = "Analizowanie i Weryfikacja QA...";
-            spinner.style.display = "block";
-
-            const jobDescription = document.getElementById('jobDescription').value;
-            const targetRole = document.getElementById('targetRole').value;
-            const provider = document.getElementById('aiProvider').value;
-            const template = document.getElementById('cvTemplate').value;
-            const lang = document.getElementById('cvLanguage').value;
-
-            try {
-                const res = await fetch('/api/tailor', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        job_description: jobDescription,
-                        target_role: targetRole,
-                        provider: provider,
-                        template: template,
-                        lang: lang
-                    })
-                });
-                const data = await res.json();
-
-                if (data.status === "success") {
-                    updatePreview();
-                    updateAtsWidget(data.ats_analysis, data.audit_results);
-                } else {
-                    alert("Informacja: " + (data.message || "Ukończono w trybie awaryjnym."));
-                }
-            } catch (err) {
-                alert("Błąd podczas dopasowywania przez AI: " + err.message);
-            } finally {
-                btnText.textContent = "✨ Dopasuj CV (Weryfikacja Logiki QA)";
                 spinner.style.display = "none";
             }
         }
@@ -732,7 +945,7 @@
                     atsReadiness.textContent = "100% Bezpieczny dla Skanerów Korporacyjnych";
                     atsReadiness.style.color = "#60a5fa";
                 } else {
-                    atsReadiness.textContent = "Wymaga sprawdzenia nagłówków/danych kontaktowych";
+                    atsReadiness.textContent = "Wymaga sprawdzenia nagłówków";
                     atsReadiness.style.color = "#f59e0b";
                 }
             }
@@ -746,11 +959,8 @@
             
             iframe.src = '/preview/current?template=' + template + '&lang=' + lang + '&t=' + timestamp;
             
-            // Dynamic PDF & HTML export button URL sync with fresh timestamp
             const pdfBtn = document.getElementById('btnDownloadPdf');
-            const htmlBtn = document.getElementById('btnDownloadHtml');
             if (pdfBtn) pdfBtn.href = '/api/export/pdf?template=' + template + '&lang=' + lang + '&t=' + timestamp;
-            if (htmlBtn) htmlBtn.href = '/api/export/html?template=' + template + '&lang=' + lang + '&t=' + timestamp;
         }
 
         function printPreviewIframe() {

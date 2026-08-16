@@ -1,0 +1,142 @@
+{
+  "id": "cv_1786897714_c84434",
+  "company_name": "Senior  QA Engineer",
+  "target_title": "Astek",
+  "lang": "pl",
+  "match_score": 100,
+  "created_at": "2026-08-16 18:28:34",
+  "job_text": "quick apply\nyou can start ASAP\nTester manualny / Testerka manualna\nFirma: ASTEK Polska\nod: 29 lipca 2026\ndo: 28 sierpnia 2026\nbrak widełek\nkontrakt B2B (pełny etat)\nbrak widełek\numowa o pracę\nSzczegóły wynagrodzenia\n\nwięcej\nstała podstawa wynagrodzenia\npoziom:\njunior\ntryb pracy:\nzdalna\nlokalizacja:\nWarszawa, mazowieckie\nWymagania\nSystem operacyjny\nWindows\nNasze wymagania\nWyróżniasz się czymś ciekawym? Jesteś mistrzem komunikacji? Matematycznym freakiem? A może kochasz Star Wars?\nSzukamy osób kreatywnych, otwartych na nowe doświadczenia. :)\nPoza tym bardzo ważne jest również:\nDoświadczenie w testowaniu rozwiązań IT z wykorzystaniem zagadnień zachowania i kontroli jakości systemów informatycznych\nPraktyczna dobra znajomość narzędzi wspomagających proces testowania (preferowane HP QC, UTP, JIRA, Katalon, ALM)\nCertyfikat ISEB/ISTQB (must have)\nZnajomość zasad testowania, technik testowych, procedur testowych, metodyk testowych, procesu testowania\nZnajomość aplikacji bankowych i maklerskich\nProfesjonalizm i samodzielność w działaniu\nTwój zakres obowiązków\nZapewnienie funkcjonalnej zgodności oprogramowania z wymaganiami technicznymi i biznesowymi\nRealizacja testów funkcjonalnych systemów zgodnie z dokumentacją i założeniami biznesowymi\nTworzenie planu testów\nPrzygotowanie przypadków testowych\nZgłaszanie błędów aplikacji wykrytych w czasie testów\nAnaliza i raportowanie wyników testów\nWspółpraca z klientem biznesowym w zakresie realizowanych zadań\nWspółpraca z innymi działami testowymi Banku lub firm zewnętrznych\nWspółpraca z zespołem wytwarzającym oprogramowanie przy usuwaniu wykrytych defektów\nTworzenie dokumentacji projektowej w zakresie testowania\nAktualizacja dokumentacji technicznej\nCompany\nBenefity\ndofinansowanie zajęć sportowych\nprywatna opieka medyczna\nubezpieczenie na życie\nmożliwość pracy zdalnej\nelastyczny czas pracy\nspotkania integracyjne\nEtapy rekrutacji\n1.\nDostępny od zaraz lub maks. miesiąc wypowiedzenia\nASTEK Polska\nZałożona w 1988 roku we Francji Grupa Astek jest światowym partnerem w obszarze doradztwa inżynieryjnego oraz IT. Dzięki swojej wiedzy specjalistycznej w wielu sektorach przemysłowych i technologicznych, Astek wspiera międzynarodowych Klientów w rozwijaniu i wdrażaniu produktów oraz usług, jednocześnie uczestnicząc w ich transformacji cyfrowej.\nGrupa Astek od momentu powstania opiera swój rozwój na kulturze przedsiębiorczości i innowacyjności oraz na budowaniu umiejętności swoich ponad 10 000 pracowników, którzy codziennie uczestniczą w zróżnicowanych projektach technologicznych i inżynieryjnych.\nDołącz do silnie rozwijającej się we Francji i na całym świecie Grupy, której obroty w 2025 r. wyniosły 730 milionów euro.\nZapraszamy na https://astek.net po więcej szczegółów.\n\nPodsumowanie oferty\n\nTester manualny / Testerka manualna\n\nzapisz\n\naplikuj szybko\nZgłaszam się do:\n\nASTEK Polska\nWarszawa, mazowieckie\n\nPodsumowanie oferty\n\nzapisz\n\naplikuj szybko\n\nrozwiń formularz\nBrakuje Ci informacji?\n\nUpewnij się, że w treści nie ma tego, czego szukasz.\nZadaj pytanie, jeśli potrzebujesz więcej szczegółów dotyczących powyższej oferty.\n",
+  "profile_data": {
+    "_buckets_breakdown": {
+      "bucket_a": [
+        "Jira",
+        "HP QC",
+        "HP ALM",
+        "Katalon Studio",
+        "UTP",
+        "Windows OS",
+        "ISTQB / ISEB Certification"
+      ],
+      "bucket_b": [
+        "Integration Testing",
+        "Functional Testing",
+        "Regression Testing",
+        "Jira (Xray)",
+        "HP QC / ALM",
+        "Confluence",
+        "Git",
+        "SQL Developer / DBeaver"
+      ],
+      "bucket_c": [
+        "Android Studio",
+        "Xcode",
+        "Mobile Device Logs",
+        "Playwright",
+        "TypeScript"
+      ]
+    },
+    "certifications": [],
+    "education": [
+      {
+        "degree": "Inżynieria Oprogramowania / Informatyka",
+        "graduation_year": "2019",
+        "institution": "Uczelnia Wyższa",
+        "location": "Warszawa"
+      }
+    ],
+    "experience": [
+      {
+        "company": "Benefit Systems S.A.",
+        "end_date": "Obecnie",
+        "highlights": [
+          "Tworzenie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji projektowej w Jira (Xray) i Confluence w zespole Agile/Scrum.",
+          "Wykonywanie zapytań SQL w celu weryfikacji baz danych i spójności danych na środowiskach Windows OS.",
+          "Przeprowadzanie testów manualnych, funkcjonalnych i integracyjnych systemów informatycznych zgodnie z dokumentacją techniczną.",
+          "Zgłaszanie błędów aplikacji, analiza wyników testów oraz współpraca z zespołem deweloperskim przy usuwaniu defektów.",
+          "Wykonywanie walidacji usług API (REST & SOAP) przy użyciu Postman oraz SoapUI."
+        ],
+        "location": "Warszawa",
+        "position": "Software tester / QA Automation",
+        "start_date": "2022"
+      },
+      {
+        "company": "Sii Polska Sp. z o.o. (Freelance)",
+        "end_date": "2022-04",
+        "highlights": [
+          "Dokumentowanie defektów z jasnymi krokami reprodukcji i zarządzanie błędami w narzędziach Jira (Xray) oraz HP QC / ALM.",
+          "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji biznesowych w oparciu o wymagania z backlogu.",
+          "Weryfikacja danych w bazach danych z użyciem narzędzia SQL Developer."
+        ],
+        "location": "Warszawa",
+        "position": "Test And Analysis Engineer",
+        "start_date": "2021-09"
+      },
+      {
+        "company": "Euroloan Group (Freelance)",
+        "end_date": "2021-01",
+        "highlights": [
+          "Przeprowadzanie kompleksowych testów funkcjonalnych, UI oraz regresyjnych dla platform finansowych i cyfrowych.",
+          "Projektowanie, wykonywanie i optymalizacja przypadków testowych zgodnych z kryteriami akceptacji."
+        ],
+        "location": "Warszawa",
+        "position": "Software tester",
+        "start_date": "2019-07"
+      }
+    ],
+    "languages": [
+      {
+        "language": "Polski",
+        "level": "Ojczysty (Native)"
+      },
+      {
+        "language": "Angielski",
+        "level": "Biegły (Professional)"
+      }
+    ],
+    "personal_info": {
+      "email": "mmkosowski94@gmail.com",
+      "full_name": "Michał Kosowski",
+      "github": "https://github.com",
+      "linkedin": "https://linkedin.com/in/michal-kosowski",
+      "location": "Warszawa",
+      "phone": "518075716",
+      "title": "Senior  QA Engineer"
+    },
+    "skills": [
+      {
+        "category": "Testowanie & API",
+        "items": [
+          "ISTQB / ISEB Certification",
+          "Integration Testing",
+          "Functional Testing",
+          "Regression Testing"
+        ]
+      },
+      {
+        "category": "Narzędzia & Zarządzanie Testami",
+        "items": [
+          "Jira",
+          "HP QC",
+          "HP ALM",
+          "Katalon Studio",
+          "UTP",
+          "Windows OS",
+          "Jira (Xray)",
+          "HP QC / ALM"
+        ]
+      },
+      {
+        "category": "Automatyzacja & Języki",
+        "items": [
+          "Windows OS",
+          "SQL",
+          "Playwright",
+          "TypeScript",
+          "JavaScript",
+          "GitLab CI/CD"
+        ]
+      }
+    ],
+    "summary": "Inżynier QA z ponad 5-letnim doświadczeniem specjalizujący się w Jira, HP QC, HP ALM, Katalon Studio. Specjalizuje się w tworzeniu planów testów, przypadków testowych, raportowaniu błędów oraz weryfikacji baz danych SQL na środowiskach Windows OS. Doświadczony w tworzeniu dokumentacji projektowej, planów testów oraz raportów z wykonania dla systemów bankowych i biznesowych. Wspierany wiedzą z zakresu automatyzacji testów w Playwright oraz narzędziach Java."
+  }
+}

@@ -1,10 +1,10 @@
 """
 VitaeCraft AI - Intelligent Personal CV Generator & Tailor
 Author: MagicMike Development Team
-Version: 2.0.0
+Version: 2.1.0
 
 Web GUI and API server for VitaeCraft AI with Playwright 1:1 PDF exporter,
-QA Logic Engine, Anti-AI Auditor, ATS Compliance Safeguard, and Dynamic PDF State Persistence.
+QA Logic Engine, Anti-AI Auditor, ATS Compliance Safeguard, and Saved CVs Archive Manager.
 """
 
 import os
@@ -14,11 +14,12 @@ import argparse
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, Response
 
-from ai_engine import AIEngine
+from ai_engine import AIEngine, clean_job_offer_text
 from job_analyzer import JobAnalyzer
 from pdf_parser import PDFParser
 from pdf_exporter import PDFExporter
 from qa_logic_engine import QALogicEngine
+from cv_archive_manager import CVArchiveManager
 
 APP_DIR = Path(__file__).parent
 DEFAULT_PROFILE_PATH = APP_DIR / "profile_data.json"
@@ -82,63 +83,18 @@ def master_profile_api():
             ACTIVE_TAILORED_PROFILE = new_data
             ACTIVE_JOB_TEXT = ""
             save_json_file(TAILORED_PROFILE_PATH, new_data)
-            return jsonify({"status": "success", "message": "Główny profil pomyślnie zapisany!"})
+            return jsonify({"status": "success", "message": "Główny profil bazowy pomyślnie zapisany!"})
         return jsonify({"status": "error", "message": "Błąd podczas zapisu profilu."}), 500
     
     data = load_json_file(DEFAULT_PROFILE_PATH, {})
     return jsonify(data)
 
-@app.route("/api/upload-pdf", methods=["POST"])
-def upload_pdf_api():
-    global ACTIVE_TAILORED_PROFILE, ACTIVE_JOB_TEXT
-    if 'file' not in request.files:
-        return jsonify({"status": "error", "message": "Brak pliku PDF w żądaniu."}), 400
-
-    file = request.files['file']
-    if not file.filename.lower().endswith('.pdf'):
-        return jsonify({"status": "error", "message": "Załączony plik musi być w formacie PDF."}), 400
-
-    pdf_bytes = file.read()
-    raw_text = PDFParser.extract_text_from_pdf(pdf_bytes)
-
-    if not raw_text.strip():
-        return jsonify({"status": "error", "message": "Nie udało się odczytać tekstu z tego pliku PDF."}), 400
-
-    settings = get_settings()
-    gemini_key = settings.get("gemini_key") or os.environ.get("GEMINI_API_KEY", "")
-    ollama_url = settings.get("ollama_url", "http://localhost:11434")
-    
-    ai = AIEngine(provider="auto", gemini_key=gemini_key, ollama_url=ollama_url)
-    parsed_profile = PDFParser.convert_text_to_profile(raw_text, ai_engine=ai)
-    parsed_profile = QALogicEngine.audit_and_refine_profile(parsed_profile, lang=ACTIVE_LANGUAGE, job_text="")
-
-    save_json_file(DEFAULT_PROFILE_PATH, parsed_profile)
-    ACTIVE_TAILORED_PROFILE = parsed_profile
-    ACTIVE_JOB_TEXT = ""
-    save_json_file(TAILORED_PROFILE_PATH, parsed_profile)
-
-    return jsonify({
-        "status": "success",
-        "message": "CV w formacie PDF zostało pomyślnie zaimportowane i przetworzone!",
-        "profile": parsed_profile
-    })
-
-@app.route("/api/settings", methods=["GET", "POST"])
-def settings_api():
-    if request.method == "POST":
-        data = request.get_json()
-        if save_json_file(SETTINGS_PATH, data):
-            if data.get("gemini_key"):
-                os.environ["GEMINI_API_KEY"] = data["gemini_key"]
-            return jsonify({"status": "success", "message": "Ustawienia zapisane pomyślnie!"})
-        return jsonify({"status": "error", "message": "Błąd podczas zapisu ustawień."}), 500
-
-    settings = get_settings()
-    masked = dict(settings)
-    if masked.get("gemini_key"):
-        k = masked["gemini_key"]
-        masked["gemini_key_masked"] = k[:4] + "..." + k[-4:] if len(k) > 8 else "***"
-    return jsonify(masked)
+@app.route("/api/clean-text", methods=["POST"])
+def clean_text_api():
+    payload = request.get_json() or {}
+    raw_text = payload.get("text", "")
+    cleaned = clean_job_offer_text(raw_text)
+    return jsonify({"status": "success", "cleaned_text": cleaned})
 
 @app.route("/api/tailor", methods=["POST"])
 def tailor_api():
@@ -155,7 +111,7 @@ def tailor_api():
     gemini_key = settings.get("gemini_key") or os.environ.get("GEMINI_API_KEY", "")
     ollama_url = settings.get("ollama_url", "http://localhost:11434")
     
-    # ALWAYS load fresh master_profile baseline to prevent state contamination
+    # ALWAYS load pristine master_profile baseline from disk
     master_profile = load_json_file(DEFAULT_PROFILE_PATH, {})
     
     ai = AIEngine(provider=provider, gemini_key=gemini_key, ollama_url=ollama_url)
@@ -170,10 +126,88 @@ def tailor_api():
 
     return jsonify({
         "status": "success",
-        "message": "CV pomyślnie dopasowane i zsynchronizowane z plikiem PDF!",
+        "message": "CV DRAFT pomyślnie wygenerowane! Możesz je teraz przejrzeć, zedytować lub zapisać do Moich CV.",
+        "profile": tailored_profile,
         "ats_analysis": ats_analysis,
-        "audit_results": audit_results
+        "audit_results": audit_results,
+        "buckets_breakdown": tailored_profile.get("_buckets_breakdown", {})
     })
+
+# --- SAVED CVS ARCHIVE API ENDPOINTS ---
+
+@app.route("/api/saved-cvs", methods=["GET", "POST"])
+def saved_cvs_archive_api():
+    if request.method == "POST":
+        payload = request.get_json() or {}
+        company_name = payload.get("company_name", "Moja Aplikacja")
+        target_title = payload.get("target_title", "")
+        lang = payload.get("lang", ACTIVE_LANGUAGE)
+        match_score = payload.get("match_score", 0)
+        profile_data = payload.get("profile_data") or get_active_profile()
+        job_text = payload.get("job_text", ACTIVE_JOB_TEXT)
+        
+        record = CVArchiveManager.save_cv(
+            company_name=company_name,
+            target_title=target_title,
+            lang=lang,
+            match_score=match_score,
+            profile_data=profile_data,
+            job_text=job_text
+        )
+        return jsonify({"status": "success", "message": f"CV dla {company_name} zostało pomyślnie zapisane w Moich CV!", "record": record})
+        
+    records = CVArchiveManager.list_saved_cvs()
+    return jsonify({"status": "success", "cvs": records})
+
+@app.route("/api/saved-cvs/<cv_id>", methods=["GET", "PUT", "DELETE"])
+def saved_cv_detail_api(cv_id):
+    if request.method == "DELETE":
+        if CVArchiveManager.delete_cv(cv_id):
+            return jsonify({"status": "success", "message": "Zapisane CV zostało usunięte."})
+        return jsonify({"status": "error", "message": "Nie znaleziono wskazanego pliku CV."}), 404
+        
+    if request.method == "PUT":
+        payload = request.get_json() or {}
+        profile_data = payload.get("profile_data")
+        company_name = payload.get("company_name")
+        target_title = payload.get("target_title")
+        
+        updated = CVArchiveManager.update_cv(cv_id, profile_data, company_name=company_name, target_title=target_title)
+        if updated:
+            return jsonify({"status": "success", "message": "Zapisane CV zaktualizowane pomyślnie!", "record": updated})
+        return jsonify({"status": "error", "message": "Wystąpił błąd podczas aktualizacji."}), 500
+        
+    record = CVArchiveManager.get_cv(cv_id)
+    if record:
+        return jsonify({"status": "success", "record": record})
+    return jsonify({"status": "error", "message": "Nie znaleziono wskazanego CV."}), 404
+
+@app.route("/api/saved-cvs/<cv_id>/export/pdf")
+def saved_cv_export_pdf(cv_id):
+    record = CVArchiveManager.get_cv(cv_id)
+    if not record:
+        return jsonify({"status": "error", "message": "Nie znaleziono CV."}), 404
+        
+    template_name = request.args.get("template", "pro_qa_sidebar")
+    data = record.get("profile_data", {})
+    lang = record.get("lang", "pl")
+    job_text = record.get("job_text", "")
+    
+    data = QALogicEngine.audit_and_refine_profile(data, lang=lang, job_text=job_text)
+    rendered_html = render_template(f"cv_templates/{template_name}.html", data=data, lang=lang)
+    
+    pdf_bytes = PDFExporter.generate_pdf_from_html(rendered_html)
+    if not pdf_bytes:
+        pdf_bytes = PDFExporter.generate_pdf(data)
+        
+    company_slug = record.get("company_name", "CV").replace(" ", "_")
+    filename = f"Michal_Kosowski_CV_{company_slug}.pdf"
+    
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
 
 @app.route("/preview/current")
 def preview_current():
@@ -214,24 +248,6 @@ def export_pdf():
         headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
-@app.route("/api/export/html")
-def export_html():
-    global ACTIVE_LANGUAGE, ACTIVE_JOB_TEXT
-    template_name = request.args.get("template", "pro_qa_sidebar")
-    lang = request.args.get("lang", ACTIVE_LANGUAGE)
-    
-    data = get_active_profile()
-    data = QALogicEngine.audit_and_refine_profile(data, lang=lang, job_text=ACTIVE_JOB_TEXT)
-    
-    rendered = render_template(f"cv_templates/{template_name}.html", data=data, lang=lang)
-    filename = "Michal_Kosowski_CV.html" if lang == "pl" else "Michal_Kosowski_Resume.html"
-    
-    return Response(
-        rendered,
-        mimetype="text/html",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
-    )
-
 def main():
     parser = argparse.ArgumentParser(description="VitaeCraft AI - Inteligentny Generator CV")
     parser.add_argument("--export", action="store_true", help="Wyeksportuj aktualne CV jako plik HTML")
@@ -251,7 +267,7 @@ def main():
         print(f"✅ Wyeksportowano CV do: {out_file.resolve()}")
         sys.exit(0)
 
-    print(f"🚀 Uruchamianie VitaeCraft AI v2.0...")
+    print(f"🚀 Uruchamianie VitaeCraft AI v2.1.0 (z Archiwum Moje CV-ki)...")
     print(f"📍 Serwer dostępny pod adresem: http://{args.host}:{args.port}")
     app.run(host=args.host, port=args.port, debug=True)
 

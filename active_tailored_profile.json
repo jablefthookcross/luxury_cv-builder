@@ -1,50 +1,46 @@
 {
   "personal_info": {
     "full_name": "Michał Kosowski",
-    "title": "Senior QA Engineer",
+    "title": "Senior  QA Engineer",
     "email": "mmkosowski94@gmail.com",
     "phone": "518075716",
-    "location": "Warsaw, Poland",
-    "website": "",
+    "location": "Warszawa",
     "linkedin": "https://linkedin.com/in/michal-kosowski",
     "github": "https://github.com"
   },
-  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w testach manualnych, integracyjnych oraz testowaniu API (REST & SOAP). Specjalizuje się w weryfikacji baz danych za pomocą SQL, projektowaniu scenariuszy testowych oraz śledzeniu błędów w Jira (Xray) w zespole Agile/Scrum. Doświadczony w tworzeniu kompleksowej dokumentacji testowej, planów testów oraz raportów dla systemów rejestrów i platform cyfrowych. Wspierany praktyczną znajomością automatyzacji testów w Playwright (TypeScript).",
+  "summary": "Software QA Engineer with 5+ years of experience specializing in Jira, HP QC, HP ALM, Katalon Studio. Proficient in test plan creation, test scenario design, defect reporting, and database verification across Agile/Scrum delivery teams. Experienced in preparing comprehensive test documentation, execution summary reports, and quality metrics for enterprise applications. Complemented by test automation capabilities using Playwright and Java frameworks.",
   "skills": [
     {
-      "category": "Testowanie & API",
+      "category": "Testing & API",
       "items": [
-        "SOAP & REST API Testing",
-        "SoapUI",
-        "Postman",
-        "SQL Database Verification",
+        "ISTQB / ISEB Certification",
         "Integration Testing",
         "Functional Testing",
-        "Regression Testing",
-        "ISTQB Standards"
+        "Regression Testing"
       ]
     },
     {
-      "category": "Narzędzia & Zarządzanie Testami",
+      "category": "Tools & Test Management",
       "items": [
+        "Jira",
+        "HP QC",
+        "HP ALM",
+        "Katalon Studio",
+        "UTP",
+        "Windows OS",
         "Jira (Xray)",
-        "Confluence",
-        "Git",
-        "SQL Developer / DBeaver",
-        "Test Documentation & Reporting",
-        "TestRail",
-        "Docker"
+        "HP QC / ALM"
       ]
     },
     {
-      "category": "Automatyzacja & Języki",
+      "category": "Automation & Languages",
       "items": [
+        "Windows OS",
         "SQL",
         "Playwright",
         "TypeScript",
         "JavaScript",
-        "GitLab CI/CD",
-        "GitHub Actions"
+        "GitLab CI/CD"
       ]
     }
   ],
@@ -52,51 +48,86 @@
     {
       "position": "Software tester / QA Automation",
       "company": "Benefit Systems S.A.",
-      "location": "Warszawa",
+      "location": "Warsaw, Poland",
       "start_date": "2022",
-      "end_date": "Obecnie",
+      "end_date": "Present",
       "highlights": [
-        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
-        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji poprawności przesyłania danych backendowych.",
-        "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
-        "Tworzenie planów testów, scenariuszy testowych oraz raportów z wykonania w Jira (Xray) i Confluence w zespole Agile/Scrum."
+        "Prepared test plans, test scenarios, and comprehensive test documentation in Jira (Xray) and Confluence within Agile/Scrum delivery teams.",
+        "Conducted database verification and data integrity checks using complex SQL queries across Windows OS test environments.",
+        "Executed manual, functional, and integration testing for core enterprise platforms aligned with business acceptance criteria.",
+        "Reported software defects with clear reproduction steps and collaborated with development teams on issue resolution.",
+        "Executed manual and API testing (REST & SOAP) using Postman and SoapUI to validate backend workflows."
       ]
     },
     {
       "position": "Test And Analysis Engineer",
       "company": "Sii Polska Sp. z o.o. (Freelance)",
-      "location": "Warszawa",
+      "location": "Warsaw, Poland",
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o wymagania z backlogu.",
-        "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
-        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira (Xray) w metodologii Scrum."
+        "Documented defects with clear reproduction steps and managed issue tracking in Jira (Xray) and HP QC / ALM following Scrum methodology.",
+        "Conducted manual and functional testing of enterprise web application modules based on backlog user stories.",
+        "Executed backend API validation via Postman and performed data integrity verification using SQL Developer."
       ]
     },
     {
       "position": "Software tester",
       "company": "Euroloan Group (Freelance)",
-      "location": "Warszawa",
+      "location": "Warsaw, Poland",
       "start_date": "2019-07",
       "end_date": "2021-01",
       "highlights": [
-        "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych na platformach webowych.",
-        "Projektowanie, wykonywanie i optymalizacja przypadków i scenariuszy testowych zgodnych z wymaganiami biznesowymi."
+        "Executed comprehensive UI, functional, and regression testing for financial and digital platforms.",
+        "Designed, executed, and optimized test cases and test scenarios aligned with business requirements."
       ]
     }
   ],
-  "education": [],
-  "projects": [],
   "languages": [
     {
-      "language": "Polski",
-      "level": "Ojczysty (Native)"
+      "language": "Polish",
+      "level": "Native"
     },
     {
-      "language": "Angielski",
-      "level": "Biegły (Professional)"
+      "language": "English",
+      "level": "Full Professional (C2)"
     }
   ],
-  "certifications": []
+  "education": [
+    {
+      "degree": "Inżynieria Oprogramowania / Informatyka",
+      "institution": "Uczelnia Wyższa",
+      "location": "Warszawa",
+      "graduation_year": "2019"
+    }
+  ],
+  "certifications": [],
+  "_buckets_breakdown": {
+    "bucket_a": [
+      "Jira",
+      "HP QC",
+      "HP ALM",
+      "Katalon Studio",
+      "UTP",
+      "Windows OS",
+      "ISTQB / ISEB Certification"
+    ],
+    "bucket_b": [
+      "Integration Testing",
+      "Functional Testing",
+      "Regression Testing",
+      "Jira (Xray)",
+      "HP QC / ALM",
+      "Confluence",
+      "Git",
+      "SQL Developer / DBeaver"
+    ],
+    "bucket_c": [
+      "Android Studio",
+      "Xcode",
+      "Mobile Device Logs",
+      "Playwright",
+      "TypeScript"
+    ]
+  }
 }
