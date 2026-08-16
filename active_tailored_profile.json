@@ -8,36 +8,39 @@
     "linkedin": "https://linkedin.com/in/michal-kosowski",
     "github": "https://github.com"
   },
-  "summary": "Software QA Engineer with 5+ years of experience specializing in Postman, API Testing, SQL Database Verification, Playwright. Proficient in test plan creation, test scenario design, defect reporting, and database verification across Agile/Scrum delivery teams. Experienced in preparing comprehensive test documentation, execution summary reports, and quality metrics for enterprise applications. Complemented by test automation capabilities using Playwright and Java frameworks.",
+  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem specjalizujący się w Manual Testing, API Testing, Postman, Kibana. Specjalizuje się w tworzeniu planów testów, przypadków testowych, zgłaszaniu błędów w GitLab/Jira oraz weryfikacji baz danych SQL. Doświadczony w tworzeniu dokumentacji projektowej i zapewnianiu jakości serwisów oraz portali internetowych. Wspierany wiedzą z zakresu automatyzacji testów w Playwright oraz narzędziach JavaScript/TypeScript.",
   "skills": [
     {
-      "category": "Testing & API",
+      "category": "Testowanie & API",
       "items": [
+        "Manual Testing",
+        "API Testing",
         "Postman",
+        "Kibana",
         "Integration Testing",
         "Functional Testing",
         "Regression Testing"
       ]
     },
     {
-      "category": "Tools & Test Management",
+      "category": "Narzędzia & Zarządzanie Testami",
       "items": [
-        "SQL Database Verification",
-        "Git",
+        "Kibana",
         "Jira",
         "Jira (Xray)",
-        "HP QC / ALM",
-        "Windows OS",
         "Confluence",
-        "SQL Developer / DBeaver"
+        "SQL Database Verification",
+        "GitLab / GitLab CI",
+        "Git",
+        "Windows OS"
       ]
     },
     {
-      "category": "Automation & Languages",
+      "category": "Automatyzacja & Języki",
       "items": [
         "SQL Database Verification",
         "Playwright",
-        "GitLab CI/CD",
+        "GitLab / GitLab CI",
         "SQL",
         "TypeScript",
         "JavaScript"
@@ -48,49 +51,49 @@
     {
       "position": "Software tester / QA Automation",
       "company": "Benefit Systems S.A.",
-      "location": "Warsaw, Poland",
+      "location": "Warszawa",
       "start_date": "2022",
-      "end_date": "Present",
+      "end_date": "Obecnie",
       "highlights": [
-        "Executed manual and API testing (REST & SOAP) using Postman and SoapUI to validate backend workflows.",
-        "Prepared test plans, test scenarios, and comprehensive test documentation in Jira (Xray) and Confluence within Agile/Scrum delivery teams.",
-        "Executed manual, functional, and integration testing for core enterprise platforms aligned with business acceptance criteria.",
-        "Conducted database verification and data integrity checks using complex SQL queries across Windows OS test environments.",
-        "Reported software defects with clear reproduction steps and collaborated with development teams on issue resolution."
+        "Tworzenie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji projektowej w Jira (Xray) i Confluence w zespole Agile/Scrum.",
+        "Przeprowadzanie testów manualnych, funkcjonalnych oraz walidacji API (REST & SOAP) z użyciem narzędzia Postman dla portali i systemów.",
+        "Wykonywanie zapytań SQL w celu weryfikacji baz danych i spójności danych na środowiskach Windows OS.",
+        "Zgłaszanie błędów aplikacji z jasnymi krokami reprodukcji, analiza wyników testów oraz współpraca z deweloperami w GitLab.",
+        "Wykonywanie automatycznych testów regresyjnych E2E dla modułów webowych w Playwright."
       ]
     },
     {
       "position": "Test And Analysis Engineer",
       "company": "Sii Polska Sp. z o.o. (Freelance)",
-      "location": "Warsaw, Poland",
+      "location": "Warszawa",
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Executed backend API validation via Postman and performed data integrity verification using SQL Developer.",
-        "Documented defects with clear reproduction steps and managed issue tracking in Jira (Xray) and HP QC / ALM following Scrum methodology.",
-        "Conducted manual and functional testing of enterprise web application modules based on backlog user stories."
+        "Dokumentowanie defektów z jasnymi krokami reprodukcji i zarządzanie błędami w narzędziach Jira (Xray) oraz HP QC / ALM.",
+        "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji webowych w oparciu o wymagania z backlogu.",
+        "Weryfikacja danych w bazach danych z użyciem narzędzia SQL Developer."
       ]
     },
     {
       "position": "Software tester",
       "company": "Euroloan Group (Freelance)",
-      "location": "Warsaw, Poland",
+      "location": "Warszawa",
       "start_date": "2019-07",
       "end_date": "2021-01",
       "highlights": [
-        "Executed comprehensive UI, functional, and regression testing for financial and digital platforms.",
-        "Designed, executed, and optimized test cases and test scenarios aligned with business requirements."
+        "Przeprowadzanie kompleksowych testów funkcjonalnych, eksploatacyjnych, UI oraz regresyjnych dla platform cyfrowych.",
+        "Projektowanie, wykonywanie i optymalizacja przypadków testowych zgodnych z kryteriami akceptacji."
       ]
     }
   ],
   "languages": [
     {
-      "language": "Polish",
-      "level": "Native"
+      "language": "Polski",
+      "level": "Ojczysty (Native)"
     },
     {
-      "language": "English",
-      "level": "Full Professional (C2)"
+      "language": "Angielski",
+      "level": "Biegły (Professional)"
     }
   ],
   "education": [
@@ -104,29 +107,31 @@
   "certifications": [],
   "_buckets_breakdown": {
     "bucket_a": [
-      "Postman",
+      "Manual Testing",
       "API Testing",
-      "SQL Database Verification",
-      "Playwright",
-      "Git",
-      "GitLab CI/CD"
+      "Postman",
+      "Kibana",
+      "Jira",
+      "Jira (Xray)",
+      "Confluence",
+      "Test Cases & Scenarios"
     ],
     "bucket_b": [
       "Integration Testing",
       "Functional Testing",
       "Regression Testing",
-      "Jira",
-      "Jira (Xray)",
-      "HP QC / ALM",
+      "SQL Database Verification",
+      "GitLab / GitLab CI",
+      "Git",
       "Windows OS",
-      "Confluence"
+      "SQL Database Verification"
     ],
     "bucket_c": [
       "Android Studio",
       "Xcode",
       "Mobile Device Logs",
-      "TypeScript",
-      "Docker"
+      "Docker",
+      "SoapUI"
     ]
   }
 }

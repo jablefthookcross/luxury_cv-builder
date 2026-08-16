@@ -8,6 +8,9 @@
     "soapui": "SoapUI",
     "swagger": "Swagger",
     "kibana": "Kibana",
+    "grafana": "Grafana",
+    "splunk": "Splunk",
+    "curl": "cURL",
     "jmeter": "JMeter",
     "k6": "K6",
     "playwright": "Playwright",
@@ -19,6 +22,7 @@
     "iseb": "ISTQB / ISEB Certification",
     "jira": "Jira",
     "xray": "Jira (Xray)",
+    "testflo": "TestFLO (Jira)",
     "confluence": "Confluence",
     "testrail": "TestRail",
     "hp qc": "HP QC",
@@ -29,7 +33,10 @@
     "uat": "UAT Acceptance Testing",
     "test plan": "Test Plans & Documentation",
     "scenariusz": "Scenariusze i Przypadki Testowe",
-    "test cases": "Test Cases & Scenarios"
+    "test cases": "Test Cases & Scenarios",
+    "ai tools": "AI Testing Tools (ChatGPT / Copilot)",
+    "copilot": "AI Tools (Copilot / ChatGPT)",
+    "chatgpt": "AI Tools (ChatGPT / Copilot)"
   },
   "development": {
     "java": "Java",
@@ -102,6 +109,8 @@
     "bank": "Aplikacje Bankowe i Finansowe",
     "finans": "Aplikacje Finansowe",
     "makler": "Systemy Maklerskie",
+    "insurance": "Insurance & Financial Systems",
+    "ubezpiecz": "Systemy Ubezpieczeniowe i Finansowe",
     "e-commerce": "E-Commerce Platforms",
     "agile": "Agile / Scrum",
     "scrum": "Agile / Scrum",
