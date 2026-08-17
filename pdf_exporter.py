@@ -42,7 +42,7 @@ class PDFExporter:
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
                 page = browser.new_page()
-                page.set_content(html_content, wait_until="load")
+                page.set_content(html_content, wait_until="networkidle")
                 
                 pdf_bytes = page.pdf(
                     format="A4",

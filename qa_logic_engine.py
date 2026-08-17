@@ -88,7 +88,23 @@ class QALogicEngine:
                         if item.lower() not in BACKEND_SOAP_KEYWORDS
                     ]
 
-        # 100% STRICT LANGUAGE LOCK: If lang == 'pl', translate category titles & date keywords to Polish. If 'en', to English.
+        PL_PROCESS_SKILLS_MAP = {
+            "Manual Testing": "Testy Manualne",
+            "API Testing": "Testowanie API (REST & SOAP)",
+            "Integration Testing": "Testy Integracyjne",
+            "Functional Testing": "Testy Funkcjonalne",
+            "Regression Testing": "Testy Regresyjne",
+            "Exploratory Testing": "Testy Eksploracyjne",
+            "Bug Reporting": "Zgłaszanie i Śledzenie Błędów",
+            "Test Cases & Scenarios": "Scenariusze i Przypadki Testowe",
+            "Test Plans & Documentation": "Plany Testów i Dokumentacja",
+            "UAT Acceptance Testing": "Testy Akceptacyjne UAT",
+            "SQL Database Verification": "Weryfikacja Baz Danych SQL",
+            "Windows OS": "Środowiska Windows OS"
+        }
+        EN_PROCESS_SKILLS_MAP = {v: k for k, v in PL_PROCESS_SKILLS_MAP.items()}
+
+        # 100% STRICT LANGUAGE LOCK: If lang == 'pl', translate category titles & process skill items to Polish. If 'en', to English.
         for cat in refined.get("skills", []):
             title = cat.get("category", "")
             if lang == "pl":
@@ -98,6 +114,8 @@ class QALogicEngine:
                     cat["category"] = "Narzędzia & Zarządzanie Testami"
                 elif title in ["Automation & Languages", "Automatyzacja & Języki"]:
                     cat["category"] = "Automatyzacja & Języki"
+                
+                cat["items"] = [PL_PROCESS_SKILLS_MAP.get(item, item) for item in cat.get("items", [])]
             else:
                 if title in ["Testing & API", "Testowanie & API"]:
                     cat["category"] = "Testing & API"
@@ -105,6 +123,8 @@ class QALogicEngine:
                     cat["category"] = "Tools & Test Management"
                 elif title in ["Automation & Languages", "Automatyzacja & Języki"]:
                     cat["category"] = "Automation & Languages"
+                
+                cat["items"] = [EN_PROCESS_SKILLS_MAP.get(item, item) for item in cat.get("items", [])]
 
         # Experience date & location sync
         for job in refined.get("experience", []):
