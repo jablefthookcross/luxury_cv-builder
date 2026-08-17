@@ -1275,13 +1275,26 @@
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
+            const token = localStorage.getItem('supabase_token') || '';
+            const uploadHeaders = {};
+            if (token) {
+                uploadHeaders['Authorization'] = 'Bearer ' + token;
+            }
+
             try {
-                const res = await fetch('/api/upload-pdf', { method: 'POST', body: formData });
+                const res = await fetch('/api/upload-pdf', { 
+                    method: 'POST',
+                    headers: uploadHeaders,
+                    body: formData 
+                });
                 const data = await res.json();
                 if (data.status === "success") {
                     alert("🎉 " + data.message);
-                    loadMasterProfileData();
-                    updatePreview();
+                    currentDraftProfile = null;
+                    const iframe = document.getElementById('previewIframe');
+                    iframe.removeAttribute('srcdoc');
+                    await loadMasterProfileData();
+                    await updatePreview();
                 } else {
                     alert("Błąd: " + (data.message || "Błąd odczytu PDF."));
                 }

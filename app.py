@@ -208,9 +208,12 @@ def upload_pdf_api():
         ollama_url = settings.get("ollama_url", "http://localhost:11434")
         ai = AIEngine(provider="auto", gemini_key=gemini_key, ollama_url=ollama_url)
         
-        new_profile = PDFParser.convert_text_to_profile(raw_text, ai_engine=ai)
+        user_id = get_authenticated_user_id()
+        existing_profile = DBManager.get_profile(user_id=user_id)
         
-        save_json_file(DEFAULT_PROFILE_PATH, new_profile)
+        new_profile = PDFParser.convert_text_to_profile(raw_text, ai_engine=ai, existing_profile=existing_profile)
+        
+        DBManager.save_profile(new_profile, user_id=user_id)
         
         global ACTIVE_TAILORED_PROFILE, ACTIVE_JOB_TEXT
         ACTIVE_TAILORED_PROFILE = new_profile
