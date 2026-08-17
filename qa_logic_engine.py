@@ -83,13 +83,13 @@ class QALogicEngine:
         # 1. PERSONAL INFO SANITY CHECK & GROUND TRUTH LOCK
         pinfo = refined.get("personal_info", {})
         if not pinfo.get("full_name") or pinfo["full_name"] in ["Kandydat", "Work Experience", "WorkExperience", "Work"]:
-            pinfo["full_name"] = master_pinfo.get("full_name") or "Michał Kosowski"
+            pinfo["full_name"] = master_pinfo.get("full_name") or ""
             
-        pinfo["email"] = master_pinfo.get("email") or pinfo.get("email") or "mmkosowski94@gmail.com"
-        pinfo["phone"] = master_pinfo.get("phone") or pinfo.get("phone") or "518075716"
-        pinfo["location"] = "Warsaw, Poland" if lang == "en" else "Warszawa"
-        pinfo["linkedin"] = master_pinfo.get("linkedin") or pinfo.get("linkedin") or "https://linkedin.com/in/michal-kosowski"
-        pinfo["github"] = master_pinfo.get("github") or pinfo.get("github") or "https://github.com"
+        pinfo["email"] = pinfo.get("email") or master_pinfo.get("email") or ""
+        pinfo["phone"] = pinfo.get("phone") or master_pinfo.get("phone") or ""
+        pinfo["location"] = pinfo.get("location") or master_pinfo.get("location") or ("Warsaw, Poland" if lang == "en" else "Warszawa")
+        pinfo["linkedin"] = pinfo.get("linkedin") or master_pinfo.get("linkedin") or ""
+        pinfo["github"] = pinfo.get("github") or master_pinfo.get("github") or ""
         refined["personal_info"] = pinfo
 
         # Languages section lock

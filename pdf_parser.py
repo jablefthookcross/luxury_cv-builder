@@ -38,11 +38,11 @@ class PDFParser:
 
         # Default fallback values from existing profile
         existing_pinfo = (existing_profile or {}).get("personal_info", {})
-        default_name = existing_pinfo.get("full_name") or "Michał Kosowski"
+        default_name = existing_pinfo.get("full_name") or ""
         default_title = existing_pinfo.get("title") or "Software QA Engineer"
-        default_email = existing_pinfo.get("email") or "mmkosowski94@gmail.com"
-        default_phone = existing_pinfo.get("phone") or "518075716"
-        default_location = existing_pinfo.get("location") or "Warsaw, Poland"
+        default_email = existing_pinfo.get("email") or ""
+        default_phone = existing_pinfo.get("phone") or ""
+        default_location = existing_pinfo.get("location") or "Warszawa"
 
         if ai_engine and ai_engine._determine_provider() in ["gemini", "ollama"]:
             try:
