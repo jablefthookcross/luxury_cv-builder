@@ -13,8 +13,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Ensure Playwright Chromium is fully installed with system dependencies
+RUN python -m playwright install --with-deps chromium || python -m playwright install chromium
+
 # Copy application files
 COPY . .
+
+# Set browser environment
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+ENV PYTHONUNBUFFERED=1
 
 # Expose port
 EXPOSE 5000

@@ -4,8 +4,11 @@ Generates 1:1 pixel-perfect PDF files matching browser preview using Playwright 
 Includes clean ReportLab fallback engine.
 """
 
+import os
+import sys
 import io
 import asyncio
+import subprocess
 from pathlib import Path
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
@@ -13,6 +16,11 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+
+# Ensure Playwright browser paths are discovered on Render / Docker / Linux
+if not os.environ.get("PLAYWRIGHT_BROWSERS_PATH"):
+    if Path("/ms-playwright").exists():
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/ms-playwright"
 
 # Register Polish UTF-8 supporting fonts for ReportLab fallback
 FONT_REGULAR = "Helvetica"
@@ -37,22 +45,22 @@ class PDFExporter:
         Renders HTML content in Playwright Headless Chromium with Docker/Cloud sandbox flags.
         Guarantees 100% pixel-perfect matching with browser preview!
         """
-        try:
+        docker_args = [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--no-first-run",
+            "--no-zygote",
+            "--single-process"
+        ]
+
+        def _render_once():
             from playwright.sync_api import sync_playwright
             with sync_playwright() as p:
-                docker_args = [
-                    "--no-sandbox",
-                    "--disable-setuid-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--disable-gpu",
-                    "--no-first-run",
-                    "--no-zygote",
-                    "--single-process"
-                ]
                 browser = p.chromium.launch(headless=True, args=docker_args)
                 page = browser.new_page()
                 page.set_content(html_content, wait_until="load", timeout=30000)
-                
                 pdf_bytes = page.pdf(
                     format="A4",
                     print_background=True,
@@ -60,9 +68,17 @@ class PDFExporter:
                 )
                 browser.close()
                 return pdf_bytes
-        except Exception as e:
-            print(f"[PDFExporter Warning] Playwright PDF generation failed ({e}). Falling back to ReportLab.")
-            return b""
+
+        try:
+            return _render_once()
+        except Exception as first_err:
+            print(f"[PDFExporter Warning] First Playwright launch attempt failed ({first_err}). Attempting on-the-fly chromium installation...")
+            try:
+                subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=True)
+                return _render_once()
+            except Exception as e:
+                print(f"[PDFExporter Fatal] Playwright PDF generation failed after install attempt: {e}. Falling back to ReportLab.")
+                return b""
 
     @staticmethod
     def generate_pdf(data: dict, lang: str = "pl") -> bytes:

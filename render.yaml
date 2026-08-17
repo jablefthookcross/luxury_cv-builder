@@ -1,10 +1,11 @@
 services:
   - type: web
     name: vitaecraft-ai
-    env: docker
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 app:app"
     plan: free
     region: frankfurt
-    dockerfilePath: ./Dockerfile
     envVars:
       - key: SUPABASE_URL
         sync: false
@@ -12,3 +13,5 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: "0"
