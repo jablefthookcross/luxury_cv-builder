@@ -1315,17 +1315,25 @@
 
         function updatePreview() {
             const template = document.getElementById('cvTemplate').value;
-            const lang = document.getElementById('cvLanguage').value;
+            const selectedLang = document.getElementById('cvLanguage').value;
+            let effectiveLang = selectedLang;
+            if (selectedLang === 'auto') {
+                effectiveLang = (currentJobSpec && currentJobSpec.detected_language) ? currentJobSpec.detected_language : 'pl';
+            }
             const iframe = document.getElementById('previewIframe');
             const timestamp = new Date().getTime();
             
-            iframe.src = '/preview/current?template=' + template + '&lang=' + lang + '&t=' + timestamp;
+            iframe.src = '/preview/current?template=' + template + '&lang=' + effectiveLang + '&t=' + timestamp;
         }
 
         async function generateAndDownloadPdf() {
             const jobText = document.getElementById('jobDescription').value.trim();
             const targetRole = document.getElementById('targetRole').value.trim();
-            const lang = document.getElementById('cvLanguage').value;
+            const selectedLang = document.getElementById('cvLanguage').value;
+            let effectiveLang = selectedLang;
+            if (selectedLang === 'auto') {
+                effectiveLang = (currentJobSpec && currentJobSpec.detected_language) ? currentJobSpec.detected_language : 'pl';
+            }
             const template = document.getElementById('cvTemplate').value;
             const provider = document.getElementById('aiProvider').value;
 
@@ -1345,8 +1353,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         job_text: jobText,
+                        job_spec: currentJobSpec,
                         target_role: targetRole,
-                        language: lang,
+                        language: effectiveLang,
                         template: template,
                         provider: provider
                     })
@@ -1361,7 +1370,7 @@
                 const blobUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = blobUrl;
-                a.download = (lang === 'en') ? 'Michal_Kosowski_Resume.pdf' : 'Michal_Kosowski_CV.pdf';
+                a.download = (effectiveLang === 'en') ? 'Michal_Kosowski_Resume.pdf' : 'Michal_Kosowski_CV.pdf';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);

@@ -1,17 +1,104 @@
 {
   "personal_info": {
     "full_name": "Michał Kosowski",
-    "title": "Software QA Engineer",
-    "email": "",
-    "phone": "",
+    "title": "Software QA Engineer / Test Automation Engineer",
+    "email": "mmkosowski94@gmail.com",
+    "phone": "518075716",
     "location": "Warszawa",
     "linkedin": "",
-    "github": ""
+    "github": "https://github.com/jablefthookcross"
   },
-  "summary": "",
-  "skills": [],
-  "experience": [],
-  "languages": [],
+  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym, integracyjnym, API (REST & SOAP) oraz automatyzacji testów. Specjalizuje się w weryfikacji baz danych za pomocą zapytań SQL, projektowaniu scenariuszy testowych i planów testów oraz śledzeniu defektów w narzędziach Jira (Xray), HP QC / ALM i TestRail. Posiada wiedzę z zakresu norm ISTQB, automatyzacji w Playwright (TypeScript) oraz Selenium WebDriver (Java).",
+  "skills": [
+    {
+      "category": "Testowanie & API",
+      "items": [
+        "ISTQB / ISEB Standards",
+        "SOAP & REST API Testing",
+        "Postman",
+        "SoapUI",
+        "SQL Database Verification",
+        "Integration Testing",
+        "Functional Testing",
+        "Regression Testing"
+      ]
+    },
+    {
+      "category": "Narzędzia & Zarządzanie Testami",
+      "items": [
+        "Jira (Xray)",
+        "HP QC / ALM",
+        "TestRail",
+        "Katalon Studio",
+        "Confluence",
+        "Git",
+        "SQL Developer / DBeaver",
+        "Windows OS"
+      ]
+    },
+    {
+      "category": "Automatyzacja & Języki",
+      "items": [
+        "SQL",
+        "Playwright",
+        "TypeScript",
+        "JavaScript",
+        "Java",
+        "Selenium WebDriver",
+        "RestAssured",
+        "GitLab CI/CD"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "position": "Software tester / QA Automation",
+      "company": "Benefit Systems S.A.",
+      "location": "Warszawa",
+      "start_date": "2022",
+      "end_date": "Obecnie",
+      "highlights": [
+        "Tworzenie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji projektowej w Jira (Xray) i Confluence w zespole Agile/Scrum.",
+        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
+        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji spójności danych na środowiskach testowych.",
+        "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
+        "Zgłaszanie błędów aplikacji, analiza wyników testów oraz współpraca z zespołem deweloperskim i biznesowym przy usuwaniu defektów."
+      ]
+    },
+    {
+      "position": "Test And Analysis Engineer",
+      "company": "Sii Polska Sp. z o.o. (Freelance)",
+      "location": "Warszawa",
+      "start_date": "2021-09",
+      "end_date": "2022-04",
+      "highlights": [
+        "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji biznesowych oraz HR w oparciu o wymagania z backlogu.",
+        "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
+        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w narzędziach Jira (Xray) oraz HP QC / ALM."
+      ]
+    },
+    {
+      "position": "Software tester",
+      "company": "Euroloan Group (Freelance)",
+      "location": "Warszawa",
+      "start_date": "2019-07",
+      "end_date": "2021-01",
+      "highlights": [
+        "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych oraz finansowych.",
+        "Projektowanie, wykonywanie i optymalizacja przypadków testowych zgodnych z kryteriami akceptacji (Acceptance Criteria)."
+      ]
+    }
+  ],
+  "languages": [
+    {
+      "language": "Polski",
+      "level": "Ojczysty (Native)"
+    },
+    {
+      "language": "Angielski",
+      "level": "Biegły (Professional)"
+    }
+  ],
   "education": [],
   "certifications": []
 }

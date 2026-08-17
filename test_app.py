@@ -36,8 +36,8 @@ def test_flask_endpoints():
     client = app.test_client()
     res = client.get("/api/profile")
     assert res.status_code == 200
-    res_del = client.post("/api/profile/delete")
-    assert res_del.status_code == 200
+    res_saved = client.get("/api/saved-cvs")
+    assert res_saved.status_code == 200
     print("✅ Flask API endpoints unit test passed!")
 
 if __name__ == "__main__":

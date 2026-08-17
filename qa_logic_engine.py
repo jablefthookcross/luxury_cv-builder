@@ -258,15 +258,7 @@ class QALogicEngine:
                 job["period"] = f"{job['start_date']} – {job.get('end_date', 'Present' if lang == 'en' else 'Obecnie')}"
 
         # 5. EDUCATION & LANGUAGES PRESERVATION
-        if not refined.get("education") or len(refined["education"]) == 0:
-            refined["education"] = master.get("education") or [
-                {
-                    "degree": "Inżynieria Oprogramowania / Informatyka",
-                    "institution": "Uczelnia Wyższa",
-                    "location": "Warszawa" if lang != "en" else "Warsaw, Poland",
-                    "graduation_year": "2019"
-                }
-            ]
+        refined["education"] = master.get("education", [])
 
         if lang == "en":
             refined["languages"] = [
