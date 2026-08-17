@@ -387,20 +387,6 @@
             </section>
             {% endif %}
 
-            {% if data.education %}
-            <section>
-                <h2 class="sec-title">{% if lang == 'en' %}Education{% else %}Wykształcenie{% endif %}</h2>
-                {% for edu in data.education %}
-                <div class="exp-item">
-                    <div class="exp-top-row">
-                        <div class="exp-role">{{ edu.degree }}</div>
-                        <div class="exp-meta">{{ edu.graduation_year }} | {{ edu.location }}</div>
-                    </div>
-                    <div class="exp-company">{{ edu.institution }}</div>
-                </div>
-                {% endfor %}
-            </section>
-            {% endif %}
 
             <div class="rodo-clause">
                 {% if lang == 'en' %}
