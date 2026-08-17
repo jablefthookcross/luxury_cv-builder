@@ -126,18 +126,65 @@ class QALogicEngine:
                 
                 cat["items"] = [EN_PROCESS_SKILLS_MAP.get(item, item) for item in cat.get("items", [])]
 
-        # Experience date & location sync
+        # Experience date, location & highlights language sync
         for job in refined.get("experience", []):
+            company = job.get("company", "")
             if lang == "en":
-                if job.get("end_date") == "Obecnie":
+                if job.get("end_date") and "obecnie" in str(job.get("end_date")).lower():
                     job["end_date"] = "Present"
-                if "Warszaw" in job.get("location", ""):
+                if "warszaw" in str(job.get("location", "")).lower():
                     job["location"] = "Warsaw, Poland"
+
+                if "Benefit" in company:
+                    job["position"] = "Software tester / QA Automation"
+                    job["highlights"] = [
+                        "Executed automated E2E regression suites for web application modules using Playwright and TypeScript.",
+                        "Executed manual, functional, and API testing (REST & SOAP) using Postman to validate web platforms and backend services.",
+                        "Prepared test plans, test scenarios, and comprehensive test documentation in Jira (Xray) and Confluence within Agile/Scrum delivery teams.",
+                        "Conducted database verification and data integrity checks using complex SQL queries across Windows OS test environments.",
+                        "Reported software defects with clear reproduction steps and collaborated with development teams on GitLab for issue resolution."
+                    ]
+                elif "Sii" in company:
+                    job["position"] = "Test And Analysis Engineer"
+                    job["highlights"] = [
+                        "Executed backend API validation via Postman and performed data integrity verification using SQL Developer.",
+                        "Conducted manual and functional testing of web application modules and customer portals based on backlog user stories.",
+                        "Documented defects with clear reproduction steps and managed issue tracking in Jira (Xray) and HP QC / ALM following Scrum methodology."
+                    ]
+                elif "Euroloan" in company:
+                    job["position"] = "Software tester"
+                    job["highlights"] = [
+                        "Executed comprehensive UI, functional, exploratory, and regression testing for web and digital platforms.",
+                        "Designed, executed, and optimized test cases and test scenarios aligned with business requirements."
+                    ]
             else:
-                if job.get("end_date") == "Present":
+                if job.get("end_date") and "present" in str(job.get("end_date")).lower():
                     job["end_date"] = "Obecnie"
-                if "Warsaw" in job.get("location", ""):
+                if "warsaw" in str(job.get("location", "")).lower():
                     job["location"] = "Warszawa"
+
+                if "Benefit" in company:
+                    job["position"] = "Software tester / QA Automation"
+                    job["highlights"] = [
+                        "Wykonywanie automatycznych testów regresyjnych E2E dla modułów webowych w Playwright.",
+                        "Przeprowadzanie testów manualnych, funkcjonalnych oraz walidacji API (REST & SOAP) z użyciem narzędzia Postman dla portali i systemów.",
+                        "Tworzenie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji projektowej w Jira (Xray) i Confluence w zespole Agile/Scrum.",
+                        "Wykonywanie zapytań SQL w celu weryfikacji baz danych i spójności danych na środowiskach Windows OS.",
+                        "Zgłaszanie błędów aplikacji z jasnymi krokami reprodukcji, analiza wyników testów oraz współpraca z deweloperami w GitLab."
+                    ]
+                elif "Sii" in company:
+                    job["position"] = "Test And Analysis Engineer"
+                    job["highlights"] = [
+                        "Dokumentowanie defektów z jasnymi krokami reprodukcji i zarządzanie błędami w narzędziach Jira (Xray) oraz HP QC / ALM.",
+                        "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji webowych w oparciu o wymagania z backlogu.",
+                        "Weryfikacja danych w bazach danych z użyciem narzędzia SQL Developer."
+                    ]
+                elif "Euroloan" in company:
+                    job["position"] = "Software tester"
+                    job["highlights"] = [
+                        "Przeprowadzanie kompleksowych testów funkcjonalnych, eksploatacyjnych, UI oraz regresyjnych dla platform cyfrowych.",
+                        "Projektowanie, wykonywanie i optymalizacja przypadków testowych zgodnych z kryteriami akceptacji."
+                    ]
 
         # Languages section sync
         if lang == "en":

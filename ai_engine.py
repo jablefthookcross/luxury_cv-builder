@@ -335,37 +335,48 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             else:
                 tailored["personal_info"]["title"] = "Senior QA Automation Engineer"
 
-        # 3. DYNAMIC 3-BUCKETS SKILLS BUCKETING WITH STRICT DEDUPLICATION Across Categories
-        cat1_items = [t for t in matched_techs if any(k in t for k in ["Testing", "Postman", "SoapUI", "Swagger", "Kibana", "ISTQB", "Playwright", "Selenium", "API"])]
-        if not cat1_items:
-            cat1_items = ["Manual Testing", "API Testing", "Bug Reporting", "Integration Testing", "Functional Testing"]
-        cat1_items.extend(["Integration Testing", "Functional Testing", "Regression Testing"])
-        
-        cat1_final = []
-        for item in cat1_items:
-            if item not in cat1_final:
-                cat1_final.append(item)
+        # 3. DYNAMIC 3-BUCKETS SKILLS BUCKETING WITH ZERO LOSS OF MATCHED TECHS
+        cat1_items = []
+        cat2_items = []
+        cat3_items = []
 
-        cat2_items = [t for t in matched_techs if any(k in t for k in ["GitLab", "Git", "Jira", "Xray", "Confluence", "SQL", "MySQL", "HP QC", "ALM", "Windows", "Kibana"])]
-        cat2_items.extend(["GitLab / GitLab CI", "Git", "Jira", "Jira (Xray)", "Confluence", "SQL Database Verification", "Windows OS"])
-        
+        # Categorize every matched technology from job offer
+        for t in matched_techs:
+            t_low = t.lower()
+            if any(k in t_low for k in ["testing", "test", "tosca", "postman", "soapui", "swagger", "kibana", "istqb", "iseb", "playwright", "selenium", "cypress", "appium", "api", "uat", "sit", "prompt", "ai"]):
+                if t not in cat1_items:
+                    cat1_items.append(t)
+            elif any(k in t_low for k in ["gitlab", "git", "jira", "xray", "confluence", "testrail", "hp", "alm", "azure", "windows", "linux", "crm", "agile", "scrum", "kanban"]):
+                if t not in cat2_items:
+                    cat2_items.append(t)
+            else:
+                if t not in cat3_items:
+                    cat3_items.append(t)
+
+        # Ensure base defaults if matched items are few
+        cat1_defaults = ["Manual Testing", "API Testing", "Bug Reporting", "Integration Testing", "Functional Testing", "Regression Testing"]
+        for d in cat1_defaults:
+            if d not in cat1_items:
+                cat1_items.append(d)
+
+        cat2_defaults = ["Jira", "Azure DevOps", "Git", "GitLab / GitLab CI", "Confluence", "SQL Database Verification", "Windows OS"]
+        for d in cat2_defaults:
+            if d not in cat1_items and d not in cat2_items:
+                cat2_items.append(d)
+
+        cat3_defaults = ["Playwright", "SQL", "TypeScript", "JavaScript", "GitLab / GitLab CI"]
+        for d in cat3_defaults:
+            if d not in cat1_items and d not in cat2_items and d not in cat3_items:
+                cat3_items.append(d)
+
         # Deduplicate Cat2 against Cat1
-        cat2_final = []
-        for item in cat2_items:
-            if item not in cat1_final and item not in cat2_final:
-                cat2_final.append(item)
+        cat2_final = [item for item in cat2_items if item not in cat1_items]
 
-        cat3_items = [t for t in matched_techs if any(k in t for k in ["Playwright", "TypeScript", "JavaScript", "SQL", "GitLab", "Python", "Java", "Docker", "Jenkins"])]
-        cat3_items.extend(["Playwright", "GitLab / GitLab CI", "SQL", "TypeScript", "JavaScript"])
-        
         # Deduplicate Cat3 against Cat1 and Cat2
-        cat3_final = []
-        for item in cat3_items:
-            if item not in cat1_final and item not in cat2_final and item not in cat3_final:
-                cat3_final.append(item)
+        cat3_final = [item for item in cat3_items if item not in cat1_items and item not in cat2_final]
 
         new_skills = [
-            {"category": "Testing & API" if is_english else "Testowanie & API", "items": cat1_final[:8]},
+            {"category": "Testing & API" if is_english else "Testowanie & API", "items": cat1_items[:8]},
             {"category": "Tools & Test Management" if is_english else "Narzędzia & Zarządzanie Testami", "items": cat2_final[:8]},
             {"category": "Automation & Languages" if is_english else "Automatyzacja & Języki", "items": cat3_final[:8]}
         ]
@@ -373,7 +384,7 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
 
         # Compute 3 Buckets Breakdown for GUI Card
         bucket_a = matched_techs[:8]
-        bucket_b = [item for item in cat1_final + cat2_final + cat3_final if item not in bucket_a][:8]
+        bucket_b = [item for item in cat1_items + cat2_final + cat3_final if item not in bucket_a][:8]
         all_master_tools = ["Android Studio", "Xcode", "Mobile Device Logs", "Docker", "SoapUI"]
         bucket_c = [t for t in all_master_tools if t not in bucket_a and t not in bucket_b][:5]
         

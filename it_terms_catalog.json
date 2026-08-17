@@ -18,6 +18,7 @@
     "restassured": "RestAssured",
     "cypress": "Cypress",
     "appium": "Appium",
+    "tosca": "Tricentis Tosca",
     "istqb": "ISTQB / ISEB Certification",
     "iseb": "ISTQB / ISEB Certification",
     "jira": "Jira",
@@ -31,12 +32,15 @@
     "katalon": "Katalon Studio",
     "utp": "UTP",
     "uat": "UAT Acceptance Testing",
+    "sit": "SIT System Integration Testing",
     "test plan": "Test Plans & Documentation",
     "scenariusz": "Scenariusze i Przypadki Testowe",
     "test cases": "Test Cases & Scenarios",
-    "ai tools": "AI Testing Tools (ChatGPT / Copilot)",
+    "ai tools": "AI Testing Tools (ChatGPT / Copilot / Prompt Engineering)",
     "copilot": "AI Tools (Copilot / ChatGPT)",
-    "chatgpt": "AI Tools (ChatGPT / Copilot)"
+    "chatgpt": "AI Tools (ChatGPT / Copilot)",
+    "prompt engineering": "Prompt Engineering & AI Testing",
+    "ai testing": "AI Testing & Validation"
   },
   "development": {
     "java": "Java",
@@ -67,7 +71,8 @@
     "kubernetes": "Kubernetes",
     "k8s": "Kubernetes",
     "aws": "Amazon Web Services (AWS)",
-    "azure": "Microsoft Azure",
+    "azure": "Microsoft Azure / Azure DevOps",
+    "azure devops": "Azure DevOps",
     "gcp": "Google Cloud Platform",
     "terraform": "Terraform",
     "ansible": "Ansible",
@@ -106,6 +111,7 @@
     "kafka": "Apache Kafka"
   },
   "domains_and_agile": {
+    "crm": "Systemy CRM",
     "bank": "Aplikacje Bankowe i Finansowe",
     "finans": "Aplikacje Finansowe",
     "makler": "Systemy Maklerskie",
