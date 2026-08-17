@@ -1,17 +1,24 @@
 """
-VitaeCraft AI - Supabase Database & Auth Manager
+VitaeCraft AI - Database & Authentication Manager
 Author: MagicMike Development Team
+Version: 2.2.0
 
-Handles authentication, database persistence, and Row Level Security (RLS) via Supabase API.
-Includes seamless fallback to local JSON files when operating offline or in standalone local mode.
+Lightweight, robust, zero-rate-limit Auth and User Isolation engine.
+Supports standalone HMAC-signed session tokens and persistent profile storage
+with seamless Supabase cloud synchronization.
 """
 
 import os
+import sys
 import json
 import time
 import uuid
+import hmac
+import base64
+import hashlib
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+from werkzeug.security import generate_password_hash, check_password_hash
 
 try:
     from dotenv import load_dotenv
@@ -21,20 +28,42 @@ except ImportError:
 
 APP_DIR = Path(__file__).parent
 DEFAULT_PROFILE_PATH = APP_DIR / "profile_data.json"
+USERS_FILE = APP_DIR / "users_db.json"
+USER_PROFILES_FILE = APP_DIR / "user_profiles_db.json"
 
-# Supabase Environment Config
+AUTH_SECRET = os.environ.get("SUPABASE_ANON_KEY", "vitaecraft-secret-token-key-2026-qa-engine")
+
+# Supabase Cloud Client (Optional / Secondary Vault)
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY", "") or os.environ.get("SUPABASE_KEY", "")
 
 supabase_client = None
-
 if SUPABASE_URL and SUPABASE_KEY:
     try:
         from supabase import create_client, Client
         supabase_client: Optional[Client] = create_client(SUPABASE_URL, SUPABASE_KEY)
         print("[DBManager] Connected to Supabase Cloud Database.")
     except Exception as e:
-        print(f"[DBManager Warning] Supabase client initialization failed: {e}. Using local JSON fallback.")
+        print(f"[DBManager Warning] Supabase client initialization failed: {e}")
+
+def _load_json(path: Path, default_val: Any) -> Any:
+    if path.exists():
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return default_val
+    return default_val
+
+def _save_json(path: Path, data: Any) -> bool:
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as e:
+        print(f"[DBManager Error] Failed saving {path}: {e}")
+        return False
+
 
 class DBManager:
     @staticmethod
@@ -42,213 +71,236 @@ class DBManager:
         return supabase_client is not None
 
     @classmethod
+    def create_token(cls, user_id: str, username: str) -> str:
+        """Creates a tamper-proof HMAC-SHA256 signed session token."""
+        payload = {
+            "uid": user_id,
+            "usr": username,
+            "exp": int(time.time()) + (60 * 86400)  # 60 days validity
+        }
+        raw_bytes = json.dumps(payload).encode("utf-8")
+        b64_payload = base64.urlsafe_b64encode(raw_bytes).decode("utf-8").rstrip("=")
+        sig = hmac.new(AUTH_SECRET.encode("utf-8"), b64_payload.encode("utf-8"), hashlib.sha256).hexdigest()
+        return f"{b64_payload}.{sig}"
+
+    @classmethod
     def get_user_from_token(cls, token: str) -> Optional[Dict[str, Any]]:
-        """Verifies JWT token with Supabase Auth and returns user info."""
-        if not cls.is_supabase_enabled() or not token:
+        """Verifies session token signature and returns authenticated user metadata."""
+        if not token or "." not in token:
             return None
         try:
-            res = supabase_client.auth.get_user(token)
-            if res and res.user:
-                return {"id": res.user.id, "email": res.user.email}
+            b64_payload, sig = token.rsplit(".", 1)
+            expected_sig = hmac.new(AUTH_SECRET.encode("utf-8"), b64_payload.encode("utf-8"), hashlib.sha256).hexdigest()
+            if not hmac.compare_digest(sig, expected_sig):
+                return None
+            
+            # Decode base64 padding
+            padding = "=" * ((4 - len(b64_payload) % 4) % 4)
+            raw_json = base64.urlsafe_b64decode((b64_payload + padding).encode("utf-8")).decode("utf-8")
+            payload = json.loads(raw_json)
+            
+            if payload.get("exp", 0) < time.time():
+                return None
+            
+            return {
+                "id": payload.get("uid"),
+                "email": payload.get("usr"),
+                "username": payload.get("usr")
+            }
         except Exception as e:
-            print(f"[DBManager Warning] Token verification failed: {e}")
-        return None
+            return None
 
     @classmethod
-    def register_user(cls, email: str, password: str, full_name: str = "") -> Dict[str, Any]:
-        """Registers a new user in Supabase and initializes a clean, isolated profile."""
-        if not cls.is_supabase_enabled():
-            return {"status": "error", "message": "Supabase nie jest połączone. Użyj trybu lokalnego."}
+    def register_user(cls, email_or_username: str, password: str, full_name: str = "") -> Dict[str, Any]:
+        """Registers a user without external email dependencies or SMTP rate limits."""
+        username = email_or_username.strip().lower()
+        full_name_clean = full_name.strip()
+        
+        if not username or not password:
+            return {"status": "error", "message": "Wprowadź login/e-mail oraz hasło."}
             
-        try:
-            display_name = full_name.strip() or email.split("@")[0].capitalize()
-            res = supabase_client.auth.sign_up({
-                "email": email,
-                "password": password,
-                "options": {
-                    "data": {"full_name": display_name}
-                }
-            })
-            if res.user:
-                # Initialize clean profile row in Supabase profiles table
-                try:
-                    init_profile = {
-                        "id": res.user.id,
-                        "full_name": display_name,
-                        "email": email,
-                        "phone": "",
-                        "location": "Warszawa",
-                        "linkedin": "",
-                        "github": "",
-                        "summary": "",
-                        "skills": [],
-                        "experience": [],
-                        "languages": [
-                            {"language": "Polish", "level": "Native"},
-                            {"language": "English", "level": "Full Professional (C2)"}
-                        ],
-                        "education": [],
-                        "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")
-                    }
-                    supabase_client.table("profiles").upsert(init_profile).execute()
-                except Exception as db_err:
-                    print(f"[DBManager Warning] Initial profile creation failed: {db_err}")
+        if len(password) < 4:
+            return {"status": "error", "message": "Hasło musi mieć co najmniej 4 znaki."}
 
-                return {
-                    "status": "success",
-                    "message": "Konto utworzone pomyślnie! Zaloguj się.",
-                    "user": {"id": res.user.id, "email": res.user.email, "full_name": display_name},
-                    "access_token": res.session.access_token if res.session else None
-                }
-            return {"status": "error", "message": "Rejestracja nie powiodła się."}
-        except Exception as e:
-            return {"status": "error", "message": f"Błąd rejestracji: {str(e)}"}
+        users_db = _load_json(USERS_FILE, {})
+        if username in users_db:
+            return {"status": "error", "message": "Użytkownik o takim loginie już istnieje. Zaloguj się."}
+
+        user_id = str(uuid.uuid4())
+        pwd_hash = generate_password_hash(password)
+        
+        # Save user to store
+        users_db[username] = {
+            "id": user_id,
+            "username": username,
+            "full_name": full_name_clean,
+            "password_hash": pwd_hash,
+            "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        _save_json(USERS_FILE, users_db)
+
+        # Initialize clean isolated profile for this user
+        init_profile = {
+            "personal_info": {
+                "full_name": full_name_clean or username,
+                "title": "Software QA Engineer",
+                "email": username if "@" in username else "",
+                "phone": "",
+                "location": "Warszawa",
+                "linkedin": "",
+                "github": ""
+            },
+            "summary": "",
+            "skills": [],
+            "experience": [],
+            "languages": [
+                {"language": "Polish", "level": "Native"},
+                {"language": "English", "level": "Full Professional (C2)"}
+            ],
+            "education": [],
+            "certifications": []
+        }
+        
+        cls.save_profile(init_profile, user_id=user_id)
+        token = cls.create_token(user_id, username)
+
+        return {
+            "status": "success",
+            "message": "Konto utworzone pomyślnie! Zalogowano automatycznie.",
+            "user": {"id": user_id, "email": username, "username": username, "full_name": full_name_clean},
+            "access_token": token
+        }
 
     @classmethod
-    def login_user(cls, email: str, password: str) -> Dict[str, Any]:
-        if not cls.is_supabase_enabled():
-            return {"status": "error", "message": "Supabase nie jest połączone. Użyj trybu lokalnego."}
-            
-        try:
-            res = supabase_client.auth.sign_in_with_password({
-                "email": email,
-                "password": password
-            })
-            if res.user and res.session:
-                return {
-                    "status": "success",
-                    "message": "Zalogowano pomyślnie!",
-                    "user": {"id": res.user.id, "email": res.user.email},
-                    "access_token": res.session.access_token
-                }
-            return {"status": "error", "message": "Błędny email lub hasło."}
-        except Exception as e:
-            return {"status": "error", "message": f"Błąd logowania: {str(e)}"}
+    def login_user(cls, email_or_username: str, password: str) -> Dict[str, Any]:
+        """Authenticates user with username/password instantly."""
+        username = email_or_username.strip().lower()
+        if not username or not password:
+            return {"status": "error", "message": "Wprowadź login/e-mail oraz hasło."}
+
+        users_db = _load_json(USERS_FILE, {})
+        user_record = users_db.get(username)
+
+        if not user_record or not check_password_hash(user_record.get("password_hash", ""), password):
+            return {"status": "error", "message": "Błędny login lub hasło."}
+
+        token = cls.create_token(user_record["id"], username)
+        return {
+            "status": "success",
+            "message": "Zalogowano pomyślnie!",
+            "user": {
+                "id": user_record["id"],
+                "email": username,
+                "username": username,
+                "full_name": user_record.get("full_name", "")
+            },
+            "access_token": token
+        }
 
     @classmethod
     def get_profile(cls, user_id: Optional[str] = None) -> Dict[str, Any]:
         """
-        Fetches user master profile from Supabase profiles table for authenticated users.
-        Falls back to local profile_data.json ONLY when user_id is None (guest mode).
+        Fetches master profile:
+        - If user_id is provided, returns ONLY that user's isolated profile.
+        - If user_id is None (guest/offline), returns default profile_data.json.
         """
-        if cls.is_supabase_enabled() and user_id:
-            try:
-                res = supabase_client.table("profiles").select("*").eq("id", user_id).execute()
-                if res.data and len(res.data) > 0:
-                    row = res.data[0]
-                    return {
-                        "personal_info": {
-                            "full_name": row.get("full_name", ""),
-                            "title": row.get("title", "Software QA Engineer"),
-                            "email": row.get("email", ""),
-                            "phone": row.get("phone", ""),
-                            "location": row.get("location", "Warszawa"),
-                            "linkedin": row.get("linkedin", ""),
-                            "github": row.get("github", "")
-                        },
-                        "summary": row.get("summary", ""),
-                        "skills": row.get("skills", []),
-                        "experience": row.get("experience", []),
-                        "languages": row.get("languages", [
-                            {"language": "Polish", "level": "Native"},
-                            {"language": "English", "level": "Full Professional (C2)"}
-                        ]),
-                        "education": [],
-                        "certifications": []
-                    }
-                else:
-                    # Clean isolated template for new authenticated user
-                    return {
-                        "personal_info": {
-                            "full_name": "",
-                            "title": "Software QA Engineer",
-                            "email": "",
-                            "phone": "",
-                            "location": "Warszawa",
-                            "linkedin": "",
-                            "github": ""
-                        },
-                        "summary": "",
-                        "skills": [],
-                        "experience": [],
-                        "languages": [
-                            {"language": "Polish", "level": "Native"},
-                            {"language": "English", "level": "Full Professional (C2)"}
-                        ],
-                        "education": [],
-                        "certifications": []
-                    }
-            except Exception as e:
-                print(f"[DBManager Error] Reading profile from Supabase failed: {e}")
-                return {
-                    "personal_info": {
-                        "full_name": "",
-                        "title": "Software QA Engineer",
-                        "email": "",
-                        "phone": "",
-                        "location": "Warszawa",
-                        "linkedin": "",
-                        "github": ""
-                    },
-                    "summary": "",
-                    "skills": [],
-                    "experience": [],
-                    "languages": [
-                        {"language": "Polish", "level": "Native"},
-                        {"language": "English", "level": "Full Professional (C2)"}
-                    ],
-                    "education": [],
-                    "certifications": []
-                }
+        if user_id:
+            profiles_db = _load_json(USER_PROFILES_FILE, {})
+            if user_id in profiles_db:
+                return profiles_db[user_id]
+            
+            # Sync check with Supabase if enabled
+            if cls.is_supabase_enabled():
+                try:
+                    res = supabase_client.table("profiles").select("*").eq("id", user_id).execute()
+                    if res.data and len(res.data) > 0:
+                        row = res.data[0]
+                        prof = {
+                            "personal_info": {
+                                "full_name": row.get("full_name", ""),
+                                "title": row.get("title", "Software QA Engineer"),
+                                "email": row.get("email", ""),
+                                "phone": row.get("phone", ""),
+                                "location": row.get("location", "Warszawa"),
+                                "linkedin": row.get("linkedin", ""),
+                                "github": row.get("github", "")
+                            },
+                            "summary": row.get("summary", ""),
+                            "skills": row.get("skills", []),
+                            "experience": row.get("experience", []),
+                            "languages": row.get("languages", [
+                                {"language": "Polish", "level": "Native"},
+                                {"language": "English", "level": "Full Professional (C2)"}
+                            ]),
+                            "education": [],
+                            "certifications": []
+                        }
+                        profiles_db[user_id] = prof
+                        _save_json(USER_PROFILES_FILE, profiles_db)
+                        return prof
+                except Exception as e:
+                    print(f"[DBManager Warning] Supabase profile read: {e}")
 
-        # Local JSON Fallback (ONLY for guest / offline mode where user_id is None)
-        if DEFAULT_PROFILE_PATH.exists():
-            try:
-                with open(DEFAULT_PROFILE_PATH, "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except Exception:
-                pass
-        return {}
+            # Blank isolated template for newly registered authenticated user
+            return {
+                "personal_info": {
+                    "full_name": "",
+                    "title": "Software QA Engineer",
+                    "email": "",
+                    "phone": "",
+                    "location": "Warszawa",
+                    "linkedin": "",
+                    "github": ""
+                },
+                "summary": "",
+                "skills": [],
+                "experience": [],
+                "languages": [
+                    {"language": "Polish", "level": "Native"},
+                    {"language": "English", "level": "Full Professional (C2)"}
+                ],
+                "education": [],
+                "certifications": []
+            }
+
+        # Guest mode / Master Base Profile
+        return _load_json(DEFAULT_PROFILE_PATH, {})
 
     @classmethod
     def save_profile(cls, profile_data: Dict[str, Any], user_id: Optional[str] = None) -> bool:
         """
         Saves profile data:
-        - If user_id is provided, saves ONLY to Supabase profiles table for that user_id.
+        - If user_id is provided, saves strictly to user's isolated profile (NEVER touches profile_data.json).
         - If user_id is None, saves to local profile_data.json.
         """
-        pinfo = profile_data.get("personal_info", {})
-        
-        if cls.is_supabase_enabled() and user_id:
-            try:
-                payload = {
-                    "id": user_id,
-                    "full_name": pinfo.get("full_name", ""),
-                    "title": pinfo.get("title", "Software QA Engineer"),
-                    "email": pinfo.get("email", ""),
-                    "phone": pinfo.get("phone", ""),
-                    "location": pinfo.get("location", "Warszawa"),
-                    "linkedin": pinfo.get("linkedin", ""),
-                    "github": pinfo.get("github", ""),
-                    "summary": profile_data.get("summary", ""),
-                    "skills": profile_data.get("skills", []),
-                    "experience": profile_data.get("experience", []),
-                    "languages": profile_data.get("languages", []),
-                    "education": [],
-                    "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")
-                }
-                supabase_client.table("profiles").upsert(payload).execute()
-                print(f"[DBManager] Profile saved to Supabase for user {user_id}")
-                return True
-            except Exception as e:
-                print(f"[DBManager Error] Saving profile to Supabase failed: {e}")
-                return False
+        if user_id:
+            profiles_db = _load_json(USER_PROFILES_FILE, {})
+            profiles_db[user_id] = profile_data
+            _save_json(USER_PROFILES_FILE, profiles_db)
 
-        # Only save locally in guest mode
-        try:
-            with open(DEFAULT_PROFILE_PATH, "w", encoding="utf-8") as f:
-                json.dump(profile_data, f, ensure_ascii=False, indent=2)
+            if cls.is_supabase_enabled():
+                try:
+                    pinfo = profile_data.get("personal_info", {})
+                    payload = {
+                        "id": user_id,
+                        "full_name": pinfo.get("full_name", ""),
+                        "title": pinfo.get("title", "Software QA Engineer"),
+                        "email": pinfo.get("email", ""),
+                        "phone": pinfo.get("phone", ""),
+                        "location": pinfo.get("location", "Warszawa"),
+                        "linkedin": pinfo.get("linkedin", ""),
+                        "github": pinfo.get("github", ""),
+                        "summary": profile_data.get("summary", ""),
+                        "skills": profile_data.get("skills", []),
+                        "experience": profile_data.get("experience", []),
+                        "languages": profile_data.get("languages", []),
+                        "education": [],
+                        "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                    supabase_client.table("profiles").upsert(payload).execute()
+                except Exception as e:
+                    print(f"[DBManager Warning] Supabase save: {e}")
             return True
-        except Exception as e:
-            print(f"[DBManager Error] Saving profile locally failed: {e}")
-            return False
+
+        # Guest mode save
+        return _save_json(DEFAULT_PROFILE_PATH, profile_data)

@@ -17,5 +17,7 @@ settings.json
 scratch/
 output/
 active_tailored_profile.json
+users_db.json
+user_profiles_db.json
 *.log
 .DS_Store
