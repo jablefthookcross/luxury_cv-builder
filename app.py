@@ -304,8 +304,15 @@ def tailor_api():
     
     ats_analysis = JobAnalyzer.analyze(job_description or json.dumps(job_spec), tailored_profile)
     audit_results = QALogicEngine.audit_anti_ai_and_ats(tailored_profile)
-    
+
     ACTIVE_TAILORED_PROFILE = tailored_profile
+    save_json_file(TAILORED_PROFILE_PATH, tailored_profile)
+    
+    template_name = payload.get("template", "pro_qa_sidebar")
+    try:
+        rendered_html = render_template(f"cv_templates/{template_name}.html", data=tailored_profile, lang=ACTIVE_LANGUAGE)
+    except Exception:
+        rendered_html = render_template("cv_templates/pro_qa_sidebar.html", data=tailored_profile, lang=ACTIVE_LANGUAGE)
 
     return jsonify({
         "status": "success",
@@ -314,8 +321,26 @@ def tailor_api():
         "job_spec": job_spec,
         "ats_analysis": ats_analysis,
         "audit_results": audit_results,
-        "buckets_breakdown": tailored_profile.get("_buckets_breakdown", {})
+        "buckets_breakdown": tailored_profile.get("_buckets_breakdown", {}),
+        "rendered_html": rendered_html
     })
+
+@app.route("/preview/render", methods=["POST"])
+def preview_render():
+    payload = request.get_json() or {}
+    data = payload.get("profile") or get_active_profile()
+    template_name = payload.get("template", "pro_qa_sidebar")
+    lang = payload.get("lang") or payload.get("language") or ACTIVE_LANGUAGE
+    
+    master_profile = load_json_file(DEFAULT_PROFILE_PATH, {})
+    refined_data = QALogicEngine.audit_and_refine_profile(data, lang=lang, job_text=ACTIVE_JOB_TEXT, master_profile=master_profile)
+    
+    try:
+        html = render_template(f"cv_templates/{template_name}.html", data=refined_data, lang=lang)
+    except Exception:
+        html = render_template("cv_templates/pro_qa_sidebar.html", data=refined_data, lang=lang)
+        
+    return jsonify({"status": "success", "html": html})
 
 # --- SAVED CVS ARCHIVE API ENDPOINTS ---
 

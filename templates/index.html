@@ -796,7 +796,15 @@
                         renderJobSpecCard(data.job_spec);
                     }
                     lastMatchScore = data.ats_analysis ? data.ats_analysis.match_score : 100;
-                    updatePreview();
+                    
+                    const iframe = document.getElementById('previewIframe');
+                    if (data.rendered_html) {
+                        iframe.removeAttribute('src');
+                        iframe.srcdoc = data.rendered_html;
+                    } else {
+                        updatePreview();
+                    }
+                    
                     updateAtsWidget(data.ats_analysis, data.audit_results);
                     renderBucketsWidget(data.buckets_breakdown);
                 } else {
@@ -1313,7 +1321,7 @@
             }
         }
 
-        function updatePreview() {
+        async function updatePreview() {
             const template = document.getElementById('cvTemplate').value;
             const selectedLang = document.getElementById('cvLanguage').value;
             let effectiveLang = selectedLang;
@@ -1321,8 +1329,31 @@
                 effectiveLang = (currentJobSpec && currentJobSpec.detected_language) ? currentJobSpec.detected_language : 'pl';
             }
             const iframe = document.getElementById('previewIframe');
+
+            if (currentDraftProfile) {
+                try {
+                    const res = await fetch('/preview/render', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            profile: currentDraftProfile,
+                            template: template,
+                            lang: effectiveLang
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.status === "success" && data.html) {
+                        iframe.removeAttribute('src');
+                        iframe.srcdoc = data.html;
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Preview render failed:", e);
+                }
+            }
+
             const timestamp = new Date().getTime();
-            
+            iframe.removeAttribute('srcdoc');
             iframe.src = '/preview/current?template=' + template + '&lang=' + effectiveLang + '&t=' + timestamp;
         }
 

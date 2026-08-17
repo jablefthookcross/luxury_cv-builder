@@ -16,5 +16,6 @@ settings.json
 # Scratch and temporary outputs
 scratch/
 output/
+active_tailored_profile.json
 *.log
 .DS_Store
