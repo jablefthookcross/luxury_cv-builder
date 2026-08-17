@@ -296,52 +296,84 @@
         <div id="tab-tailor" class="tab-content active">
             <div class="left-panel">
                 <div class="card">
-                    <h2 class="section-h2">🎯 Oferta Pracy i Personalizacja</h2>
-                    <div class="form-group">
-                        <label class="form-label">Docelowa Firma / Stanowisko (Opcjonalnie)</label>
-                        <input type="text" id="targetRole" class="form-input" placeholder="np. ASTEK Polska / Tester manualny">
-                    </div>
+                    <h2 class="section-h2">🎯 Oferta Pracy i Personalizacja (2 Etapy)</h2>
+                    
                     <div class="form-group">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
-                            <label class="form-label" style="margin-bottom: 0;">Treść Oferty Pracy / Wymagania</label>
-                            <button class="btn-clean-micro" onclick="cleanInputText()">🧹 Oczyść tekst ze śmieci WWW</button>
+                            <label class="form-label" style="margin-bottom: 0;">1. Wklej Treść Oferty Pracy (surowy tekst ze strony)</label>
+                            <button class="btn-clean-micro" onclick="cleanInputText()">🧹 Oczyść tekst WWW</button>
                         </div>
-                        <textarea id="jobDescription" class="form-textarea" placeholder="Wklej treść oferty pracy tutaj..."></textarea>
+                        <textarea id="jobDescription" class="form-textarea" style="min-height: 120px;" placeholder="Wklej tutaj całe ogłoszenie (np. z Pracuj.pl, NoFluffJobs, LinkedIn)..."></textarea>
                     </div>
-                    
+
                     <!-- Row 1: Język & Szablon -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+                        <div class="form-group" style="margin-bottom: 0;">
                             <label class="form-label">Język CV</label>
                             <select id="cvLanguage" class="form-select" onchange="updatePreview()">
                                 <option value="pl">🇵🇱 Polski (PL)</option>
                                 <option value="en">🇬🇧 English (EN)</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Szablon Wizualny CV</label>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Szablon CV</label>
                             <select id="cvTemplate" class="form-select" onchange="updatePreview()">
                                 <option value="pro_qa_sidebar">⭐ Ultra Pro Sidebar (2-Kolumny)</option>
-                                <option value="ats_single_column">🎯 ATS-Proof Standard (100% Skaner ATS)</option>
+                                <option value="ats_single_column">🎯 ATS-Proof Standard (1-Kolumna)</option>
                             </select>
                         </div>
                     </div>
 
                     <!-- Row 2: Silnik AI -->
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 0.8rem;">
                         <label class="form-label">Dostawca Silnika AI</label>
                         <select id="aiProvider" class="form-select">
-                            <option value="auto">Auto (Gemini / Ollama / Reguły)</option>
-                            <option value="gemini">Google Gemini API (Darmowy Tier)</option>
-                            <option value="ollama">Ollama (Lokalny LLM)</option>
-                            <option value="fallback">Silnik Dynamiczny (Bez API Key)</option>
+                            <option value="auto">Auto (Gemini / Ollama / Dynamiczny NLP)</option>
+                            <option value="gemini">Google Gemini API (Flash Structured JSON)</option>
+                            <option value="fallback">Silnik Dynamiczny NLP (Bez API Key)</option>
                         </select>
                     </div>
 
-                    <button class="btn-primary" onclick="runTailorProcess()" style="width: 100%; margin-top: 0.5rem;">
-                        <div class="spinner" id="tailorSpinner"></div>
-                        <span id="tailorBtnText">✨ Generuj DRAFT CV pod tę Ofertę</span>
+                    <!-- KROK 1 BUTTON -->
+                    <button class="btn-secondary" style="width: 100%; font-weight: 700; border-color: #3b82f6; color: #60a5fa;" onclick="analyzeJobOffer()">
+                        <span id="analyzeSpinner" class="spinner"></span>
+                        <span id="analyzeBtnText">🔍 KROK 1: Przeanalizuj Wymagania Oferty</span>
                     </button>
+
+                    <!-- KARTA PODSUMOWANIA EKSTRAKCJI (PO KROKU 1) -->
+                    <div id="jobSpecCard" style="display: none; margin-top: 1rem; padding: 0.9rem; background: rgba(15, 23, 42, 0.9); border: 1px solid #3b82f6; border-radius: 8px;">
+                        <div style="font-weight: 700; font-size: 0.92rem; color: #60a5fa; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span>📋 Wyekstrahowana Specyfikacja Oferty</span>
+                            <span id="specSeniorityBadge" style="font-size: 0.72rem; background: #1e293b; padding: 0.15rem 0.5rem; border-radius: 4px; color: #38bdf8;">Senior</span>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0.5rem;">
+                            <label class="form-label" style="font-size: 0.76rem;">Stanowisko docelowe:</label>
+                            <input type="text" id="targetRole" class="form-input" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;" placeholder="np. Senior Test Engineer-QA (UI & API)">
+                        </div>
+                        <div style="margin-bottom: 0.4rem;">
+                            <div style="font-size: 0.74rem; color: #34d399; font-weight: 600;">Wymagane technologie (Must-Have):</div>
+                            <div id="specPrimaryBadges" class="kw-badges" style="margin-top: 0.2rem;"></div>
+                        </div>
+                        <div style="margin-bottom: 0.4rem;">
+                            <div style="font-size: 0.74rem; color: #60a5fa; font-weight: 600;">Narzędzia & CI/CD:</div>
+                            <div id="specSecondaryBadges" class="kw-badges" style="margin-top: 0.2rem;"></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.74rem; color: #fbbf24; font-weight: 600;">Zakres testów:</div>
+                            <div id="specTestingBadges" class="kw-badges" style="margin-top: 0.2rem;"></div>
+                        </div>
+                    </div>
+
+                    <!-- KROK 2 & RESET BUTTONS -->
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button class="btn-primary" style="flex: 2;" onclick="runTailorProcess()">
+                            <span id="tailorSpinner" class="spinner"></span>
+                            <span id="tailorBtnText">✨ KROK 2: Wygeneruj Dedykowane CV</span>
+                        </button>
+                        <button class="btn-secondary" style="flex: 1; font-size: 0.8rem;" title="Resetuj aktywny draft i przywróć czysty profil bazowy" onclick="resetDraftToMaster()">
+                            🔄 Resetuj DRAFT
+                        </button>
+                    </div>
                 </div>
 
                 <!-- ATS Match Score Widget -->
@@ -413,7 +445,7 @@
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
                         <button class="btn-save-action" onclick="openSaveModal()">💾 Zapisz do Moich CV</button>
-                        <a href="/api/export/pdf" id="btnDownloadPdf" download class="btn-download-action">📥 Pobierz PDF</a>
+                        <button id="btnDownloadPdf" class="btn-download-action" onclick="generateAndDownloadPdf()">📥 Pobierz PDF</button>
                         <button class="btn-secondary" onclick="printPreviewIframe()">🖨️ Drukuj</button>
                     </div>
                 </div>
@@ -464,6 +496,7 @@
                             <button class="btn-secondary" onclick="toggleEditorMode('form')" id="btnEditForm">📝 Formularz Wizualny</button>
                             <button class="btn-secondary" onclick="toggleEditorMode('json')" id="btnEditJson">💻 Kod JSON</button>
                             <button class="btn-save-action" onclick="saveProfileFromFormOrJson()">💾 Zapisz Profil Bazowy</button>
+                            <button class="btn-danger-sm" style="height: 38px; padding: 0 0.9rem;" onclick="deleteMasterProfileData()" title="Wyczyszczenie profilu bazowego pozwala wgrać nowy plik PDF od zera">🗑️ Usuń Profil Bazowy</button>
                         </div>
                     </div>
 
@@ -615,6 +648,7 @@
     <script>
         let currentProfileData = {};
         let currentDraftProfile = null;
+        let currentJobSpec = null;
         let lastMatchScore = 100;
 
         function switchTab(tabId, btn) {
@@ -646,14 +680,95 @@
             } catch (err) {}
         }
 
-        async function runTailorProcess() {
-            const btnText = document.getElementById('tailorBtnText');
-            const spinner = document.getElementById('tailorSpinner');
-            btnText.textContent = "Analizowanie Oferty i Generowanie DRAFT-u...";
+        async function analyzeJobOffer() {
+            const jobDescription = document.getElementById('jobDescription').value.trim();
+            if (!jobDescription) {
+                alert("Wklej najpierw treść ogłoszenia w pole tekstowe!");
+                return;
+            }
+
+            const btnText = document.getElementById('analyzeBtnText');
+            const spinner = document.getElementById('analyzeSpinner');
+            btnText.textContent = "Ekstrakcja wymagań i technologii...";
             spinner.style.display = "block";
 
-            const jobDescription = document.getElementById('jobDescription').value;
-            const targetRole = document.getElementById('targetRole').value;
+            const provider = document.getElementById('aiProvider').value;
+
+            try {
+                const res = await fetch('/api/analyze-job', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ job_text: jobDescription, provider: provider })
+                });
+                const data = await res.json();
+
+                if (data.status === "success" && data.spec) {
+                    currentJobSpec = data.spec;
+                    renderJobSpecCard(data.spec);
+                } else {
+                    alert("Błąd analizy oferty: " + (data.message || "Nie udało się przeanalizować."));
+                }
+            } catch (err) {
+                alert("Błąd połączenia: " + err.message);
+            } finally {
+                btnText.textContent = "🔍 KROK 1: Przeanalizuj Wymagania Oferty";
+                spinner.style.display = "none";
+            }
+        }
+
+        function renderJobSpecCard(spec) {
+            const card = document.getElementById('jobSpecCard');
+            const targetRoleInput = document.getElementById('targetRole');
+            const seniorityBadge = document.getElementById('specSeniorityBadge');
+            const primaryBadges = document.getElementById('specPrimaryBadges');
+            const secondaryBadges = document.getElementById('specSecondaryBadges');
+            const testingBadges = document.getElementById('specTestingBadges');
+
+            targetRoleInput.value = spec.target_role || "";
+            seniorityBadge.textContent = (spec.seniority || "Senior") + " | " + (spec.domain || "IT");
+
+            primaryBadges.innerHTML = "";
+            (spec.primary_technologies || []).forEach(tech => {
+                const s = document.createElement('span');
+                s.className = 'kw-badge bucket-badge-a';
+                s.textContent = tech;
+                primaryBadges.appendChild(s);
+            });
+
+            secondaryBadges.innerHTML = "";
+            (spec.secondary_technologies || []).concat(spec.tools || []).slice(0, 6).forEach(tech => {
+                const s = document.createElement('span');
+                s.className = 'kw-badge bucket-badge-b';
+                s.textContent = tech;
+                secondaryBadges.appendChild(s);
+            });
+
+            testingBadges.innerHTML = "";
+            (spec.testing_types || []).forEach(type => {
+                const s = document.createElement('span');
+                s.className = 'kw-badge';
+                s.style.background = 'rgba(251, 191, 36, 0.15)';
+                s.style.color = '#fbbf24';
+                s.textContent = type;
+                testingBadges.appendChild(s);
+            });
+
+            card.style.display = "block";
+        }
+
+        async function runTailorProcess() {
+            const jobDescription = document.getElementById('jobDescription').value.trim();
+            if (!jobDescription && !currentJobSpec) {
+                alert("Wklej najpierw treść ogłoszenia!");
+                return;
+            }
+
+            const btnText = document.getElementById('tailorBtnText');
+            const spinner = document.getElementById('tailorSpinner');
+            btnText.textContent = "Kompilowanie dedykowanego CV w pamięci...";
+            spinner.style.display = "block";
+
+            const targetRole = document.getElementById('targetRole').value.trim();
             const provider = document.getElementById('aiProvider').value;
             const template = document.getElementById('cvTemplate').value;
             const lang = document.getElementById('cvLanguage').value;
@@ -664,6 +779,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         job_description: jobDescription,
+                        job_spec: currentJobSpec,
                         target_role: targetRole,
                         provider: provider,
                         template: template,
@@ -674,6 +790,10 @@
 
                 if (data.status === "success") {
                     currentDraftProfile = data.profile;
+                    if (data.job_spec && !currentJobSpec) {
+                        currentJobSpec = data.job_spec;
+                        renderJobSpecCard(data.job_spec);
+                    }
                     lastMatchScore = data.ats_analysis ? data.ats_analysis.match_score : 100;
                     updatePreview();
                     updateAtsWidget(data.ats_analysis, data.audit_results);
@@ -684,8 +804,27 @@
             } catch (err) {
                 alert("Błąd podczas dopasowywania: " + err.message);
             } finally {
-                btnText.textContent = "✨ Generuj DRAFT CV pod tę Ofertę";
+                btnText.textContent = "✨ KROK 2: Wygeneruj Dedykowane CV";
                 spinner.style.display = "none";
+            }
+        }
+
+        async function resetDraftToMaster() {
+            if (!confirm("Czy na pewno chcesz zresetować obecny DRAFT i przywrócić czysty profil bazowy?")) return;
+            try {
+                const res = await fetch('/api/profile/reset', { method: 'POST' });
+                const data = await res.json();
+                if (data.status === "success") {
+                    currentDraftProfile = null;
+                    currentJobSpec = null;
+                    document.getElementById('jobDescription').value = "";
+                    document.getElementById('targetRole').value = "";
+                    document.getElementById('jobSpecCard').style.display = "none";
+                    updatePreview();
+                    alert("✅ " + data.message);
+                }
+            } catch (err) {
+                alert("Błąd resetowania: " + err.message);
             }
         }
 
@@ -1078,6 +1217,21 @@
             }
         }
 
+        async function deleteMasterProfileData() {
+            if (!confirm("Czy na pewno chcesz usunąć obecny Główny Profil Bazowy? Będziesz mógł wgrać świeży plik PDF ze swoim CV.")) return;
+            try {
+                const res = await fetch('/api/profile/delete', { method: 'POST' });
+                const data = await res.json();
+                if (data.status === "success") {
+                    alert("✅ " + data.message);
+                    loadMasterProfileData();
+                    updatePreview();
+                }
+            } catch (err) {
+                alert("Błąd podczas usuwania profilu: " + err.message);
+            }
+        }
+
         async function uploadPdfCV() {
             const fileInput = document.getElementById('pdfFileInput');
             if (!fileInput.files || fileInput.files.length === 0) {
@@ -1165,9 +1319,58 @@
             const timestamp = new Date().getTime();
             
             iframe.src = '/preview/current?template=' + template + '&lang=' + lang + '&t=' + timestamp;
-            
-            const pdfBtn = document.getElementById('btnDownloadPdf');
-            if (pdfBtn) pdfBtn.href = '/api/export/pdf?template=' + template + '&lang=' + lang + '&t=' + timestamp;
+        }
+
+        async function generateAndDownloadPdf() {
+            const jobText = document.getElementById('jobDescription').value.trim();
+            const targetRole = document.getElementById('targetRole').value.trim();
+            const lang = document.getElementById('cvLanguage').value;
+            const template = document.getElementById('cvTemplate').value;
+            const provider = document.getElementById('aiProvider').value;
+
+            if (!jobText) {
+                alert("Wklej treść oferty pracy przed wygenerowaniem dedykowanego PDF!");
+                return;
+            }
+
+            const btn = document.getElementById('btnDownloadPdf');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "⏳ Kompilowanie PDF...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/generate-pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        job_text: jobText,
+                        target_role: targetRole,
+                        language: lang,
+                        template: template,
+                        provider: provider
+                    })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.message || "Błąd generowania PDF.");
+                }
+
+                const blob = await res.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = (lang === 'en') ? 'Michal_Kosowski_Resume.pdf' : 'Michal_Kosowski_CV.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+            } catch (err) {
+                alert("Błąd generowania PDF: " + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         function printPreviewIframe() {
@@ -1176,17 +1379,25 @@
         }
 
         async function saveSettings() {
-            const geminiKey = document.getElementById('geminiApiKey').value;
-            const ollamaUrl = document.getElementById('ollamaUrl').value;
-            const ollamaModel = document.getElementById('ollamaModel').value;
+            const geminiKey = document.getElementById('geminiApiKey').value.trim();
+            const ollamaUrl = document.getElementById('ollamaUrl').value.trim();
+            const ollamaModel = document.getElementById('ollamaModel').value.trim();
 
-            const res = await fetch('/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ gemini_key: geminiKey, ollama_url: ollamaUrl, ollama_model: ollamaModel })
-            });
-            const data = await res.json();
-            alert(data.message || "Ustawienia zapisane!");
+            localStorage.setItem('gemini_api_key', geminiKey);
+            localStorage.setItem('ollama_url', ollamaUrl);
+            localStorage.setItem('ollama_model', ollamaModel);
+
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gemini_key: geminiKey, ollama_url: ollamaUrl, ollama_model: ollamaModel })
+                });
+                const data = await res.json();
+                alert("✅ " + (data.message || "Ustawienia zapisane!"));
+            } catch(err) {
+                alert("Błąd zapisu ustawień: " + err.message);
+            }
         }
 
         let isAuthRegisterMode = false;
@@ -1331,13 +1542,35 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             checkAuthStateAndApplyGuard();
+
+            // 1. Instant local storage restoration
+            const localGemini = localStorage.getItem('gemini_api_key');
+            const localOllamaUrl = localStorage.getItem('ollama_url');
+            const localOllamaModel = localStorage.getItem('ollama_model');
+            if (localGemini) document.getElementById('geminiApiKey').value = localGemini;
+            if (localOllamaUrl) document.getElementById('ollamaUrl').value = localOllamaUrl;
+            if (localOllamaModel) document.getElementById('ollamaModel').value = localOllamaModel;
+
+            // 2. Fetch server persisted settings
             try {
                 const res = await fetch('/api/settings');
-                const s = await res.json();
-                if (s.gemini_key) document.getElementById('geminiApiKey').value = s.gemini_key;
-                if (s.ollama_url) document.getElementById('ollamaUrl').value = s.ollama_url;
-                if (s.ollama_model) document.getElementById('ollamaModel').value = s.ollama_model;
-            } catch(e){}
+                const data = await res.json();
+                const s = data.settings || data;
+                if (s.gemini_key) {
+                    document.getElementById('geminiApiKey').value = s.gemini_key;
+                    localStorage.setItem('gemini_api_key', s.gemini_key);
+                }
+                if (s.ollama_url) {
+                    document.getElementById('ollamaUrl').value = s.ollama_url;
+                    localStorage.setItem('ollama_url', s.ollama_url);
+                }
+                if (s.ollama_model) {
+                    document.getElementById('ollamaModel').value = s.ollama_model;
+                    localStorage.setItem('ollama_model', s.ollama_model);
+                }
+            } catch(e) {
+                console.warn("Could not fetch server settings:", e);
+            }
         });
     </script>
 </body>

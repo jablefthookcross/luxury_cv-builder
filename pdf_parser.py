@@ -71,8 +71,9 @@ class PDFParser:
         lines = [l.strip() for l in raw_text.splitlines() if l.strip()]
         extracted_name = ""
 
-        for line in lines[:10]:
-            if line.isdigit() or "@" in line or "Personal" in line or "Links" in line or "Skills" in line:
+        for line in lines[:15]:
+            l_low = line.lower()
+            if line.isdigit() or "@" in line or any(kw in l_low for kw in ["personal", "links", "skills", "work", "experience", "doświadczenie", "wykształcenie", "education", "summary", "podsumowanie", "profile", "contact", "dane"]):
                 continue
             if re.match(r'^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+\s+[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+$', line):
                 extracted_name = line

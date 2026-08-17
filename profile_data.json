@@ -1,52 +1,51 @@
 {
   "personal_info": {
     "full_name": "Michał Kosowski",
-    "title": "Software QA Engineer / Test Automation Engineer",
+    "title": "Software QA Engineer",
     "email": "mmkosowski94@gmail.com",
     "phone": "518075716",
-    "location": "Warszawa",
-    "linkedin": "",
-    "github": "https://github.com/jablefthookcross"
+    "location": "Warsaw, Poland",
+    "website": "",
+    "linkedin": "https://linkedin.com/in/michal-kosowski",
+    "github": "https://github.com"
   },
-  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym, integracyjnym, API (REST & SOAP) oraz automatyzacji testów. Specjalizuje się w weryfikacji baz danych za pomocą zapytań SQL, projektowaniu scenariuszy testowych i planów testów oraz śledzeniu defektów w narzędziach Jira (Xray), HP QC / ALM i TestRail. Posiada wiedzę z zakresu norm ISTQB, automatyzacji w Playwright (TypeScript) oraz Selenium WebDriver (Java).",
+  "summary": "QA Engineer z ponad 5-letnim doświadczeniem w zapewnianiu jakości aplikacji webowych i mobilnych poprzez testy manualne, API oraz automatyczne w Playwright (TypeScript/JavaScript).",
   "skills": [
     {
-      "category": "Testowanie & API",
+      "category": "Programowanie & Automatyzacja",
       "items": [
-        "ISTQB / ISEB Standards",
-        "SOAP & REST API Testing",
-        "Postman",
-        "SoapUI",
-        "SQL Database Verification",
-        "Integration Testing",
-        "Functional Testing",
-        "Regression Testing"
-      ]
-    },
-    {
-      "category": "Narzędzia & Zarządzanie Testami",
-      "items": [
-        "Jira (Xray)",
-        "HP QC / ALM",
-        "TestRail",
-        "Katalon Studio",
-        "Confluence",
-        "Git",
-        "SQL Developer / DBeaver",
-        "Windows OS"
-      ]
-    },
-    {
-      "category": "Automatyzacja & Języki",
-      "items": [
-        "SQL",
         "Playwright",
         "TypeScript",
         "JavaScript",
-        "Java",
-        "Selenium WebDriver",
-        "RestAssured",
-        "GitLab CI/CD"
+        "SQL",
+        "Git",
+        "GitLab CI/CD",
+        "GitHub Actions"
+      ]
+    },
+    {
+      "category": "Testowanie & API",
+      "items": [
+        "Manual Testing",
+        "Functional Testing",
+        "Regression Testing",
+        "E2E Testing",
+        "REST/SOAP API Testing",
+        "Postman",
+        "Swagger"
+      ]
+    },
+    {
+      "category": "Narzędzia & Systemy",
+      "items": [
+        "Jira (AIO Tests / Xray)",
+        "Confluence",
+        "Kibana",
+        "Docker",
+        "WSL",
+        "Figma",
+        "Claude Code",
+        "GitHub Copilot"
       ]
     }
   ],
@@ -54,41 +53,42 @@
     {
       "position": "Software tester / QA Automation",
       "company": "Benefit Systems S.A.",
-      "location": "Warszawa",
+      "location": "Warsaw",
       "start_date": "2022",
       "end_date": "Obecnie",
       "highlights": [
-        "Tworzenie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji projektowej w Jira (Xray) i Confluence w zespole Agile/Scrum.",
-        "Wykonywanie testów integracyjnych i walidacji usług API (REST & SOAP) przy użyciu narzędzi Postman oraz SoapUI.",
-        "Przeprowadzanie weryfikacji bazy danych za pomocą zapytań SQL w celu weryfikacji spójności danych na środowiskach testowych.",
         "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
-        "Zgłaszanie błędów aplikacji, analiza wyników testów oraz współpraca z zespołem deweloperskim i biznesowym przy usuwaniu defektów."
+        "Przeprowadzanie testów REST API oraz analiza dokumentacji w Postman i Swagger w celu walidacji integracji backendowych.",
+        "Wykonywanie testów funkcjonalnych, regresyjnych, integracyjnych i eksploracyjnych na platformach webowych i mobilnych.",
+        "Dokumentowanie błędów i scenariuszy testowych w Jira (AIO Tests/Xray) oraz Confluence."
       ]
     },
     {
       "position": "Test And Analysis Engineer",
-      "company": "Sii Polska Sp. z o.o. (Freelance)",
-      "location": "Warszawa",
+      "company": "Sii Polska Sp. z o.o.",
+      "location": "Warsaw",
       "start_date": "2021-09",
       "end_date": "2022-04",
       "highlights": [
-        "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji biznesowych oraz HR w oparciu o wymagania z backlogu.",
-        "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer.",
-        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w narzędziach Jira (Xray) oraz HP QC / ALM."
+        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o backlog.",
+        "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z SQL Developer.",
+        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira."
       ]
     },
     {
       "position": "Software tester",
-      "company": "Euroloan Group (Freelance)",
-      "location": "Warszawa",
+      "company": "Euroloan Group",
+      "location": "Warsaw",
       "start_date": "2019-07",
       "end_date": "2021-01",
       "highlights": [
-        "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych oraz finansowych.",
-        "Projektowanie, wykonywanie i optymalizacja przypadków testowych zgodnych z kryteriami akceptacji (Acceptance Criteria)."
+        "Kompleksowe testy UI, funkcjonalne i regresyjne systemów E-commerce.",
+        "Tworzenie i wykonywanie scenariuszy testowych."
       ]
     }
   ],
+  "education": [],
+  "projects": [],
   "languages": [
     {
       "language": "Polski",
@@ -97,14 +97,6 @@
     {
       "language": "Angielski",
       "level": "Biegły (Professional)"
-    }
-  ],
-  "education": [
-    {
-      "degree": "Inżynieria Oprogramowania / Informatyka",
-      "institution": "Uczelnia Wyższa",
-      "location": "Warszawa",
-      "graduation_year": "2019"
     }
   ],
   "certifications": []

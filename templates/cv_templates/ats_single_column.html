@@ -167,8 +167,8 @@
         {% for job in data.experience %}
         <div class="exp-item">
             <div class="exp-top">
-                <div class="role">{{ job.position }}</div>
-                <div class="dates">{{ job.start_date }} – {% if lang == 'en' and job.end_date == 'Obecnie' %}Present{% else %}{{ job.end_date }}{% endif %} | {{ 'Warsaw, Poland' if lang == 'en' and ('Warszaw' in job.location or 'Warsaw' in job.location) else job.location }}</div>
+                <div class="role">{{ job.position or job.role or 'Software Tester' }}</div>
+                <div class="dates">{% if job.start_date %}{{ job.start_date }}{% if job.end_date %} – {% if lang == 'en' and (job.end_date == 'Obecnie' or job.end_date == 'obecnie') %}Present{% else %}{{ job.end_date }}{% endif %}{% endif %}{% elif job.period %}{{ job.period }}{% endif %} | {{ 'Warsaw, Poland' if lang == 'en' and ('Warszaw' in (job.location or '') or 'Warsaw' in (job.location or '')) else (job.location or 'Warszawa') }}</div>
             </div>
             <div class="company">{{ job.company }}</div>
             {% if job['highlights'] %}

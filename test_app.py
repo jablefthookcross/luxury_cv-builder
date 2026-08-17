@@ -31,7 +31,17 @@ def test_ai_fallback():
     assert result["personal_info"]["full_name"] == "Test User"
     print("✅ AIEngine fallback unit test passed!")
 
+def test_flask_endpoints():
+    from app import app
+    client = app.test_client()
+    res = client.get("/api/profile")
+    assert res.status_code == 200
+    res_del = client.post("/api/profile/delete")
+    assert res_del.status_code == 200
+    print("✅ Flask API endpoints unit test passed!")
+
 if __name__ == "__main__":
     test_job_analyzer()
     test_ai_fallback()
+    test_flask_endpoints()
     print("🎉 All unit tests passed successfully!")

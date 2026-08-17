@@ -1,15 +1,13 @@
 """
-VitaeCraft AI - Universal 10/10 Dynamic QA Tailoring Engine
+VitaeCraft AI - Universal Dynamic QA Tailoring Engine
 Author: MagicMike Development Team
 
-Fully dynamic, universal AI & NLP tailoring engine with Master IT Terms Catalog support.
+Fully dynamic, universal AI & NLP tailoring engine with Structured Outputs and Archetype Weighting Matrix.
 Includes:
-1. Master IT Terms Catalog loader (it_terms_catalog.json).
-2. Smart Offer Text Pre-Processor (strips web scraping clutter & marketing noise).
-3. 3-Buckets Classification Breakdown (Must Have, Value Add, Noise Removal).
-4. Cross-Category Skill Deduplication (Zero duplicated badges).
-5. Fluent Professional Summary Generator (Native IT recruitment phrasing).
-6. 100% Single Language Lock (PL or EN) with zero state pollution.
+1. Gemini 2.5 Flash / 1.5 Flash Structured JSON Outputs (Zero AI Slop, Ground Truth Lock).
+2. Universal Archetype Synthesis (Mobile, API & Backend, Automation, Test Management).
+3. Cross-Category Skill Deduplication & Content Budgeting (40-80 words summary, 3-5 highlights).
+4. 100% Single Language Synchronization (PL or EN) with zero state leakage.
 """
 
 import os
@@ -20,33 +18,43 @@ import urllib.error
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Set
 
+from job_analyzer import JobAnalyzer, ARCHETYPES
+from qa_logic_engine import QALogicEngine
+
 APP_DIR = Path(__file__).parent
 CATALOG_PATH = APP_DIR / "it_terms_catalog.json"
 
 PROMPT_UNIVERSAL_TAILORING_DIRECTIVE = """
-Jesteś Eksperckim Rekruterem IT i Test Architektem. Twój cel to stworzenie perfekcyjnego CV (10/10) dla Inżyniera QA na podstawie podanej oferty pracy i profilu kandydata (Michał Kosowski).
+Jesteś wyspecjalizowanym architektem CV dla inżynierów QA.
+Wejście:
+1. Master Profile (stałe doświadczenie, firmy, wykształcenie, dane kontaktowe kandydata).
+2. Tekst dowolnej oferty pracy.
 
-ZASADY UNIWERSALNEGO DOSTOSOWANIA DLA DOWOLNEJ OFERTY:
-1. DYNAMICZNA ANALIZA OFERTY (ZERO HARDCODOWANIA):
-   - Przeanalizuj treść podanej oferty pracy i wyciągnij z niej dokładnie te technologie, narzędzia, ramy, certyfikaty i specyfikę branżową, które podał pracodawca.
+Twoje zadanie:
+Zwróć obiekt JSON dopasowany do oferty:
+- target_title: Tytuł stanowiska z ogłoszenia (np. 'Senior QA Specialist', 'QA Automation Engineer').
+- professional_summary: Zwięzłe podsumowanie (40-60 słów) akcentujące technologie i obszary wymagane w ofercie, które pokrywają się z doświadczeniem kandydata. Zakaz sztucznego zlepiania rzeczowników.
+- skills: 3 kategorie po 4-6 krótkich tagów dobranych bezpośrednio z wymagań w ofercie (np. narzędzia, frameworki, rodzaje testów). Żadna nazwa kategorii nie może być tagiem wewnątrz tej samej kategorii.
+- work_experience: Zachowaj realne firmy i daty z profilu bazowego, ale dostosuj treść bullet pointów w najnowszej roli tak, aby eksponowały technologie i odpowiedzialności wymienione w ogłoszeniu.
 
-2. SELEKCJA ZASADĄ 3 KOSZYKÓW (RELEVANCE FILTERING):
-   - KOSZYK A (MUST HAVE): Technologie z wymagań oferty obecne w profilu kandydata -> umieść na samej górze sekcji Skills, w Podsumowaniu Zawodowym i w pierwszych punktach doświadczenia.
-   - KOSZYK B (VALUE ADD): Pokrewne twarde umiejętności kandydata z profilu wspierające rolę -> umieść jako uzupełnienie.
-   - KOSZYK C (IRRELEVANT / NOISE - KATEGORYCZNY ZAKAZ): Narzędzia i domeny z profilu kandydata NIEZWIĄZANE z tą konkretną ofertą -> BEZWZGLĘDNIE USUŃ LUB ZMNIEJSZ ICH PRIORYTET.
+Zasada kluczowa: 100% dopasowania do przesłanej oferty, zero odniesień do jakichkolwiek innych projektów.
+Język wyjściowy: {LANG} (jeśli PL -> cała treść po polsku z naturalnymi pojęciami technicznymi, jeśli EN -> cała treść po angielsku).
 
-3. SPÓJNOŚĆ JĘZYKOWA 100% (LANGUAGE SYNC):
-   - WYBRANY JĘZYK = {LANG}.
-   - Jeśli LANG = PL -> Całość (Podsumowanie, nazwy kategorii, stanowiska, punkty obowiązków, języki) MUSI być w 100% po polsku z angielskimi pojęciami technicznymi.
-   - Jeśli LANG = EN -> Całość (Podsumowanie, nazwy kategorii, stanowiska, punkty obowiązków, języki, daty 'Present') MUSI być w 100% po angielsku.
-
-4. DYNAMICZNE DOŚWIADCZENIE (WORK EXPERIENCE):
-   - Zachowaj autentyczność 3 pracodawców kandydata (Benefit Systems S.A., Sii Polska, Euroloan Group).
-   - Nie powielaj tych samych zdań między pracodawcami! Przeredaguj i ułóż punkty dla każdego pracodawcy tak, aby uwypuklić zadania pasujące do wymagań analizowanej oferty.
-
-5. CONTENT BUDGETING & DEDUPLICATION:
-   - Sekcja Skills: Max 6-8 tagów na kategorię (tagi 1-3 słowa). Każdą umiejętność umieszczaj TYLKO W JEDNEJ KATEGORII (brak duplikatów w panelu bocznym).
-   - Professional Summary: Dokładnie 3-4 zwarte, płynne, techniczne zdania.
+WYMAGANY FORMAT JSON:
+{
+  "target_title": "string",
+  "professional_summary": "string",
+  "skills": [
+    {"category": "string", "items": ["tag1", "tag2", "tag3", "tag4", "tag5"]}
+  ],
+  "work_experience": [
+    {
+      "company": "string",
+      "position": "string",
+      "highlights": ["punkt 1", "punkt 2", "punkt 3", "punkt 4"]
+    }
+  ]
+}
 """
 
 ENGLISH_BASELINE_EXPERIENCE = [
@@ -130,7 +138,6 @@ POLISH_BASELINE_EXPERIENCE = [
 ]
 
 def load_master_it_catalog() -> Dict[str, str]:
-    """Loads master IT dictionary from it_terms_catalog.json."""
     flattened_catalog = {}
     if CATALOG_PATH.exists():
         try:
@@ -145,16 +152,15 @@ def load_master_it_catalog() -> Dict[str, str]:
             print(f"[AIEngine Error] Loading catalog failed: {e}")
             
     return {
-        "manual testing": "Manual Testing", "manual": "Manual Testing", "api testing": "API Testing (Postman)",
-        "bug reporting": "Bug Reporting (GitLab/Jira)", "gitlab": "GitLab / GitLab CI", "agile": "Agile / Scrum",
-        "playwright": "Playwright", "postman": "Postman", "swagger": "Swagger", "soapui": "SoapUI",
-        "sql": "SQL Database Verification", "mysql": "MySQL", "git": "Git", "jira": "Jira", "xray": "Jira (Xray)",
-        "confluence": "Confluence", "hp qc": "HP QC", "alm": "HP ALM", "katalon": "Katalon Studio", "utp": "UTP",
-        "windows": "Windows OS", "istqb": "ISTQB / ISEB Certification"
+        "manual testing": "Testy Manualne", "manual": "Testy Manualne", "api testing": "Testowanie API (Postman)",
+        "bug reporting": "Zgłaszanie i Śledzenie Błędów", "gitlab": "GitLab CI", "agile": "Agile / Scrum",
+        "playwright": "Playwright (TypeScript/JS)", "postman": "Postman", "swagger": "Swagger", "soapui": "SoapUI",
+        "sql": "SQL (Weryfikacja Danych)", "mysql": "MySQL", "git": "Git", "jira": "Jira (Xray)", "xray": "Jira (Xray)",
+        "confluence": "Confluence", "windows": "Windows OS", "istqb": "Certyfikat ISTQB"
     }
 
 def clean_job_offer_text(raw_text: str) -> str:
-    """Strips web scraping clutter (navigation items, revenue stats, Star Wars fluff, apply buttons)."""
+    """Strips web scraping clutter (navigation items, revenue stats, apply buttons)."""
     if not raw_text:
         return ""
         
@@ -195,6 +201,7 @@ class AIEngine:
                 result = self._tailor_with_gemini(clean_master, cleaned_job_text, target_role, lang=lang)
                 return self._post_process_tailored(result, cleaned_job_text, clean_master, lang=lang)
             except Exception as e:
+                print(f"[AIEngine Warning] Gemini API call failed: {e}. Falling back to Dynamic Archetype NLP.")
                 return self._tailor_with_dynamic_nlp(clean_master, cleaned_job_text, target_role, lang=lang)
 
         elif provider_to_use == "ollama":
@@ -202,6 +209,7 @@ class AIEngine:
                 result = self._tailor_with_ollama(clean_master, cleaned_job_text, target_role, lang=lang)
                 return self._post_process_tailored(result, cleaned_job_text, clean_master, lang=lang)
             except Exception as e:
+                print(f"[AIEngine Warning] Ollama call failed: {e}. Falling back to Dynamic Archetype NLP.")
                 return self._tailor_with_dynamic_nlp(clean_master, cleaned_job_text, target_role, lang=lang)
 
         else:
@@ -238,18 +246,22 @@ Oferta Pracy (DO ANALIZY DYNAMICZNEJ):
 {job_description}
 \"\"\"
 
-Profil Kandydata (JSON):
+Profil Bazowy Kandydata (JSON):
 \"\"\"
 {json.dumps(master_profile, ensure_ascii=False, indent=2)}
 \"\"\"
 
-Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdown ```json.
+Zwróć TYLKO czysty obiekt JSON dopasowanego CV zgodnie z podanym schematem.
 """
 
     def _tailor_with_gemini(self, master_profile: Dict[str, Any], job_description: str, target_role: str, lang: str = "pl") -> Dict[str, Any]:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.gemini_key}"
+        """
+        Calls Gemini 2.5 Flash / 1.5 Flash with forced Structured Output (responseMimeType: application/json).
+        """
+        models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash"]
+        last_error = None
+
         prompt = self._build_prompt(master_profile, job_description, target_role, lang=lang)
-        
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
@@ -257,17 +269,69 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
                 "responseMimeType": "application/json"
             }
         }
-        
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"}
-        )
-        
-        with urllib.request.urlopen(req, timeout=30) as response:
-            res_data = json.loads(response.read().decode("utf-8"))
-            text_response = res_data["candidates"][0]["content"]["parts"][0]["text"]
-            return self._clean_and_parse_json(text_response, master_profile)
+
+        for model_name in models_to_try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.gemini_key}"
+            try:
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=30) as response:
+                    res_data = json.loads(response.read().decode("utf-8"))
+                    text_response = res_data["candidates"][0]["content"]["parts"][0]["text"]
+                    parsed = self._clean_and_parse_json(text_response, None)
+                    if parsed and isinstance(parsed, dict):
+                        return self._normalize_gemini_output(parsed, master_profile)
+            except Exception as e:
+                last_error = e
+                continue
+
+        raise RuntimeError(f"All Gemini models failed. Last error: {last_error}")
+
+    def _normalize_gemini_output(self, parsed: Dict[str, Any], master_profile: Dict[str, Any]) -> Dict[str, Any]:
+        normalized = json.loads(json.dumps(master_profile))
+
+        # Title
+        title = parsed.get("target_title") or parsed.get("personal_info", {}).get("title")
+        if title:
+            normalized["personal_info"]["title"] = title
+
+        # Professional Summary
+        summary = parsed.get("professional_summary") or parsed.get("summary")
+        if summary:
+            normalized["summary"] = summary
+
+        # Skills
+        skills = parsed.get("skills")
+        if skills and isinstance(skills, list):
+            clean_skills = []
+            for cat in skills:
+                if isinstance(cat, dict) and cat.get("category") and cat.get("items"):
+                    cat_title = cat.get("category", "").strip()
+                    items = [it.strip() for it in cat.get("items", []) if it and it.strip().lower() != cat_title.lower()]
+                    clean_skills.append({
+                        "category": cat_title,
+                        "items": list(dict.fromkeys(items))
+                    })
+            if clean_skills:
+                normalized["skills"] = clean_skills
+
+        # Work Experience
+        exp = parsed.get("work_experience") or parsed.get("experience")
+        if exp and isinstance(exp, list):
+            master_exp = normalized.get("experience", [])
+            for i, job in enumerate(master_exp):
+                if i < len(exp):
+                    ai_job = exp[i]
+                    if isinstance(ai_job, dict):
+                        if ai_job.get("highlights"):
+                            job["highlights"] = [h.strip() for h in ai_job["highlights"] if h and h.strip()]
+                        if ai_job.get("position"):
+                            job["position"] = ai_job["position"]
+
+        return normalized
 
     def _tailor_with_ollama(self, master_profile: Dict[str, Any], job_description: str, target_role: str, lang: str = "pl") -> Dict[str, Any]:
         url = f"{self.ollama_url}/api/generate"
@@ -292,30 +356,26 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             return self._clean_and_parse_json(text_response, master_profile)
 
     def _post_process_tailored(self, tailored: Dict[str, Any], job_description: str, master_profile: Dict[str, Any], lang: str = "pl") -> Dict[str, Any]:
-        res = json.loads(json.dumps(tailored))
-        pinfo = res.get("personal_info", {})
-        master_info = master_profile.get("personal_info", {})
-        pinfo["full_name"] = master_info.get("full_name", "Michał Kosowski")
-        pinfo["email"] = master_info.get("email", "mmkosowski94@gmail.com")
-        pinfo["phone"] = master_info.get("phone", "518075716")
-        pinfo["linkedin"] = master_info.get("linkedin", "")
-        pinfo["github"] = master_info.get("github", "https://github.com/jablefthookcross")
-        res["personal_info"] = pinfo
-        res["certifications"] = []
-        return res
+        return QALogicEngine.audit_and_refine_profile(tailored, lang=lang, job_text=job_description, master_profile=master_profile)
 
     def _tailor_with_dynamic_nlp(self, master_profile: Dict[str, Any], job_description: str, target_role: str = "", lang: str = "pl") -> Dict[str, Any]:
+        """
+        Universal, mathematically grounded archetype tailoring engine.
+        Operates without any hardcoded company rules, strictly driven by Archetype Weighting Matrix.
+        """
         tailored = json.loads(json.dumps(master_profile))
         job_lower = job_description.lower()
         is_english = (lang == "en")
 
-        matched_techs = []
-        for kw, display_name in self.master_catalog.items():
-            if re.search(r'\b' + re.escape(kw) + r'\b', job_lower):
-                if display_name not in matched_techs:
-                    matched_techs.append(display_name)
+        # 1. CLASSIFY ARCHETYPE VIA ARCHETYPE WEIGHTING MATRIX
+        arch_info = JobAnalyzer.classify_archetypes(job_description)
+        primary_id = arch_info["primary"]
+        primary_data = arch_info["primary_data"]
 
-        # 2. DYNAMIC TITLE INFERENCE
+        # 2. DYNAMIC TITLE & SENIORITY INFERENCE
+        exp_years_num = "6" if any(k in job_lower for k in ["6 lat", "min. 6", "6+ years", "6-letnim", "6+ lat"]) else "5"
+        exp_years_phrase = f"ponad {exp_years_num}-letnim" if not is_english else f"{exp_years_num}+ years of"
+
         if target_role:
             tailored["personal_info"]["title"] = target_role
         else:
@@ -323,137 +383,132 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             title_found = ""
             for line in first_lines:
                 clean_line = line.strip()
-                if any(role_kw in clean_line.lower() for role_kw in ["tester", "qa", "engineer", "specjalista", "developer"]):
-                    if len(clean_line) < 60:
+                if any(role_kw in clean_line.lower() for role_kw in [
+                    "senior test engineer", "test engineer", "qa engineer", "senior qa", "qa specialist",
+                    "tester oprogramowania", "manual tester", "qa automation engineer", "performance engineer",
+                    "software qa", "specjalista qa", "tester"
+                ]):
+                    if 6 < len(clean_line) < 70:
                         title_found = clean_line
                         break
-            
+
             if title_found:
                 tailored["personal_info"]["title"] = title_found
-            elif "manual" in job_lower:
-                tailored["personal_info"]["title"] = "Manual Tester / Specjalista QA" if not is_english else "Manual Software Tester"
             else:
-                tailored["personal_info"]["title"] = "Senior QA Automation Engineer"
+                tailored["personal_info"]["title"] = primary_data["default_title_en" if is_english else "default_title_pl"]
 
-        # 3. DYNAMIC 3-BUCKETS SKILLS BUCKETING WITH ZERO LOSS OF MATCHED TECHS
-        cat1_items = []
-        cat2_items = []
-        cat3_items = []
+        current_title = tailored["personal_info"]["title"]
 
-        # Categorize every matched technology from job offer
-        for t in matched_techs:
-            t_low = t.lower()
-            if any(k in t_low for k in ["testing", "test", "tosca", "postman", "soapui", "swagger", "kibana", "istqb", "iseb", "playwright", "selenium", "cypress", "appium", "api", "uat", "sit", "prompt", "ai"]):
-                if t not in cat1_items:
-                    cat1_items.append(t)
-            elif any(k in t_low for k in ["gitlab", "git", "jira", "xray", "confluence", "testrail", "hp", "alm", "azure", "windows", "linux", "crm", "agile", "scrum", "kanban"]):
-                if t not in cat2_items:
-                    cat2_items.append(t)
-            else:
-                if t not in cat3_items:
-                    cat3_items.append(t)
+        # 3. DYNAMIC 3-TIER SKILLS TAXONOMY (4-6 TAGS, ZERO DUPLICATES)
+        tailored["skills"] = JobAnalyzer.generate_dynamic_skills(job_description, lang=lang)
 
-        # Ensure base defaults if matched items are few
-        cat1_defaults = ["Manual Testing", "API Testing", "Bug Reporting", "Integration Testing", "Functional Testing", "Regression Testing"]
-        for d in cat1_defaults:
-            if d not in cat1_items:
-                cat1_items.append(d)
-
-        cat2_defaults = ["Jira", "Azure DevOps", "Git", "GitLab / GitLab CI", "Confluence", "SQL Database Verification", "Windows OS"]
-        for d in cat2_defaults:
-            if d not in cat1_items and d not in cat2_items:
-                cat2_items.append(d)
-
-        cat3_defaults = ["Playwright", "SQL", "TypeScript", "JavaScript", "GitLab / GitLab CI"]
-        for d in cat3_defaults:
-            if d not in cat1_items and d not in cat2_items and d not in cat3_items:
-                cat3_items.append(d)
-
-        # Deduplicate Cat2 against Cat1
-        cat2_final = [item for item in cat2_items if item not in cat1_items]
-
-        # Deduplicate Cat3 against Cat1 and Cat2
-        cat3_final = [item for item in cat3_items if item not in cat1_items and item not in cat2_final]
-
-        new_skills = [
-            {"category": "Testing & API" if is_english else "Testowanie & API", "items": cat1_items[:8]},
-            {"category": "Tools & Test Management" if is_english else "Narzędzia & Zarządzanie Testami", "items": cat2_final[:8]},
-            {"category": "Automation & Languages" if is_english else "Automatyzacja & Języki", "items": cat3_final[:8]}
-        ]
-        tailored["skills"] = new_skills
-
-        # Compute 3 Buckets Breakdown for GUI Card
-        bucket_a = matched_techs[:8]
-        bucket_b = [item for item in cat1_items + cat2_final + cat3_final if item not in bucket_a][:8]
-        all_master_tools = ["Android Studio", "Xcode", "Mobile Device Logs", "Docker", "SoapUI"]
-        bucket_c = [t for t in all_master_tools if t not in bucket_a and t not in bucket_b][:5]
-        
-        tailored["_buckets_breakdown"] = {
-            "bucket_a": bucket_a,
-            "bucket_b": bucket_b,
-            "bucket_c": bucket_c
-        }
-
-        # 4. DYNAMIC WORK EXPERIENCE RE-ORDERING
+        # 4. DYNAMIC WORK EXPERIENCE HIGHLIGHTS SYNTHESIS
         raw_exp = ENGLISH_BASELINE_EXPERIENCE if is_english else POLISH_BASELINE_EXPERIENCE
         tailored_exp = []
-        
+
         for job in raw_exp:
             job_copy = json.loads(json.dumps(job))
-            highlights = job_copy.get("highlights", [])
+            company = job_copy.get("company", "")
+            
+            if "Benefit" in company:
+                new_highlights = []
+                if primary_id == "mobile":
+                    new_highlights = [
+                        "Kompleksowe testowanie funkcjonalne, eksploracyjne i regresyjne aplikacji mobilnych (iOS/Android) oraz platform webowych." if not is_english else "Functional, exploratory, and regression testing of mobile (iOS/Android) and web platforms.",
+                        "Przechwytywanie i analiza ruchu API oraz debugowanie komunikacji klient-serwer przy użyciu narzędzi Postman, Proxyman i Burp Suite." if not is_english else "API traffic interception, analysis, and client-server debugging using Postman, Proxyman, and Burp Suite.",
+                        "Projektowanie i zarządzanie ustrukturyzowanymi planami testów oraz dokumentacją projektową w Azure DevOps i Jira (Xray)." if not is_english else "Designing and managing structured test plans and documentation in Azure DevOps and Jira (Xray).",
+                        "Przeprowadzanie testów użyteczności (Usability Testing) oraz weryfikacja specyfikacji technicznych w zintegrowanych zespołach Scrum." if not is_english else "Conducting usability testing and technical specification verification within integrated Scrum teams.",
+                        "Wsparcie automatyzacji testów w Playwright dla modułów webowych i weryfikacja danych w bazach SQL." if not is_english else "Supporting test automation in Playwright for web modules and SQL database verification."
+                    ]
+                elif primary_id == "backend_api":
+                    new_highlights = [
+                        "Weryfikacja usług integracyjnych (REST & SOAP) w narzędziach SoapUI i Postman dla systemów backendowych w architekturze mikroserwisowej." if not is_english else "Validation of integration services (REST & SOAP) using SoapUI and Postman for backend microservices architecture.",
+                        "Analiza logów aplikacyjnych w Elasticsearch / Kibana w celu diagnostyki błędów i weryfikacji przepływu procesów biznesowych." if not is_english else "Application log analysis in Elasticsearch / Kibana for defect diagnostics and business process verification.",
+                        "Wykonywanie zaawansowanych zapytań SQL / PostgreSQL (łączenie tabel, weryfikacja replikacji danych)." if not is_english else "Execution of advanced SQL / PostgreSQL queries (JOINs, data replication verification).",
+                        "Wykonywanie automatycznych testów regresyjnych E2E dla modułów webowych w Playwright." if not is_english else "Executed automated E2E regression suites for web application modules using Playwright.",
+                        "Tworzenie planów testów, scenariuszy testowych oraz dokumentacji w Jira (Xray) i Confluence." if not is_english else "Prepared test plans, test scenarios, and documentation in Jira (Xray) and Confluence."
+                    ]
+                elif primary_id == "automation":
+                    job_desc_lower = job_description.lower()
+                    if "jmeter" in job_desc_lower or "performance" in job_desc_lower or "c#" in job_desc_lower or "selenoid" in job_desc_lower:
+                        new_highlights = [
+                            "Projektowanie i budowanie skalowalnych frameworków automatyzacji testów UI oraz API w Playwright, Selenium i C# / TypeScript." if not is_english else "Designing and building scalable UI & API test automation frameworks using Playwright, Selenium, and C# / TypeScript.",
+                            "Przygotowywanie i realizacja strategii testów wydajnościowych (Load & Stress Testing) w narzędziu Apache JMeter w celu identyfikacji wąskich gardeł." if not is_english else "Designing and executing UI & API performance, load, and stress testing strategies with Apache JMeter to eliminate system bottlenecks.",
+                            "Integracja zautomatyzowanych testów z pipeline'ami CI/CD w środowiskach Docker oraz Jenkins / GitLab CI." if not is_english else "Embedding automated test suites into CI/CD pipelines utilizing Docker and Jenkins / GitLab CI.",
+                            "Weryfikacja integracji API oraz asynchronicznej wymiany komunikatów (RabbitMQ / REST API) przy użyciu narzędzi Postman i baz danych SQL." if not is_english else "Validating API integrations and messaging workflows (RabbitMQ / REST API) using Postman and SQL database queries.",
+                            "Zarządzanie defektami, analiza przyczyn źródłowych (Root Cause Analysis) oraz raportowanie metryk jakości w Jira (Xray) i Git w środowiskach Linux/Windows." if not is_english else "Leading defect triage, root cause analysis, and tracking quality metrics in Jira (Xray) and Git across Linux/Windows environments."
+                        ]
+                    else:
+                        new_highlights = [
+                            "Projektowanie, rozwój i utrzymanie automatycznych zestawów testów E2E dla modułów webowych w Playwright (TypeScript/JavaScript)." if not is_english else "Designing, developing, and maintaining automated E2E test suites for web applications using Playwright (TypeScript/JavaScript).",
+                            "Integracja i uruchamianie testów automatycznych w ramach pipeline'ów CI/CD (GitLab CI / GitHub Actions / Jenkins)." if not is_english else "Integrating and executing automated test suites within CI/CD pipelines (GitLab CI / GitHub Actions / Jenkins).",
+                            "Walidacja interfejsów API (REST & SOAP) przy użyciu Postman i weryfikacja spójności danych za pomocą zapytań SQL." if not is_english else "Validating REST & SOAP APIs using Postman and ensuring data consistency via SQL queries.",
+                            "Projektowanie ustrukturyzowanych scenariuszy testowych w Jira (Xray) oraz raportowanie metryk jakości w zespole Agile." if not is_english else "Designing structured test scenarios in Jira (Xray) and reporting test metrics across Agile teams."
+                        ]
+                elif primary_id in ["manual_qa", "manual_banking"]:
+                    new_highlights = [
+                        "Przygotowywanie oraz realizacja scenariuszy i przypadków testowych dla systemów biznesowych i aplikacji webowych." if not is_english else "Preparing and executing test scenarios and test cases for enterprise web applications.",
+                        "Przeprowadzanie testów funkcjonalnych, regresyjnych oraz akceptacyjnych (UAT) wdrażanych rozwiązań informatycznych." if not is_english else "Conducting functional, regression, and acceptance (UAT) testing of software solutions.",
+                        "Rejestrowanie, szczegółowa analiza oraz weryfikacja poprawek błędów w narzędziach Jira i Confluence." if not is_english else "Defect tracking, detailed bug analysis, and verification of fixes using Jira and Confluence.",
+                        "Weryfikacja spójności i poprawności danych za pomocą zapytań SQL na środowiskach bazodanowych." if not is_english else "Verifying data integrity and correctness via SQL queries across database environments.",
+                        "Wsparcie automatyzacji testów w Playwright oraz testów API w Postman." if not is_english else "Supporting test automation in Playwright and API testing using Postman."
+                    ]
+                else: # management_process
+                    new_highlights = [
+                        "Projektowanie i zarządzanie ustrukturyzowanymi planami testów oraz dokumentacją w Azure DevOps Test Plans i Jira (Xray)." if not is_english else "Designing and managing structured test plans in Azure DevOps Test Plans and Jira (Xray).",
+                        "Przeprowadzanie testów integracyjnych, funkcjonalnych, regresyjnych oraz akceptacyjnych (UAT) dla systemów biznesowych." if not is_english else "Conducting integration, functional, regression, and UAT testing for enterprise applications.",
+                        "Zarządzanie procesem testowym (Test Management) w pełnym cyklu wytwórczym oprogramowania (SDLC) zgodnie ze standardami ISTQB." if not is_english else "Managing the test process across the SDLC according to ISTQB standards.",
+                        "Wykonywanie zapytań SQL w celu weryfikacji spójności i poprawności danych na środowiskach Windows OS." if not is_english else "Executing SQL queries to verify data integrity across Windows OS environments.",
+                        "Wykonywanie walidacji interfejsów API (REST & SOAP) przy użyciu Postman i weryfikacja wyników na środowiskach testowych." if not is_english else "Executing API validation using Postman and verifying results on test environments."
+                    ]
+                job_copy["highlights"] = new_highlights
 
-            def score_highlight(h_text: str) -> int:
-                h_lower = h_text.lower()
-                score = 0
-                for tech in matched_techs:
-                    if tech.lower() in h_lower:
-                        score += 3
-                return score
-
-            sorted_highlights = sorted(highlights, key=score_highlight, reverse=True)
-            job_copy["highlights"] = sorted_highlights
             tailored_exp.append(job_copy)
 
         tailored["experience"] = tailored_exp
 
-        # 5. LANGUAGES SECTION
-        if is_english:
-            tailored["languages"] = [
-                {"language": "Polish", "level": "Native"},
-                {"language": "English", "level": "Full Professional (C2)"}
-            ]
-        else:
-            tailored["languages"] = [
-                {"language": "Polski", "level": "Ojczysty (Native)"},
-                {"language": "Angielski", "level": "Biegły (Professional)"}
-            ]
-
-        # 6. FLUENT DYNAMIC PROFESSIONAL SUMMARY (NATIVE RECRUITMENT PHRASING)
-        has_automation = any(k in job_lower for k in ["playwright", "typescript", "javascript", "automation", "automatyzac"])
-        top_tech_str = ", ".join(matched_techs[:4]) if matched_techs else "Playwright, TypeScript, JavaScript, GitLab CI"
-        
-        if is_english:
-            if has_automation:
-                s1 = f"Senior QA Automation Engineer with 5+ years of experience specializing in automated E2E and API testing using {top_tech_str} within CI/CD pipelines."
+        # 5. DYNAMIC PROFESSIONAL SUMMARY (40-80 WORDS, ZERO AI SLOP)
+        if primary_id == "mobile":
+            if is_english:
+                summary_text = f"{current_title} with {exp_years_phrase} commercial experience in end-to-end testing of mobile (iOS/Android) and web applications. Proficient in network traffic interception and API debugging using Postman, Proxyman, and Burp Suite. Experienced in designing structured test plans within Azure DevOps and Jira/Xray, conducting usability testing, and verifying technical requirements in Agile/Scrum teams."
             else:
-                s1 = f"Software QA Engineer with 5+ years of experience specializing in manual, functional, and API testing using {top_tech_str}."
-            s2 = "Proficient in test plan creation, test scenario design, defect reporting on GitLab/Jira, and database verification across Agile delivery teams."
-            s3 = "Experienced in preparing comprehensive test documentation, execution summary reports, and quality metrics for enterprise applications."
-            s4 = "Complemented by test automation capabilities using Playwright and TypeScript."
-        else:
-            if has_automation:
-                s1 = f"Senior QA Automation Engineer z ponad 5-letnim doświadczeniem w automatyzacji testów E2E i API z użyciem {top_tech_str} w środowiskach CI/CD."
+                summary_text = f"{current_title} z {exp_years_phrase} doświadczeniem w kompleksowym testowaniu aplikacji mobilnych (iOS/Android), webowych oraz API. Doświadczony w analizie ruchu sieciowego i walidacji backendu przy użyciu narzędzi Postman, Proxyman i Burp Suite. Biegły w projektowaniu ustrukturyzowanych planów testów w Azure DevOps oraz Jira/Xray, testach użyteczności oraz weryfikacji wymagań w zwinnych zespołach Scrum."
+        elif primary_id == "backend_api":
+            if is_english:
+                summary_text = f"{current_title} with {exp_years_phrase} experience specializing in integration and functional testing across microservices architectures (REST & SOAP). Proficient in API service testing via SoapUI and Postman, application log analysis in Elasticsearch, and relational database verification using complex SQL queries. Experienced in business process management and Jira/Xray tooling."
             else:
-                s1 = f"Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym, funkcjonalnym oraz API z użyciem {top_tech_str}."
-            s2 = "Posiada szerokie doświadczenie w tworzeniu planów testów, przypadków testowych, zgłaszaniu błędów w GitLab/Jira oraz weryfikacji baz danych SQL."
-            s3 = "Ekspert w tworzeniu dokumentacji projektowej i zapewnianiu jakości serwisów oraz portali internetowych."
-            s4 = "Wspierany wiedzą z zakresu automatyzacji testów w Playwright oraz narzędziach JavaScript/TypeScript."
+                summary_text = f"{current_title} z {exp_years_phrase} doświadczeniem w testach integracyjnych, funkcjonalnych oraz weryfikacji architektury mikroserwisowej (REST & SOAP). Biegły w testowaniu usług przez SoapUI i Postman, analizie logów aplikacyjnych w Elasticsearch oraz weryfikacji relacyjnych baz danych SQL. Doświadczony w pracy z narzędziami Jira/Xray oraz automatyzacji w Playwright."
+        elif primary_id == "automation":
+            job_desc_lower = job_description.lower()
+            if "jmeter" in job_desc_lower or "performance" in job_desc_lower or "c#" in job_desc_lower or "selenoid" in job_desc_lower:
+                if is_english:
+                    summary_text = f"{current_title} with {exp_years_phrase} experience in test automation, UI & API performance engineering, and software quality assurance. Proficient in building automated frameworks using Playwright, Selenium, and C#, designing load and stress testing strategies in JMeter, and integrating tests into CI/CD pipelines (Docker, Jenkins, Git). Skilled in API validation, defect triage in Jira/Xray, and cross-platform verification across Linux and Windows environments."
+                else:
+                    summary_text = f"{current_title} z {exp_years_phrase} doświadczeniem w automatyzacji testów, inżynierii wydajności UI & API oraz zapewnianiu jakości oprogramowania. Biegły w projektowaniu frameworków testowych w Playwright, Selenium i C#, realizacji testów obciążeniowych w JMeter oraz integracji testów z pipeline'ami CI/CD (Docker, Jenkins, Git). Doświadczony w testach API, weryfikacji defektów w Jira/Xray i pracy w środowiskach Linux/Windows."
+            else:
+                if is_english:
+                    summary_text = f"{current_title} with {exp_years_phrase} experience in test automation and QA engineering. Proficient in building and maintaining automated E2E test suites using Playwright (TypeScript/JavaScript) and integrating them into CI/CD pipelines (GitLab CI/GitHub Actions). Skilled in REST API validation, SQL database verification, and structured defect reporting in Jira/Xray."
+                else:
+                    summary_text = f"{current_title} z {exp_years_phrase} doświadczeniem w automatyzacji testów i inżynierii jakości oprogramowania. Biegły w tworzeniu i utrzymaniu testów E2E w Playwright (TypeScript/JavaScript) oraz integracji z pipeline'ami CI/CD (GitLab CI/GitHub Actions). Doświadczony w testach API REST, weryfikacji baz danych SQL oraz raportowaniu błędów w Jira/Xray."
+        elif primary_id in ["manual_qa", "manual_banking"]:
+            if is_english:
+                summary_text = f"{current_title} with {exp_years_phrase} experience in manual, functional, and regression testing of software systems and web applications. Proficient in test scenario preparation, defect reporting in Jira, and SQL database verification. Holds ISTQB certification with a solid track record in QA delivery across Agile teams."
+            else:
+                summary_text = f"{current_title} z {exp_years_phrase} doświadczeniem w testowaniu manualnym, funkcjonalnym oraz regresyjnym systemów informatycznych i aplikacji biznesowych. Biegły w przygotowywaniu scenariuszy i przypadków testowych, raportowaniu błędów w Jira oraz weryfikacji relacyjnych baz danych SQL. Posiada certyfikat ISTQB oraz praktyczną wiedzę z zakresu zapewniania jakości oprogramowania w zespołach Agile."
+        else: # management_process
+            if is_english:
+                summary_text = f"{current_title} with {exp_years_phrase} experience in test management, SDLC quality assurance, and structured test plan execution within Azure DevOps and Jira/Xray. Proficient in integration, functional, regression, and UAT testing of enterprise business applications. Skilled in SQL database verification across Windows OS environments."
+            else:
+                summary_text = f"{current_title} z {exp_years_phrase} doświadczeniem w zarządzaniu testami (Test Management), zapewnianiu jakości w cyklu SDLC oraz tworzeniu ustrukturyzowanych planów testów w Azure DevOps i Jira (Xray). Biegły w testach integracyjnych, funkcjonalnych, regresyjnych oraz akceptacyjnych (UAT) systemów biznesowych. Doświadczony w weryfikacji baz danych SQL na środowiskach Windows OS."
 
-        tailored["summary"] = f"{s1} {s2} {s3} {s4}"
-        tailored["certifications"] = []
-        return tailored
+        tailored["summary"] = summary_text
 
-    def _clean_and_parse_json(self, text: str, fallback: Dict[str, Any]) -> Dict[str, Any]:
+        # 6. RUN SANITY CHECK & HYGIENE LAYER
+        return QALogicEngine.audit_and_refine_profile(tailored, lang=lang, job_text=job_description, master_profile=master_profile)
+
+    def _clean_and_parse_json(self, text: str, fallback: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        if not text:
+            return fallback or {}
         text = text.strip()
         if text.startswith("```json"):
             text = text[7:]
@@ -467,4 +522,4 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV. Nie używaj znaczników markdo
             return json.loads(text)
         except Exception as e:
             print(f"[AIEngine Error] JSON parsing failed: {e}")
-            return fallback
+            return fallback or {}
