@@ -311,9 +311,8 @@
                         <div class="form-group" style="margin-bottom: 0;">
                             <label class="form-label">Język CV</label>
                             <select id="cvLanguage" class="form-select" onchange="updatePreview()">
-                                <option value="auto" selected>🌐 Auto-detekcja (zgodnie z ofertą)</option>
+                                <option value="en" selected>🇬🇧 English (EN)</option>
                                 <option value="pl">🇵🇱 Polski (PL)</option>
-                                <option value="en">🇬🇧 English (EN)</option>
                             </select>
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
@@ -821,7 +820,10 @@
         async function resetDraftToMaster() {
             if (!confirm("Czy na pewno chcesz zresetować obecny DRAFT i przywrócić czysty profil bazowy?")) return;
             try {
-                const res = await fetch('/api/profile/reset', { method: 'POST' });
+                const res = await fetch('/api/profile/reset', { 
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
                 const data = await res.json();
                 if (data.status === "success") {
                     currentDraftProfile = null;
@@ -829,7 +831,12 @@
                     document.getElementById('jobDescription').value = "";
                     document.getElementById('targetRole').value = "";
                     document.getElementById('jobSpecCard').style.display = "none";
-                    updatePreview();
+                    
+                    const iframe = document.getElementById('previewIframe');
+                    iframe.removeAttribute('srcdoc');
+                    
+                    await loadMasterProfileData();
+                    await updatePreview();
                     alert("✅ " + data.message);
                 }
             } catch (err) {

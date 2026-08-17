@@ -153,7 +153,8 @@ def reset_profile_api():
             TAILORED_PROFILE_PATH.unlink()
         except Exception:
             pass
-    master_profile = load_json_file(DEFAULT_PROFILE_PATH, {})
+    user_id = get_authenticated_user_id()
+    master_profile = DBManager.get_profile(user_id=user_id)
     return jsonify({"status": "success", "message": "Aktywny DRAFT został zresetowany. Przywrócono czysty profil bazowy!", "profile": master_profile})
 
 @app.route("/api/profile/delete", methods=["POST", "DELETE"])
