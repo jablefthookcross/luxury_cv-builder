@@ -37,6 +37,12 @@ jobs:
 
     steps:
       - name: 📡 Trigger Render Deploy Hook
-        if: ${{ secrets.RENDER_DEPLOY_HOOK_URL != '' }}
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          if [ -n "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "Triggering deployment on Render.com..."
+            curl -X POST "$RENDER_DEPLOY_HOOK_URL"
+          else
+            echo "RENDER_DEPLOY_HOOK_URL secret is not set. Skipping CD trigger."
+          fi
