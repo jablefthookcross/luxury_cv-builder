@@ -97,14 +97,141 @@
             justify-content: center;
             z-index: 1000;
         }
-        .modal-card {
-            background: #0f172a;
-            border: 1px solid var(--accent-blue);
+        .welcome-hero {
+            min-height: 75vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 3.5rem 1.5rem;
+            background: radial-gradient(circle at 50% 30%, rgba(59, 130, 246, 0.14), transparent 70%),
+                        radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.08), transparent 50%);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-top: 1rem;
+        }
+
+        .welcome-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1.1rem;
+            border-radius: 20px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .welcome-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.7rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            max-width: 800px;
+            margin-bottom: 1.2rem;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            max-width: 680px;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+
+        .welcome-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            max-width: 900px;
+            width: 100%;
+            margin-bottom: 3rem;
+        }
+
+        .welcome-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.07);
             border-radius: var(--radius-md);
             padding: 1.5rem;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            text-align: left;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .welcome-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .welcome-card-icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .welcome-card-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: white;
+            margin-bottom: 0.4rem;
+        }
+
+        .welcome-card-desc {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .welcome-cta-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-hero-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 0.85rem 1.8rem;
+            border-radius: var(--radius-sm);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(59, 130, 246, 0.6);
+        }
+
+        .btn-hero-secondary {
+            background: rgba(30, 41, 59, 0.8);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 0.85rem 1.8rem;
+            border-radius: var(--radius-sm);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(51, 65, 85, 0.8);
+            color: white;
         }
     </style>
 </head>
@@ -115,17 +242,57 @@
             <span class="brand-title">VitaeCraft AI</span>
             <span class="brand-tag">v2.1 QA Architecture</span>
         </div>
-        <nav class="nav-tabs">
-            <button class="nav-btn active" onclick="switchTab('tailor', this)">⚡ Dopasowanie & Draft</button>
-            <button class="nav-btn" onclick="switchTab('saved', this)">📚 Moje CV-ki (Archiwum)</button>
-            <button class="nav-btn" onclick="switchTab('profile', this)">📋 Profil Bazowy</button>
-            <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Ustawienia AI</button>
-            <button class="btn-secondary" style="margin-left: 0.5rem; border-color: rgba(59, 130, 246, 0.4); color: #60a5fa;" onclick="openAuthModal()" id="btnAuthHeader">🔑 Logowanie</button>
-        </nav>
+
+        <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <nav class="nav-tabs" id="authenticatedNavTabs" style="display: none;">
+                <button class="nav-btn active" onclick="switchTab('tailor', this)">⚡ Dopasowanie & Draft</button>
+                <button class="nav-btn" onclick="switchTab('saved', this)">📚 Moje CV-ki (Archiwum)</button>
+                <button class="nav-btn" onclick="switchTab('profile', this)">📋 Profil Bazowy</button>
+                <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Ustawienia AI</button>
+            </nav>
+
+            <div id="authHeaderGroup" style="display: flex; align-items: center; gap: 0.5rem;">
+                <button class="btn-secondary" style="border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; height: 38px; padding: 0 1rem; font-size: 0.85rem;" onclick="openAuthModal()" id="btnAuthHeader">🔑 Logowanie</button>
+                <button class="btn-secondary" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171; height: 38px; padding: 0 0.8rem; font-size: 0.85rem; display: none;" onclick="logoutUser()" id="btnLogoutHeader">🚪 Wyloguj się</button>
+            </div>
+        </div>
     </header>
 
     <main class="main-container">
-        <!-- TAB 1: DOPASOWANIE & DRAFT -->
+        <!-- LUXURY WELCOME LANDING SCREEN FOR UNAUTHENTICATED USERS -->
+        <div id="welcomeScreen" class="welcome-hero">
+            <div class="welcome-badge">⚡ VitaeCraft AI — Executive Resume Intelligence</div>
+            <h1 class="welcome-title">Stwórz Perfekcyjne, Single-Page CV Dopasowane do Ofert w 30 Sekund</h1>
+            <p class="welcome-subtitle">
+                Inteligentny generator i dostosowywacz CV dla Inżynierów QA oraz Specjalistów IT. 
+                Automatyczna weryfikacja Anti-AI, bezbłędny eksport PDF 1:1, skanery ATS i bezpieczna chmura Supabase.
+            </p>
+
+            <div class="welcome-features">
+                <div class="welcome-card">
+                    <div class="welcome-card-icon">🎯</div>
+                    <div class="welcome-card-title">100% Single-Page A4 Engine</div>
+                    <div class="welcome-card-desc">Wektorowe silniki renderujące Playwright gwarantują perfekcyjne domknięcie dokumentu na 1 stronie A4 bez wycieków.</div>
+                </div>
+                <div class="welcome-card">
+                    <div class="welcome-card-icon">🤖</div>
+                    <div class="welcome-card-title">Anti-AI & QA Logic Auditor</div>
+                    <div class="welcome-card-desc">Zero botowych fraz. Autentyczny język inżynierski oparty na normach ISTQB, API (Postman/SoapUI), Playwright i SQL.</div>
+                </div>
+                <div class="welcome-card">
+                    <div class="welcome-card-icon">🔒</div>
+                    <div class="welcome-card-title">Supabase Cloud Vault</div>
+                    <div class="welcome-card-desc">Twoje dane, bazowy profil oraz zapamiętane CV-ki chronione szyfrowaniem i politykami Row Level Security (RLS).</div>
+                </div>
+            </div>
+
+            <div class="welcome-cta-group">
+                <button class="btn-hero-primary" onclick="openAuthRegisterDirect()">🚀 Zarejestruj się i Zacznij Darmowo</button>
+                <button class="btn-hero-secondary" onclick="openAuthLoginDirect()">🔑 Mam już konto (Zaloguj się)</button>
+            </div>
+        </div>
+
+        <div id="appDashboard" style="display: none;">
         <div id="tab-tailor" class="tab-content active">
             <div class="left-panel">
                 <div class="card">
@@ -392,6 +559,7 @@
                     <input type="text" id="ollamaModel" class="form-input" value="llama3.2">
                 </div>
                 <button class="btn-primary" onclick="saveSettings()" style="margin-top: 1rem;">💾 Zapisz Ustawienia</button>
+            </div>
             </div>
         </div>
     </main>
@@ -1085,9 +1253,11 @@
                     }
                     if (data.user) {
                         localStorage.setItem('user_email', data.user.email);
-                        document.getElementById('btnAuthHeader').textContent = '👤 ' + data.user.email;
                     }
-                    setTimeout(closeAuthModal, 1500);
+                    setTimeout(() => {
+                        closeAuthModal();
+                        checkAuthStateAndApplyGuard();
+                    }, 1200);
                 } else {
                     alertBox.style.display = 'block';
                     alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
@@ -1102,12 +1272,66 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const savedEmail = localStorage.getItem('user_email');
-                if (savedEmail) {
-                    document.getElementById('btnAuthHeader').textContent = '👤 ' + savedEmail;
+        function openAuthRegisterDirect() {
+            isAuthRegisterMode = true;
+            document.getElementById('authModalTitle').textContent = "📝 Rejestracja w VitaeCraft AI";
+            document.getElementById('authSubmitBtn').textContent = "🚀 Zarejestruj się";
+            document.getElementById('authToggleBtn').textContent = "Mam już konto (Logowanie)";
+            document.getElementById('authFullNameGroup').style.display = "flex";
+            openAuthModal();
+        }
+
+        function openAuthLoginDirect() {
+            isAuthRegisterMode = false;
+            document.getElementById('authModalTitle').textContent = "🔑 Logowanie do VitaeCraft AI";
+            document.getElementById('authSubmitBtn').textContent = "🔑 Zaloguj się";
+            document.getElementById('authToggleBtn').textContent = "Załóż konto (Rejestracja)";
+            document.getElementById('authFullNameGroup').style.display = "none";
+            openAuthModal();
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('supabase_token');
+            checkAuthStateAndApplyGuard();
+        }
+
+        function checkAuthStateAndApplyGuard() {
+            const savedEmail = localStorage.getItem('user_email');
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const appDashboard = document.getElementById('appDashboard');
+            const authNavTabs = document.getElementById('authenticatedNavTabs');
+            const btnAuthHeader = document.getElementById('btnAuthHeader');
+            const btnLogoutHeader = document.getElementById('btnLogoutHeader');
+
+            if (savedEmail) {
+                if (welcomeScreen) welcomeScreen.style.display = 'none';
+                if (appDashboard) appDashboard.style.display = 'block';
+                if (authNavTabs) authNavTabs.style.display = 'flex';
+                if (btnAuthHeader) {
+                    btnAuthHeader.textContent = '👤 ' + savedEmail;
+                    btnAuthHeader.onclick = null;
                 }
+                if (btnLogoutHeader) {
+                    btnLogoutHeader.style.display = 'inline-block';
+                }
+            } else {
+                if (welcomeScreen) welcomeScreen.style.display = 'flex';
+                if (appDashboard) appDashboard.style.display = 'none';
+                if (authNavTabs) authNavTabs.style.display = 'none';
+                if (btnAuthHeader) {
+                    btnAuthHeader.textContent = '🔑 Logowanie';
+                    btnAuthHeader.onclick = openAuthModal;
+                }
+                if (btnLogoutHeader) {
+                    btnLogoutHeader.style.display = 'none';
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            checkAuthStateAndApplyGuard();
+            try {
                 const res = await fetch('/api/settings');
                 const s = await res.json();
                 if (s.gemini_key) document.getElementById('geminiApiKey').value = s.gemini_key;
