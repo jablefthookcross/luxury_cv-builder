@@ -56,6 +56,41 @@ def clean_raw_job_text(text: str) -> str:
     return "\n".join(cleaned)
 
 
+def clean_target_role(role: str) -> str:
+    """Sanitizes job role title, removing gender tags, brackets and redundant noise."""
+    if not role:
+        return "Senior QA Engineer"
+    clean = str(role).strip()
+    
+    # 1. Remove gender indicators in brackets: (f/m), (m/f), (k/m), (m/k), (f/m/d), (m/w/d), (d/f/m), (k/m/inny), (f/m/x), etc.
+    clean = re.sub(r'\s*\([fmkdwdxy\s/,\-–—]+\)', '', clean, flags=re.IGNORECASE)
+    
+    # 2. Normalize dual gender slashes
+    clean = re.sub(r'\bTester\s*/\s*Testerka\b', 'Tester', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'\bTesterka\s*/\s*Tester\b', 'Tester', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'\bSpecjalista\s*/\s*Specjalistka\b', 'Specjalista', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'\bSpecjalistka\s*/\s*Specjalista\b', 'Specjalista', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'\bInżynier\s*/\s*Inżynierka\b', 'Inżynier', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'\bInżynierka\s*/\s*Inżynier\b', 'Inżynier', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'\bDeveloper\s*/\s*Developerka\b', 'Developer', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'\bDeveloperka\s*/\s*Developer\b', 'Developer', clean, flags=re.IGNORECASE)
+    
+    # 3. Phrasing fixes
+    clean = re.sub(r'aplikacji webowej', 'Aplikacji Webowych', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'aplikacji mobilnej', 'Aplikacji Mobilnych', clean, flags=re.IGNORECASE)
+    
+    # 4. Clean trailing / leading punctuation
+    clean = re.sub(r'[\s\-–—/|:]+$', '', clean).strip()
+    clean = re.sub(r'^[\s\-–—/|:]+', '', clean).strip()
+    
+    # Deduplicate repeated words like "Oprogramowania Oprogramowania"
+    clean = re.sub(r'\b(\w+)\s+\1\b', r'\1', clean, flags=re.IGNORECASE)
+    
+    if clean.lower() in ["tester", "testerka", "qa", "qa tester"]:
+        clean = "Tester Oprogramowania"
+    return clean or "Senior QA Engineer"
+
+
 class JobExtractor:
     @staticmethod
     def detect_language(text: str) -> str:
@@ -169,18 +204,8 @@ class JobExtractor:
         if not target_role:
             target_role = lines[0] if lines and len(lines[0]) < 50 else "Tester Oprogramowania"
 
-        # Normalize gender slash titles and specific role phrasing
-        target_role = re.sub(r'\s*\(k/m\)', '', target_role, flags=re.IGNORECASE)
-        target_role = re.sub(r'\s*\(m/f\)', '', target_role, flags=re.IGNORECASE)
-        target_role = re.sub(r'\s*\(k/m/d\)', '', target_role, flags=re.IGNORECASE)
-        target_role = re.sub(r'tester\s*/\s*testerka\s*', 'Tester ', target_role, flags=re.IGNORECASE)
-        target_role = re.sub(r'testerka\s*/\s*tester\s*', 'Tester ', target_role, flags=re.IGNORECASE)
-        target_role = re.sub(r'specjalista\s*/\s*specjalistka\s*', 'Specjalista ', target_role, flags=re.IGNORECASE)
-        target_role = re.sub(r'specjalistka\s*/\s*specjalista\s*', 'Specjalista ', target_role, flags=re.IGNORECASE)
-        target_role = re.sub(r'aplikacji webowej', 'Aplikacji Webowych', target_role, flags=re.IGNORECASE)
-        target_role = target_role.strip(" -–:,|")
-        if target_role.lower() in ["tester", "testerka", "qa", "qa tester"]:
-            target_role = "Tester Oprogramowania"
+        # Clean & Normalize target role
+        target_role = clean_target_role(target_role)
 
         # 2. Seniority Detection
         seniority = "Mid / Regular"
@@ -338,7 +363,7 @@ class JobExtractor:
     def _sanitize_spec(raw: Dict[str, Any]) -> Dict[str, Any]:
         """Ensures all spec fields are clean lists or strings."""
         return {
-            "target_role": str(raw.get("target_role", "Software QA Specialist")).strip(),
+            "target_role": clean_target_role(raw.get("target_role", "Software QA Specialist")),
             "seniority": str(raw.get("seniority", "Senior")).strip(),
             "domain": str(raw.get("domain", "Quality Assurance")).strip(),
             "primary_technologies": list(dict.fromkeys(raw.get("primary_technologies", []))),

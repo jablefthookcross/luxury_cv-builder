@@ -397,7 +397,11 @@ def saved_cv_export_pdf(cv_id):
 def preview_current():
     global ACTIVE_LANGUAGE, ACTIVE_JOB_TEXT
     template_name = request.args.get("template", "pro_qa_sidebar")
-    lang = request.args.get("lang", ACTIVE_LANGUAGE)
+    req_lang = request.args.get("lang", ACTIVE_LANGUAGE)
+    if not req_lang or req_lang == "auto":
+        lang = JobExtractor.detect_language(ACTIVE_JOB_TEXT) if ACTIVE_JOB_TEXT else "pl"
+    else:
+        lang = req_lang
     ACTIVE_LANGUAGE = lang
     
     data = get_active_profile()
@@ -437,7 +441,7 @@ def export_pdf():
         job_description = payload.get("job_text") or payload.get("job_description") or ACTIVE_JOB_TEXT or ""
         target_role = payload.get("target_role", "")
         template_name = payload.get("template", "pro_qa_sidebar")
-        lang = payload.get("language") or payload.get("lang") or ACTIVE_LANGUAGE
+        req_lang = payload.get("language") or payload.get("lang")
         provider = payload.get("provider", "auto")
     else:
         profile_data = None
@@ -445,8 +449,19 @@ def export_pdf():
         job_description = request.args.get("job_text") or request.args.get("job_description") or ACTIVE_JOB_TEXT or ""
         target_role = request.args.get("target_role", "")
         template_name = request.args.get("template", "pro_qa_sidebar")
-        lang = request.args.get("language") or request.args.get("lang") or ACTIVE_LANGUAGE
+        req_lang = request.args.get("language") or request.args.get("lang")
         provider = request.args.get("provider", "auto")
+
+    # Determine language with priority on auto-detection when lang == 'auto' or unspecified
+    if not req_lang or req_lang == "auto":
+        if job_spec and job_spec.get("detected_language"):
+            lang = job_spec.get("detected_language")
+        elif job_description.strip():
+            lang = JobExtractor.detect_language(job_description)
+        else:
+            lang = ACTIVE_LANGUAGE or "pl"
+    else:
+        lang = req_lang
 
     # Step 1: Load pristine master profile ground truth from disk (READ-ONLY)
     master_profile = load_json_file(DEFAULT_PROFILE_PATH, {})

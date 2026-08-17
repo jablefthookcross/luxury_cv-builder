@@ -449,23 +449,48 @@ class CVTailorEngine:
 
         # 3. Dynamic Summary Synthesis (No AI slop or bracket lists)
         exp_phrase = "5+ years of" if is_en else "ponad 5-letnim"
-        clean_primary_tech = [re.sub(r'\s*\([^)]*\)', '', t).strip() for t in primary_tech if "istqb" not in t.lower()]
         
-        # Deduplicate synonyms from key_tech_str
-        unique_primary = []
-        seen_st = set()
-        for t in clean_primary_tech:
-            t_norm = re.sub(r'[^a-zA-Z0-9]', '', t.lower())
-            if any(t_norm in s or s in t_norm for s in seen_st if len(s) > 3):
+        # 3a. Automation Frameworks & Languages
+        AUTO_FRAMEWORKS_KW = ["playwright", "selenium", "appium", "cypress", "testng", "junit", "pytest", "robot framework", "c#", "typescript", "python", "javascript", "java"]
+        auto_tech_list = []
+        for t in (primary_tech + secondary_tech + tools):
+            if any(kw in t.lower() for kw in AUTO_FRAMEWORKS_KW) and "istqb" not in t.lower():
+                clean_t = re.sub(r'\s*\([^)]*\)', '', t).strip()
+                if clean_t and clean_t not in auto_tech_list:
+                    auto_tech_list.append(clean_t)
+        if not auto_tech_list:
+            auto_tech_list = ["Selenium WebDriver", "Playwright"] if is_en else ["Selenium WebDriver", "Playwright"]
+        auto_tech_str = ", ".join(auto_tech_list[:3])
+
+        # 3b. CI/CD & Cloud Infrastructure (Docker, Kubernetes, AWS, Azure, Jenkins, GitLab CI)
+        CI_CLOUD_KW = ["docker", "kubernetes", "k8s", "aws", "azure", "jenkins", "gitlab", "github", "ci/cd", "continuous integration", "cloud"]
+        ci_cloud_list = []
+        for t in (secondary_tech + tools + primary_tech):
+            if any(kw in t.lower() for kw in CI_CLOUD_KW) and "istqb" not in t.lower():
+                clean_t = re.sub(r'\s*\([^)]*\)', '', t).strip()
+                if clean_t and clean_t not in ci_cloud_list:
+                    ci_cloud_list.append(clean_t)
+        
+        if ci_cloud_list:
+            ci_str_en = f"integrating test execution across CI/CD and cloud environments ({', '.join(ci_cloud_list[:2])}), "
+            ci_str_pl = f"integracji procesów testowych ze środowiskami CI/CD i chmurowymi ({', '.join(ci_cloud_list[:2])}), "
+        else:
+            ci_str_en = "integrating automated workflows into CI/CD pipelines, " if has_cicd else ""
+            ci_str_pl = "integracji procesów testowych z pipeline'ami CI/CD, " if has_cicd else ""
+
+        # 3c. Defect Management Tools (Strictly Jira, Confluence, Xray, Azure DevOps Test Plans - NEVER cloud/Docker)
+        DEFECT_KW = ["jira", "confluence", "xray", "azure devops test plans", "azure devops", "bugzilla", "hp qc", "alm", "zephyr", "qase"]
+        defect_list = []
+        for t in tools:
+            # Explicitly exclude pure clouds or containers from defect management
+            if any(kw in t.lower() for kw in ["aws", "docker", "kubernetes", "k8s", "linux", "windows"]):
                 continue
-            unique_primary.append(t)
-            seen_st.add(t_norm)
-        key_tech_str = ", ".join(unique_primary[:3]) or ("Selenium, Playwright and SQL" if is_en else "Selenium, Playwright oraz SQL")
-        
-        clean_tools = [re.sub(r'\s*\([^)]*\)', '', t).strip() for t in tools if "istqb" not in t.lower() and not any(m in t.lower() for m in ["agile", "scrum"])]
-        key_tools_str = ", ".join(clean_tools[:3]) or ("Jira and Confluence" if is_en else "Jira i Confluence")
-        ci_str_en = "integrating automated workflows into CI/CD pipelines, " if has_cicd else ""
-        ci_str_pl = "integracji procesów testowych z pipeline'ami CI/CD, " if has_cicd else ""
+            if any(kw in t.lower() for kw in DEFECT_KW):
+                clean_t = re.sub(r'\s*\([^)]*\)', '', t).strip()
+                if clean_t and clean_t not in defect_list:
+                    defect_list.append(clean_t)
+        defect_tools_str = ", ".join(defect_list[:2]) or ("Jira (Xray) and Confluence" if is_en else "Jira (Xray) i Confluence")
+
         has_istqb = any("istqb" in str(x).lower() for x in (primary_tech + testing_types + tools))
         istqb_str_pl = " Posiada certyfikat ISTQB." if has_istqb else ""
         istqb_str_en = " Certified in ISTQB standards." if has_istqb else ""
@@ -473,15 +498,15 @@ class CVTailorEngine:
         if is_en:
             summary = (
                 f"{target_title} with {exp_phrase} experience specializing in web application quality assurance and test automation. "
-                f"Proficient in designing structured verification strategies, developing automated test suites utilizing {key_tech_str}, "
-                f"{ci_str_en}and defect management in {key_tools_str}. "
+                f"Proficient in designing structured verification strategies, developing automated test suites utilizing {auto_tech_str}, "
+                f"{ci_str_en}and defect management in {defect_tools_str}. "
                 f"Skilled in backend data validation using SQL queries.{istqb_str_en}"
             )
         else:
             summary = (
                 f"{target_title} z {exp_phrase} doświadczeniem w testowaniu i zapewnianiu jakości oprogramowania. "
-                f"Specjalizuje się w projektowaniu ustrukturyzowanych strategii weryfikacji, automatyzacji testów w oparciu o {key_tech_str} "
-                f"{ci_str_pl}oraz sprawnym raportowaniu defektów w {key_tools_str}. "
+                f"Specjalizuje się w projektowaniu ustrukturyzowanych strategii weryfikacji, automatyzacji testów w oparciu o {auto_tech_str} "
+                f"{ci_str_pl}oraz sprawnym raportowaniu defektów w {defect_tools_str}. "
                 f"Biegle waliduje spójność danych z wykorzystaniem relacyjnych baz danych SQL.{istqb_str_pl}"
             )
 

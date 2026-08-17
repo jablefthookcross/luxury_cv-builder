@@ -118,13 +118,16 @@
         }
 
         .rodo-clause {
-            font-size: 0.68rem;
-            color: #94a3b8;
+            font-size: 6.6pt;
+            color: #8c9ba5;
             border-top: 1px solid #e2e8f0;
-            padding-top: 0.6rem;
-            margin-top: 1.5rem;
+            padding-top: 4px;
+            margin-top: 1.0rem;
             font-style: italic;
-            line-height: 1.35;
+            line-height: 1.25;
+            text-align: justify;
+            word-break: normal;
+            white-space: normal;
         }
 
         @media print {
@@ -132,11 +135,73 @@
                 size: A4 portrait;
                 margin: 0;
             }
-            body {
-                padding: 1.5rem 1.8rem;
-                height: 100%;
+            html, body {
+                background: white;
+                height: 297mm;
+                max-height: 297mm;
+                margin: 0;
+                padding: 8mm 14mm 6mm 14mm;
+                box-sizing: border-box;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                overflow: hidden;
+            }
+            .header {
+                padding-bottom: 0.3rem;
+                margin-bottom: 0.5rem;
+            }
+            .name {
+                font-size: 1.7rem;
+            }
+            .title {
+                font-size: 0.92rem;
+            }
+            .contact-line {
+                margin-top: 0.25rem;
+                gap: 0.7rem;
+                font-size: 0.76rem;
+            }
+            .sec-title {
+                font-size: 0.8rem;
+                margin-top: 0.5rem;
+                margin-bottom: 0.3rem;
+                padding-bottom: 0.12rem;
+            }
+            .summary-text {
+                font-size: 0.76rem;
+                line-height: 1.32;
+            }
+            .exp-item {
+                margin-bottom: 0.45rem;
+            }
+            .role {
+                font-size: 0.84rem;
+            }
+            .company {
+                font-size: 0.78rem;
+            }
+            .dates {
+                font-size: 0.74rem;
+            }
+            .bullet-list {
+                padding-left: 0.95rem;
+                margin-top: 0.12rem;
+            }
+            .bullet-list li {
+                font-size: 0.75rem;
+                line-height: 1.28;
+                margin-bottom: 0.12rem;
+            }
+            .skills-list {
+                font-size: 0.76rem;
+                line-height: 1.28;
+                margin-bottom: 0.15rem;
+            }
+            .rodo-clause {
+                font-size: 6.2pt;
+                line-height: 1.18;
+                margin-top: auto;
+                padding-top: 3px;
             }
         }
     </style>
@@ -198,14 +263,25 @@
     <section>
         <h2 class="sec-title">{% if lang == 'en' %}Education{% else %}Wykształcenie{% endif %}</h2>
         {% for edu in data.education %}
-        <div class="exp-item">
+        <div class="exp-item" style="margin-bottom: 0.25rem;">
             <div class="exp-top">
-                <div class="role">{{ edu.degree }}</div>
-                <div class="dates">{{ edu.graduation_year }} | {{ edu.location }}</div>
+                <div class="role">{{ 'Software Engineering / Computer Science' if lang == 'en' and ('Informatyk' in (edu.degree or '') or 'Oprogramowani' in (edu.degree or '')) else (edu.degree or 'Inżynieria Oprogramowania') }}</div>
+                <div class="dates">{{ edu.graduation_year }} | {{ 'Warsaw, Poland' if lang == 'en' and ('Warszaw' in (edu.location or '') or 'Warsaw' in (edu.location or '')) else (edu.location or 'Warszawa') }}</div>
             </div>
-            <div class="company">{{ edu.institution }}</div>
+            <div class="company">{{ 'University of Technology' if lang == 'en' and ('Uczelnia' in (edu.institution or '') or 'Politechnik' in (edu.institution or '')) else (edu.institution or 'Uczelnia Wyższa') }}</div>
         </div>
         {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if data.languages %}
+    <section>
+        <h2 class="sec-title">{% if lang == 'en' %}Languages{% else %}Języki{% endif %}</h2>
+        <div class="skills-list">
+            {% for item in data.languages %}
+            <span><strong>{{ item.language }}:</strong> {{ item.level }}{% if not loop.last %} &bull; {% endif %}</span>
+            {% endfor %}
+        </div>
     </section>
     {% endif %}
 
