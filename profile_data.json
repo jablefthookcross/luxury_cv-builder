@@ -2,102 +2,16 @@
   "personal_info": {
     "full_name": "Michał Kosowski",
     "title": "Software QA Engineer",
-    "email": "mmkosowski94@gmail.com",
-    "phone": "518075716",
-    "location": "Warsaw, Poland",
-    "website": "",
-    "linkedin": "https://linkedin.com/in/michal-kosowski",
-    "github": "https://github.com"
+    "email": "",
+    "phone": "",
+    "location": "Warszawa",
+    "linkedin": "",
+    "github": ""
   },
-  "summary": "QA Engineer z ponad 5-letnim doświadczeniem w zapewnianiu jakości aplikacji webowych i mobilnych poprzez testy manualne, API oraz automatyczne w Playwright (TypeScript/JavaScript).",
-  "skills": [
-    {
-      "category": "Programowanie & Automatyzacja",
-      "items": [
-        "Playwright",
-        "TypeScript",
-        "JavaScript",
-        "SQL",
-        "Git",
-        "GitLab CI/CD",
-        "GitHub Actions"
-      ]
-    },
-    {
-      "category": "Testowanie & API",
-      "items": [
-        "Manual Testing",
-        "Functional Testing",
-        "Regression Testing",
-        "E2E Testing",
-        "REST/SOAP API Testing",
-        "Postman",
-        "Swagger"
-      ]
-    },
-    {
-      "category": "Narzędzia & Systemy",
-      "items": [
-        "Jira (AIO Tests / Xray)",
-        "Confluence",
-        "Kibana",
-        "Docker",
-        "WSL",
-        "Figma",
-        "Claude Code",
-        "GitHub Copilot"
-      ]
-    }
-  ],
-  "experience": [
-    {
-      "position": "Software tester / QA Automation",
-      "company": "Benefit Systems S.A.",
-      "location": "Warsaw",
-      "start_date": "2022",
-      "end_date": "Obecnie",
-      "highlights": [
-        "Projektowanie, wykonywanie i utrzymywanie automatycznych skryptów testowych E2E dla aplikacji webowych w Playwright (TypeScript/JavaScript).",
-        "Przeprowadzanie testów REST API oraz analiza dokumentacji w Postman i Swagger w celu walidacji integracji backendowych.",
-        "Wykonywanie testów funkcjonalnych, regresyjnych, integracyjnych i eksploracyjnych na platformach webowych i mobilnych.",
-        "Dokumentowanie błędów i scenariuszy testowych w Jira (AIO Tests/Xray) oraz Confluence."
-      ]
-    },
-    {
-      "position": "Test And Analysis Engineer",
-      "company": "Sii Polska Sp. z o.o.",
-      "location": "Warsaw",
-      "start_date": "2021-09",
-      "end_date": "2022-04",
-      "highlights": [
-        "Przeprowadzanie testów manualnych i funkcjonalnych aplikacji webowych HR w oparciu o backlog.",
-        "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z SQL Developer.",
-        "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w Jira."
-      ]
-    },
-    {
-      "position": "Software tester",
-      "company": "Euroloan Group",
-      "location": "Warsaw",
-      "start_date": "2019-07",
-      "end_date": "2021-01",
-      "highlights": [
-        "Kompleksowe testy UI, funkcjonalne i regresyjne systemów E-commerce.",
-        "Tworzenie i wykonywanie scenariuszy testowych."
-      ]
-    }
-  ],
+  "summary": "",
+  "skills": [],
+  "experience": [],
+  "languages": [],
   "education": [],
-  "projects": [],
-  "languages": [
-    {
-      "language": "Polski",
-      "level": "Ojczysty (Native)"
-    },
-    {
-      "language": "Angielski",
-      "level": "Biegły (Professional)"
-    }
-  ],
   "certifications": []
 }

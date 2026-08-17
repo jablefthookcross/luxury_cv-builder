@@ -171,6 +171,12 @@
     ".net": "C# (.NET)",
     "java": "Java",
     "bash": "Bash / Shell",
-    "powershell": "PowerShell"
+    "powershell": "PowerShell",
+    "flask": "Flask",
+    "fastapi": "FastAPI",
+    "django": "Django",
+    "react": "React",
+    "node": "Node.js",
+    "spring": "Spring Boot"
   }
 }
