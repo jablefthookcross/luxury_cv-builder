@@ -20,6 +20,7 @@ from pdf_parser import PDFParser
 from pdf_exporter import PDFExporter
 from qa_logic_engine import QALogicEngine
 from cv_archive_manager import CVArchiveManager
+from db_manager import DBManager
 
 APP_DIR = Path(__file__).parent
 DEFAULT_PROFILE_PATH = APP_DIR / "profile_data.json"
@@ -73,6 +74,38 @@ def get_active_profile() -> dict:
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/api/auth/register", methods=["POST"])
+def auth_register():
+    payload = request.get_json() or {}
+    email = payload.get("email", "").strip()
+    password = payload.get("password", "").strip()
+    full_name = payload.get("full_name", "Michał Kosowski").strip()
+    
+    if not email or not password:
+        return jsonify({"status": "error", "message": "Wprowadź adres e-mail i hasło."}), 400
+        
+    res = DBManager.register_user(email, password, full_name)
+    return jsonify(res)
+
+@app.route("/api/auth/login", methods=["POST"])
+def auth_login():
+    payload = request.get_json() or {}
+    email = payload.get("email", "").strip()
+    password = payload.get("password", "").strip()
+    
+    if not email or not password:
+        return jsonify({"status": "error", "message": "Wprowadź adres e-mail i hasło."}), 400
+        
+    res = DBManager.login_user(email, password)
+    return jsonify(res)
+
+@app.route("/api/auth/status")
+def auth_status():
+    return jsonify({
+        "status": "success",
+        "supabase_enabled": DBManager.is_supabase_enabled()
+    })
 
 @app.route("/api/profile", methods=["GET", "POST"])
 def master_profile_api():

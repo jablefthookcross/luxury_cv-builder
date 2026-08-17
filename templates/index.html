@@ -120,6 +120,7 @@
             <button class="nav-btn" onclick="switchTab('saved', this)">📚 Moje CV-ki (Archiwum)</button>
             <button class="nav-btn" onclick="switchTab('profile', this)">📋 Profil Bazowy</button>
             <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Ustawienia AI</button>
+            <button class="btn-secondary" style="margin-left: 0.5rem; border-color: rgba(59, 130, 246, 0.4); color: #60a5fa;" onclick="openAuthModal()" id="btnAuthHeader">🔑 Logowanie</button>
         </nav>
     </header>
 
@@ -410,6 +411,35 @@
             <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.2rem;">
                 <button class="btn-secondary" onclick="closeSaveModal()">Anuluj</button>
                 <button class="btn-save-action" onclick="confirmSaveCV()">💾 Zapisz Aplikację</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Logowania i Rejestracji Supabase -->
+    <div id="authModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="color: white; font-family: 'Outfit', sans-serif; font-size: 1.2rem;" id="authModalTitle">🔑 Logowanie do VitaeCraft AI</h3>
+                <button class="btn-secondary" onclick="closeAuthModal()" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">✕</button>
+            </div>
+            <div id="authAlert" style="display: none; padding: 0.6rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 1rem;"></div>
+            
+            <div class="form-group">
+                <label class="form-label">Adres E-mail</label>
+                <input type="email" id="authEmail" class="form-input" placeholder="twoj.email@domain.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hasło Dostępowe</label>
+                <input type="password" id="authPassword" class="form-input" placeholder="••••••••">
+            </div>
+            <div class="form-group" id="authFullNameGroup" style="display: none;">
+                <label class="form-label">Imię i Nazwisko</label>
+                <input type="text" id="authFullName" class="form-input" value="Michał Kosowski">
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.2rem;">
+                <button class="btn-secondary" id="authToggleBtn" style="font-size: 0.78rem;" onclick="toggleAuthMode()">Załóż konto (Rejestracja)</button>
+                <button class="btn-primary" id="authSubmitBtn" style="height: 38px; font-size: 0.84rem;" onclick="submitAuthForm()">🔑 Zaloguj się</button>
             </div>
         </div>
     </div>
@@ -991,8 +1021,93 @@
             alert(data.message || "Ustawienia zapisane!");
         }
 
+        let isAuthRegisterMode = false;
+
+        function openAuthModal() {
+            document.getElementById('authModal').style.display = 'flex';
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').style.display = 'none';
+        }
+
+        function toggleAuthMode() {
+            isAuthRegisterMode = !isAuthRegisterMode;
+            const title = document.getElementById('authModalTitle');
+            const submitBtn = document.getElementById('authSubmitBtn');
+            const toggleBtn = document.getElementById('authToggleBtn');
+            const fullNameGroup = document.getElementById('authFullNameGroup');
+
+            if (isAuthRegisterMode) {
+                title.textContent = "📝 Rejestracja w VitaeCraft AI";
+                submitBtn.textContent = "🚀 Zarejestruj się";
+                toggleBtn.textContent = "Mam już konto (Logowanie)";
+                fullNameGroup.style.display = "flex";
+            } else {
+                title.textContent = "🔑 Logowanie do VitaeCraft AI";
+                submitBtn.textContent = "🔑 Zaloguj się";
+                toggleBtn.textContent = "Załóż konto (Rejestracja)";
+                fullNameGroup.style.display = "none";
+            }
+        }
+
+        async function submitAuthForm() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const fullName = document.getElementById('authFullName').value;
+            const alertBox = document.getElementById('authAlert');
+
+            if (!email || !password) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                alertBox.style.color = '#f87171';
+                alertBox.textContent = 'Wprowadź e-mail oraz hasło.';
+                return;
+            }
+
+            const endpoint = isAuthRegisterMode ? '/api/auth/register' : '/api/auth/login';
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, full_name: fullName })
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    alertBox.style.display = 'block';
+                    alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
+                    alertBox.style.color = '#34d399';
+                    alertBox.textContent = data.message;
+                    
+                    if (data.access_token) {
+                        localStorage.setItem('supabase_token', data.access_token);
+                    }
+                    if (data.user) {
+                        localStorage.setItem('user_email', data.user.email);
+                        document.getElementById('btnAuthHeader').textContent = '👤 ' + data.user.email;
+                    }
+                    setTimeout(closeAuthModal, 1500);
+                } else {
+                    alertBox.style.display = 'block';
+                    alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                    alertBox.style.color = '#f87171';
+                    alertBox.textContent = data.message || 'Wystąpił błąd.';
+                }
+            } catch (err) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                alertBox.style.color = '#f87171';
+                alertBox.textContent = 'Błąd połączenia z serwerem.';
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', async () => {
             try {
+                const savedEmail = localStorage.getItem('user_email');
+                if (savedEmail) {
+                    document.getElementById('btnAuthHeader').textContent = '👤 ' + savedEmail;
+                }
                 const res = await fetch('/api/settings');
                 const s = await res.json();
                 if (s.gemini_key) document.getElementById('geminiApiKey').value = s.gemini_key;
