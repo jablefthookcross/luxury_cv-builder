@@ -168,6 +168,17 @@ class QALogicEngine:
                 "items": list(dict.fromkeys(filtered_items))[:6]
             })
             
+        # Deduplicate and differentiate category titles (e.g. avoid repeating "API Testing" in Category 1 and 3)
+        for i, cat in enumerate(clean_skills):
+            cname = cat.get("category", "")
+            if i > 0 and ("api" in cname.lower() or "testy" in cname.lower()) and any("api" in clean_skills[j].get("category", "").lower() for j in range(i)):
+                if "database" in cname.lower() or "bazy" in cname.lower() or any("sql" in str(it).lower() for it in cat.get("items", [])):
+                    cat["category"] = "Databases & Backend Tools" if lang == "en" else "Bazy Danych & Narzędzia"
+                elif "ci/cd" in cname.lower() or "cloud" in cname.lower():
+                    cat["category"] = "CI/CD & Cloud Infrastructure" if lang == "en" else "Infrastruktura CI/CD & Cloud"
+                else:
+                    cat["category"] = "Testing Tools & Methodologies" if lang == "en" else "Narzędzia & Metodyki Testowe"
+
         refined["skills"] = clean_skills
 
         # 3. PROFESSIONAL SUMMARY WORD BUDGETING (40-80 WORDS)

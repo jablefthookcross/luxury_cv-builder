@@ -777,7 +777,7 @@
             try {
                 const res = await fetch('/api/tailor', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({
                         job_description: jobDescription,
                         job_spec: currentJobSpec,
@@ -985,17 +985,26 @@
             }
         }
 
+        function getAuthHeaders() {
+            const token = localStorage.getItem('supabase_token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) {
+                headers['Authorization'] = 'Bearer ' + token;
+            }
+            return headers;
+        }
+
         async function loadMasterProfileData() {
             try {
-                const res = await fetch('/api/profile');
+                const res = await fetch('/api/profile', { headers: getAuthHeaders() });
                 const data = await res.json();
                 currentProfileData = data;
                 
                 const pinfo = data.personal_info || {};
-                document.getElementById('formFullName').value = pinfo.full_name || "Michał Kosowski";
+                document.getElementById('formFullName').value = pinfo.full_name || "";
                 document.getElementById('formTitle').value = pinfo.title || "Software QA Engineer";
-                document.getElementById('formEmail').value = pinfo.email || "mmkosowski94@gmail.com";
-                document.getElementById('formPhone').value = pinfo.phone || "518075716";
+                document.getElementById('formEmail').value = pinfo.email || "";
+                document.getElementById('formPhone').value = pinfo.phone || "";
                 document.getElementById('formLocation').value = pinfo.location || "Warszawa";
                 document.getElementById('formLinkedin').value = pinfo.linkedin || "";
                 document.getElementById('formGithub').value = pinfo.github || "";
@@ -1214,7 +1223,7 @@
             try {
                 const res = await fetch('/api/profile', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(profileToSave)
                 });
                 const result = await res.json();
@@ -1229,7 +1238,10 @@
         async function deleteMasterProfileData() {
             if (!confirm("Czy na pewno chcesz usunąć obecny Główny Profil Bazowy? Będziesz mógł wgrać świeży plik PDF ze swoim CV.")) return;
             try {
-                const res = await fetch('/api/profile/delete', { method: 'POST' });
+                const res = await fetch('/api/profile/delete', { 
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
                 const data = await res.json();
                 if (data.status === "success") {
                     alert("✅ " + data.message);
@@ -1334,7 +1346,7 @@
                 try {
                     const res = await fetch('/preview/render', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: getAuthHeaders(),
                         body: JSON.stringify({
                             profile: currentDraftProfile,
                             template: template,
@@ -1353,8 +1365,9 @@
             }
 
             const timestamp = new Date().getTime();
+            const token = localStorage.getItem('supabase_token') || '';
             iframe.removeAttribute('srcdoc');
-            iframe.src = '/preview/current?template=' + template + '&lang=' + effectiveLang + '&t=' + timestamp;
+            iframe.src = '/preview/current?template=' + template + '&lang=' + effectiveLang + '&token=' + encodeURIComponent(token) + '&t=' + timestamp;
         }
 
         async function generateAndDownloadPdf() {
@@ -1381,7 +1394,7 @@
             try {
                 const res = await fetch('/api/generate-pdf', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({
                         job_text: jobText,
                         job_spec: currentJobSpec,
@@ -1401,7 +1414,15 @@
                 const blobUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = blobUrl;
-                a.download = (effectiveLang === 'en') ? 'Michal_Kosowski_Resume.pdf' : 'Michal_Kosowski_CV.pdf';
+                
+                let dlName = 'Michal_Kosowski_CV.pdf';
+                if (currentProfileData && currentProfileData.personal_info && currentProfileData.personal_info.full_name) {
+                    const rawName = currentProfileData.personal_info.full_name.replace(/[^a-zA-Z0-9]/g, '_');
+                    dlName = (effectiveLang === 'en') ? `${rawName}_Resume.pdf` : `${rawName}_CV.pdf`;
+                } else {
+                    dlName = (effectiveLang === 'en') ? 'Michal_Kosowski_Resume.pdf' : 'Michal_Kosowski_CV.pdf';
+                }
+                a.download = dlName;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -1579,6 +1600,9 @@
                     btnLogoutHeader.style.display = 'none';
                 }
             }
+
+            loadMasterProfileData();
+            updatePreview();
         }
 
         window.addEventListener('DOMContentLoaded', async () => {

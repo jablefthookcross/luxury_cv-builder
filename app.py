@@ -9,9 +9,11 @@ QA Logic Engine, Anti-AI Auditor, ATS Compliance Safeguard, and Saved CVs Archiv
 
 import os
 import sys
+import re
 import json
 import argparse
 from pathlib import Path
+from typing import Optional, Dict, Any
 from flask import Flask, render_template, request, jsonify, Response
 
 from ai_engine import AIEngine, clean_job_offer_text
@@ -73,6 +75,21 @@ def get_active_profile() -> dict:
         return ACTIVE_TAILORED_PROFILE
     return load_json_file(DEFAULT_PROFILE_PATH, {})
 
+def get_authenticated_user_id() -> Optional[str]:
+    """Securely extracts authenticated user ID from Supabase Bearer token."""
+    auth_header = request.headers.get("Authorization", "")
+    token = None
+    if auth_header.startswith("Bearer "):
+        token = auth_header.split("Bearer ")[1].strip()
+    elif request.args.get("token"):
+        token = request.args.get("token").strip()
+    
+    if token:
+        user = DBManager.get_user_from_token(token)
+        if user:
+            return user.get("id")
+    return None
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -82,7 +99,7 @@ def auth_register():
     payload = request.get_json() or {}
     email = payload.get("email", "").strip()
     password = payload.get("password", "").strip()
-    full_name = payload.get("full_name", "Michał Kosowski").strip()
+    full_name = payload.get("full_name", "").strip()
     
     if not email or not password:
         return jsonify({"status": "error", "message": "Wprowadź adres e-mail i hasło."}), 400
@@ -112,16 +129,18 @@ def auth_status():
 @app.route("/api/profile", methods=["GET", "POST"])
 def master_profile_api():
     global ACTIVE_TAILORED_PROFILE, ACTIVE_JOB_TEXT
+    user_id = get_authenticated_user_id()
     if request.method == "POST":
         new_data = request.get_json()
-        if save_json_file(DEFAULT_PROFILE_PATH, new_data):
-            ACTIVE_TAILORED_PROFILE = new_data
-            ACTIVE_JOB_TEXT = ""
-            save_json_file(TAILORED_PROFILE_PATH, new_data)
+        if DBManager.save_profile(new_data, user_id=user_id):
+            if not user_id:
+                ACTIVE_TAILORED_PROFILE = new_data
+                ACTIVE_JOB_TEXT = ""
+                save_json_file(TAILORED_PROFILE_PATH, new_data)
             return jsonify({"status": "success", "message": "Główny profil bazowy pomyślnie zapisany!"})
         return jsonify({"status": "error", "message": "Błąd podczas zapisu profilu."}), 500
     
-    data = load_json_file(DEFAULT_PROFILE_PATH, {})
+    data = DBManager.get_profile(user_id=user_id)
     return jsonify(data)
 
 @app.route("/api/profile/reset", methods=["POST"])
@@ -292,8 +311,9 @@ def tailor_api():
     ACTIVE_LANGUAGE = req_lang if (req_lang and req_lang != "auto") else detected_lang
     ACTIVE_JOB_TEXT = job_description
     
-    # ALWAYS load pristine master_profile baseline from disk (READ-ONLY)
-    master_profile = load_json_file(DEFAULT_PROFILE_PATH, {})
+    # Load profile baseline for authenticated user or fallback for guest
+    user_id = get_authenticated_user_id()
+    master_profile = DBManager.get_profile(user_id=user_id)
 
     if target_role:
         job_spec["target_role"] = target_role
@@ -332,7 +352,8 @@ def preview_render():
     template_name = payload.get("template", "pro_qa_sidebar")
     lang = payload.get("lang") or payload.get("language") or ACTIVE_LANGUAGE
     
-    master_profile = load_json_file(DEFAULT_PROFILE_PATH, {})
+    user_id = get_authenticated_user_id()
+    master_profile = DBManager.get_profile(user_id=user_id)
     refined_data = QALogicEngine.audit_and_refine_profile(data, lang=lang, job_text=ACTIVE_JOB_TEXT, master_profile=master_profile)
     
     try:
@@ -429,8 +450,9 @@ def preview_current():
         lang = req_lang
     ACTIVE_LANGUAGE = lang
     
-    data = get_active_profile()
-    master_profile = load_json_file(DEFAULT_PROFILE_PATH, {})
+    user_id = get_authenticated_user_id()
+    master_profile = DBManager.get_profile(user_id=user_id)
+    data = master_profile if user_id else get_active_profile()
     data = QALogicEngine.audit_and_refine_profile(data, lang=lang, job_text=ACTIVE_JOB_TEXT, master_profile=master_profile)
     
     template_file = f"cv_templates/{template_name}.html"
@@ -488,8 +510,9 @@ def export_pdf():
     else:
         lang = req_lang
 
-    # Step 1: Load pristine master profile ground truth from disk (READ-ONLY)
-    master_profile = load_json_file(DEFAULT_PROFILE_PATH, {})
+    # Step 1: Load pristine master profile ground truth (user-scoped or guest)
+    user_id = get_authenticated_user_id()
+    master_profile = DBManager.get_profile(user_id=user_id)
 
     if profile_data:
         tailored_data = profile_data
@@ -516,7 +539,8 @@ def export_pdf():
     if not pdf_bytes:
         pdf_bytes = PDFExporter.generate_pdf(final_data, lang=lang)
 
-    filename = "Michal_Kosowski_CV.pdf" if lang == "pl" else "Michal_Kosowski_Resume.pdf"
+    name_slug = re.sub(r'[^a-zA-Z0-9]', '_', final_data.get("personal_info", {}).get("full_name", "Michal_Kosowski")).strip('_') or "CV"
+    filename = f"{name_slug}_CV.pdf" if lang == "pl" else f"{name_slug}_Resume.pdf"
 
     # Step 5: Return PDF with zero-cache headers
     response = Response(
