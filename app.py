@@ -514,7 +514,7 @@ def export_pdf():
     rendered_html = render_template(f"cv_templates/{template_name}.html", data=final_data, lang=lang)
     pdf_bytes = PDFExporter.generate_pdf_from_html(rendered_html)
     if not pdf_bytes:
-        pdf_bytes = PDFExporter.generate_pdf(final_data)
+        pdf_bytes = PDFExporter.generate_pdf(final_data, lang=lang)
 
     filename = "Michal_Kosowski_CV.pdf" if lang == "pl" else "Michal_Kosowski_Resume.pdf"
 
