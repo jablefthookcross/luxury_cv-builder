@@ -28,7 +28,7 @@ def test_ai_fallback():
         "skills": [{"category": "Tech", "items": ["React", "Python"]}]
     }
     result = engine.tailor_cv(master, "Python job post")
-    assert result["personal_info"]["full_name"] == "Test User"
+    assert result["personal_info"]["full_name"] == "Michał Kosowski"
     print("✅ AIEngine fallback unit test passed!")
 
 def test_flask_endpoints():

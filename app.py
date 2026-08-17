@@ -26,7 +26,7 @@ from qa_logic_engine import QALogicEngine
 from cv_archive_manager import CVArchiveManager
 from db_manager import DBManager
 
-APP_DIR = Path(__file__).parent
+APP_DIR = Path(__file__).resolve().parent
 DEFAULT_PROFILE_PATH = APP_DIR / "profile_data.json"
 TAILORED_PROFILE_PATH = APP_DIR / "active_tailored_profile.json"
 SETTINGS_PATH = APP_DIR / "settings.json"

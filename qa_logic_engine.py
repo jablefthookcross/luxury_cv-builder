@@ -54,7 +54,7 @@ class QALogicEngine:
             "has_summary": bool(profile.get("summary")),
             "has_experience": bool(profile.get("experience")),
             "has_skills": bool(profile.get("skills")),
-            "has_education": bool(profile.get("education"))
+            "has_languages": bool(profile.get("languages"))
         }
 
         passed_checks = sum(1 for v in ats_checks.values() if v)
@@ -82,15 +82,14 @@ class QALogicEngine:
         
         # 1. PERSONAL INFO SANITY CHECK & GROUND TRUTH LOCK
         pinfo = refined.get("personal_info", {})
-        if not pinfo.get("full_name") or pinfo["full_name"] in ["Kandydat", "Work Experience", "WorkExperience", "Work"]:
-            pinfo["full_name"] = master_pinfo.get("full_name") or ""
-            
-        pinfo["email"] = pinfo.get("email") or master_pinfo.get("email") or ""
-        pinfo["phone"] = pinfo.get("phone") or master_pinfo.get("phone") or ""
-        pinfo["location"] = pinfo.get("location") or master_pinfo.get("location") or ("Warsaw, Poland" if lang == "en" else "Warszawa")
-        pinfo["linkedin"] = pinfo.get("linkedin") or master_pinfo.get("linkedin") or ""
-        pinfo["github"] = pinfo.get("github") or master_pinfo.get("github") or ""
+        pinfo["full_name"] = "Michał Kosowski"
+        pinfo["email"] = "mmkosowski94@gmail.com"
+        pinfo["phone"] = "518075716"
+        pinfo["location"] = "Warsaw, Poland" if lang == "en" else "Warszawa"
+        pinfo["linkedin"] = ""
+        pinfo["github"] = "https://github.com/jablefthookcross"
         refined["personal_info"] = pinfo
+        refined["education"] = []
 
         # Languages section lock
         if lang == "en":
