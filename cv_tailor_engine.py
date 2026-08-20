@@ -495,28 +495,49 @@ class CVTailorEngine:
         istqb_str_pl = " Posiada certyfikat ISTQB." if has_istqb else ""
         istqb_str_en = " Certified in ISTQB standards." if has_istqb else ""
 
+        # Summary synthesis with role focus
+        all_spec_text = " ".join([target_title, str(primary_tech), str(secondary_tech), str(testing_types), str(tools), str(job_spec.get("key_responsibilities", []))]).lower()
+        is_mobile = any(k in all_spec_text for k in ["mobile", "ios", "android", "appium", "aosp", "mobiln"])
+        is_backend_manual_api = (
+            any(k in all_spec_text for k in ["manual", "backend", "api", "soap", "rest", "postman", "swagger", "sql", "database", "baza danych", "kibana", "grafana", "dahlia", "logs", "logi"])
+            and not any(k in target_title.lower() for k in ["automation", "automatyzujący", "sdet", "developer in test"])
+        )
+
         if is_en:
-            summary = (
-                f"{target_title} with {exp_phrase} experience specializing in web application quality assurance and test automation. "
-                f"Proficient in designing structured verification strategies, developing automated test suites utilizing {auto_tech_str}, "
-                f"{ci_str_en}and defect management in {defect_tools_str}. "
-                f"Skilled in backend data validation using SQL queries.{istqb_str_en}"
-            )
+            if is_backend_manual_api:
+                summary = (
+                    f"{target_title} with {exp_phrase} experience specializing in functional, integration, REST & SOAP API testing, and SQL database validation. "
+                    f"Proficient in designing structured test scenarios in {defect_tools_str}, system log analysis (Kibana, Grafana), and defect lifecycle management. "
+                    f"Possesses working knowledge of test automation frameworks ({auto_tech_str}).{istqb_str_en}"
+                )
+            else:
+                summary = (
+                    f"{target_title} with {exp_phrase} experience specializing in web application quality assurance and test automation. "
+                    f"Proficient in designing structured verification strategies, developing automated test suites utilizing {auto_tech_str}, "
+                    f"{ci_str_en}and defect management in {defect_tools_str}. "
+                    f"Skilled in backend data validation using SQL queries.{istqb_str_en}"
+                )
         else:
-            summary = (
-                f"{target_title} z {exp_phrase} doświadczeniem w testowaniu i zapewnianiu jakości oprogramowania. "
-                f"Specjalizuje się w projektowaniu ustrukturyzowanych strategii weryfikacji, automatyzacji testów w oparciu o {auto_tech_str} "
-                f"{ci_str_pl}oraz sprawnym raportowaniu defektów w {defect_tools_str}. "
-                f"Biegle waliduje spójność danych z wykorzystaniem relacyjnych baz danych SQL.{istqb_str_pl}"
-            )
+            if is_backend_manual_api:
+                summary = (
+                    f"{target_title} z {exp_phrase} doświadczeniem w testowaniu funkcjonalnym, integracyjnym, API (REST & SOAP) oraz weryfikacji baz danych SQL. "
+                    f"Specjalizuje się w projektowaniu ustrukturyzowanych scenariuszy testowych w {defect_tools_str}, analizie logów aplikacyjnych (Kibana, Grafana) oraz sprawnym raportowaniu defektów. "
+                    f"Posiada praktyczną znajomość automatyzacji testów ({auto_tech_str}).{istqb_str_pl}"
+                )
+            else:
+                summary = (
+                    f"{target_title} z {exp_phrase} doświadczeniem w testowaniu i zapewnianiu jakości oprogramowania. "
+                    f"Specjalizuje się w projektowaniu ustrukturyzowanych strategii weryfikacji, automatyzacji testów w oparciu o {auto_tech_str} "
+                    f"{ci_str_pl}oraz sprawnym raportowaniu defektów w {defect_tools_str}. "
+                    f"Biegle waliduje spójność danych z wykorzystaniem relacyjnych baz danych SQL.{istqb_str_pl}"
+                )
 
         tailored["summary"] = summary
 
-        # 4. Dynamic Work Experience Synthesis (Benefit Systems role)
+        # 4. Dynamic Work Experience Synthesis (Benefit Systems role with Smart Prioritization)
         raw_exp = ENGLISH_BASELINE_EXPERIENCE if is_en else POLISH_BASELINE_EXPERIENCE
         tailored_exp = []
 
-        # Find automation frameworks specifically for Bullet 1
         AUTO_FRAMEWORKS_KW = ["playwright", "selenium", "appium", "cypress", "testng", "junit", "pytest", "robot framework", "c#", "typescript", "python"]
         auto_frameworks = []
         for t in (primary_tech + secondary_tech + tools):
@@ -527,56 +548,107 @@ class CVTailorEngine:
         if not auto_frameworks:
             auto_frameworks = ["Playwright", "Selenium WebDriver", "Appium"] if is_en else ["Playwright", "Selenium WebDriver", "Appium"]
 
-        has_mobile = any(k in str(primary_tech + secondary_tech + testing_types + tools).lower() for k in ["appium", "mobile", "ios", "android", "mobiln"])
-
         for job in raw_exp:
             job_copy = json.loads(json.dumps(job))
             if "Benefit" in job_copy.get("company", ""):
                 bullets = []
-                # Bullet 1: Pure Test Automation (Web & Mobile)
-                bullets.append(
-                    f"Designing and implementing scalable automated E2E test suites and verification workflows utilizing {', '.join(auto_frameworks[:3])}."
-                    if is_en else
-                    f"Projektowanie i wdrażanie automatycznych zestawów testowych E2E oraz strategii weryfikacji z wykorzystaniem {', '.join(auto_frameworks[:3])}."
-                )
-
-                # Bullet 2: Functional / Exploratory / Mobile Scope
-                if has_mobile:
+                if is_backend_manual_api:
+                    # Priority 1: API, SQL & Logs
                     bullets.append(
-                        "Conducting thorough functional, integration, and exploratory testing across web platforms and mobile applications (iOS / Android)."
+                        "Validating REST & SOAP web APIs using Postman and Swagger, verifying data integrity across SQL databases, and analyzing application logs in Kibana and Grafana."
                         if is_en else
-                        "Wykonywanie testów funkcjonalnych, integracyjnych i eksploracyjnych na platformach webowych oraz aplikacjach mobilnych (iOS / Android)."
+                        "Walidacja usług sieciowych REST & SOAP API przy użyciu narzędzi Postman oraz Swagger, weryfikacja spójności danych na relacyjnych bazach SQL oraz analiza logów aplikacyjnych w Kibana i Grafana."
+                    )
+                    # Priority 2: Functional & Backend Integration
+                    bullets.append(
+                        "Conducting thorough functional, integration, and exploratory testing across backend services and web platforms."
+                        if is_en else
+                        "Przeprowadzanie testów integracyjnych, funkcjonalnych oraz eksploracyjnych systemów backendowych i platform webowych."
+                    )
+                    # Priority 3: Test Planning & Documentation
+                    bullets.append(
+                        "Designing structured test plans, comprehensive test scenarios, and project documentation in Jira (Xray) and Confluence in Agile/Scrum teams."
+                        if is_en else
+                        "Projektowanie planów testów, scenariuszy testowych oraz kompleksowej dokumentacji w Jira (Xray) i Confluence w zespole Agile/Scrum."
+                    )
+                    # Priority 4: Defect Tracking & Root Cause Analysis
+                    bullets.append(
+                        "Managing defect triage lifecycles, performing root cause analysis (RCA), and verifying developer bug fixes."
+                        if is_en else
+                        "Prowadzenie procesu obsługi defektów, analiza przyczyn źródłowych błędów (RCA) oraz retesty zgłoszeń deweloperskich."
+                    )
+                    # Priority 5: Test Automation Support
+                    bullets.append(
+                        f"Maintaining and supporting automated regression test suites utilizing {', '.join(auto_frameworks[:2])}."
+                        if is_en else
+                        f"Utrzymanie i rozbudowa automatycznych skryptów testowych w oparciu o {', '.join(auto_frameworks[:2])} na potrzeby testów regresyjnych."
+                    )
+                elif is_mobile:
+                    # Priority 1: Mobile Testing
+                    bullets.append(
+                        "Conducting comprehensive mobile application testing across iOS and Android platforms utilizing diagnostic tools and device emulators."
+                        if is_en else
+                        "Przeprowadzanie kompleksowych testów aplikacji mobilnych na platformach iOS i Android z wykorzystaniem narzędzi diagnostycznych i emulatorów."
+                    )
+                    # Priority 2: Automation E2E
+                    bullets.append(
+                        f"Designing and developing automated E2E test suites utilizing {', '.join(auto_frameworks[:3])}."
+                        if is_en else
+                        f"Projektowanie i wdrażanie automatycznych zestawów testowych E2E z wykorzystaniem {', '.join(auto_frameworks[:3])}."
+                    )
+                    # Priority 3: CI/CD
+                    bullets.append(
+                        "Integrating mobile and web test suites into continuous delivery pipelines (GitLab CI / CI/CD Pipelines)."
+                        if is_en else
+                        "Integracja testów mobilnych i webowych w procesach ciągłego dostarczania oprogramowania (CI/CD Pipelines)."
+                    )
+                    # Priority 4: API & SQL
+                    bullets.append(
+                        "Validating mobile backend REST/SOAP APIs in Postman and ensuring data consistency via SQL database queries."
+                        if is_en else
+                        "Walidacja usług backendowych REST/SOAP API w Postmanie oraz weryfikacja spójności danych za pomocą zapytań SQL."
+                    )
+                    # Priority 5: Defect Tracking
+                    bullets.append(
+                        "Managing mobile defect triage workflows, conducting root cause analysis, and collaborating within Agile Scrum teams in Jira."
+                        if is_en else
+                        "Prowadzenie procesu obsługi defektów aplikacji mobilnych, analiza błędów oraz współpraca w zespole Scrum z wykorzystaniem narzędzi Jira i Confluence."
                     )
                 else:
+                    # Priority 1: Pure Test Automation (Web)
+                    bullets.append(
+                        f"Designing and implementing scalable automated E2E test suites and verification workflows utilizing {', '.join(auto_frameworks[:3])}."
+                        if is_en else
+                        f"Projektowanie i wdrażanie automatycznych zestawów testowych E2E oraz strategii weryfikacji z wykorzystaniem {', '.join(auto_frameworks[:3])}."
+                    )
+                    # Priority 2: Functional / Exploratory
                     bullets.append(
                         "Conducting thorough functional, integration, and exploratory testing across enterprise web platforms."
                         if is_en else
                         "Wykonywanie testów funkcjonalnych, integracyjnych i eksploracyjnych na platformach webowych i systemach cyfrowych."
                     )
-
-                # Bullet 3: CI/CD
-                if secondary_tech or "docker" in str(tools).lower() or "jenkins" in str(tools).lower() or has_cicd:
-                    ci_tools = [t for t in (secondary_tech + tools) if any(k in t.lower() for k in ["docker", "jenkins", "gitlab", "github", "ci"])]
-                    ci_str = ", ".join(ci_tools[:2]) or ("CI/CD Pipelines" if is_en else "procesów CI/CD")
+                    # Priority 3: CI/CD
+                    if secondary_tech or "docker" in str(tools).lower() or "jenkins" in str(tools).lower() or has_cicd:
+                        ci_tools = [t for t in (secondary_tech + tools) if any(k in t.lower() for k in ["docker", "jenkins", "gitlab", "github", "ci"])]
+                        ci_str = ", ".join(ci_tools[:2]) or ("CI/CD Pipelines" if is_en else "procesów CI/CD")
+                        bullets.append(
+                            f"Embedding automated test execution into continuous delivery pipelines utilizing {ci_str}."
+                            if is_en else
+                            f"Integracja testów w procesach ciągłego dostarczania oprogramowania (CI/CD) w oparciu o {ci_str}."
+                        )
+                    # Priority 4: API & Database
                     bullets.append(
-                        f"Embedding automated test execution into continuous delivery pipelines utilizing {ci_str}."
+                        "Validating REST/SOAP web APIs using Postman and ensuring backend data consistency across SQL relational databases."
                         if is_en else
-                        f"Integracja testów w procesach ciągłego dostarczania oprogramowania (CI/CD) w oparciu o {ci_str}."
+                        "Walidacja usług sieciowych REST/SOAP API przy użyciu narzędzia Postman oraz weryfikacja spójności danych na relacyjnych bazach danych SQL."
+                    )
+                    # Priority 5: Defect Tracking & Agile
+                    bullets.append(
+                        "Managing defect triage workflows, conducting root cause analysis, and collaborating within Agile Scrum teams using Jira and Confluence."
+                        if is_en else
+                        "Prowadzenie procesu obsługi defektów, analiza przyczyn źródłowych błędów oraz współpraca w zespole Scrum z wykorzystaniem narzędzi Jira i Confluence."
                     )
 
-                # Bullet 4: API & Database
-                bullets.append(
-                    "Validating REST/SOAP web APIs using Postman and ensuring backend data consistency across SQL relational databases."
-                    if is_en else
-                    "Walidacja usług sieciowych REST/SOAP API przy użyciu narzędzia Postman oraz weryfikacja spójności danych na relacyjnych bazach danych SQL."
-                )
-
-                # Bullet 5: Defect Tracking & Agile
-                bullets.append(
-                    "Managing defect triage workflows, conducting root cause analysis, and collaborating within Agile Scrum teams using Jira and Confluence."
-                    if is_en else
-                    "Prowadzenie procesu obsługi defektów, analiza przyczyn źródłowych błędów oraz współpraca w zespole Scrum z wykorzystaniem narzędzi Jira i Confluence."
-                )
                 job_copy["highlights"] = bullets[:5]
 
             tailored_exp.append(job_copy)
