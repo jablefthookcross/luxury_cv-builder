@@ -1023,7 +1023,7 @@
             if (!data) return;
             currentProfileData = data;
             try {
-                localStorage.setItem('vitaecraft_cached_master_profile', JSON.stringify(data));
+                localStorage.setItem('vitaecraft_master_base_profile', JSON.stringify(data));
             } catch (e) {}
 
             const pinfo = data.personal_info || {};
@@ -1059,17 +1059,12 @@
                 if (data && data.experience && data.experience.length > 0) {
                     populateProfileEditor(data);
                 } else {
-                    const cached = localStorage.getItem('vitaecraft_cached_master_profile');
+                    const cached = localStorage.getItem('vitaecraft_master_base_profile');
                     if (cached) {
                         try {
                             const cachedObj = JSON.parse(cached);
                             if (cachedObj && cachedObj.experience && cachedObj.experience.length > 0) {
                                 populateProfileEditor(cachedObj);
-                                fetch('/api/profile', {
-                                    method: 'POST',
-                                    headers: getAuthHeaders(),
-                                    body: cached
-                                });
                                 return;
                             }
                         } catch (e) {}
@@ -1078,7 +1073,7 @@
                 }
             } catch (err) {
                 console.error("Błąd ładowania profilu", err);
-                const cached = localStorage.getItem('vitaecraft_cached_master_profile');
+                const cached = localStorage.getItem('vitaecraft_master_base_profile');
                 if (cached) {
                     try { populateProfileEditor(JSON.parse(cached)); } catch (e) {}
                 }
@@ -1484,7 +1479,6 @@
                 const data = await res.json();
                 if (data.status === "success" && data.profile) {
                     currentDraftProfile = data.profile;
-                    currentProfileData = data.profile;
                     const iframe = document.getElementById('previewIframe');
                     if (data.rendered_html) {
                         iframe.removeAttribute('src');
@@ -1492,7 +1486,6 @@
                     } else {
                         updatePreview();
                     }
-                    populateProfileEditor(data.profile);
                     alert("✨ Poprawki AI zostały pomyślnie zastosowane!");
                     promptInput.value = "";
                 } else {
