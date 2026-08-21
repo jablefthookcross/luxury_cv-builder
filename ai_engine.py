@@ -215,6 +215,101 @@ class AIEngine:
         else:
             return self._tailor_with_dynamic_nlp(clean_master, cleaned_job_text, target_role, lang=lang)
 
+    def refine_cv(self, current_cv_data: Dict[str, Any], user_instruction: str, lang: str = "pl") -> Dict[str, Any]:
+        """
+        Step 3: AI Prompt Refinement.
+        Modifies current CV structure according to precise user instructions using Gemini (or dynamic NLP fallback).
+        """
+        clean_current = json.loads(json.dumps(current_cv_data))
+        if not user_instruction or not user_instruction.strip():
+            return clean_current
+
+        prompt = f"""
+Jesteś precyzyjnym silnikiem korekty i szlifowania CV dla inżynierów QA w aplikacji VitaeCraft AI.
+Otrzymujesz aktualną strukturę danych CV (JSON) oraz instrukcję modyfikacji od użytkownika.
+
+AKTUALNE DANE CV (JSON):
+{json.dumps(clean_current, ensure_ascii=False, indent=2)}
+
+INSTRUKCJA UŻYTKOWNIKA:
+"{user_instruction.strip()}"
+
+ZASADY KOREKTY:
+1. Wprowadź DOKŁADNIE i WYŁĄCZNIE modyfikacje wskazane przez użytkownika (np. dodaj/usuń technologię z umiejętności, przeredaguj podsumowanie, zmień treść lub szyk punktu w doświadczeniu, zmień tytuł).
+2. POD ŻADNYM POZOREM NIE DODAWAJ sekcji wykształcenia (education) ani profilu LinkedIn.
+3. Zachowaj stałe dane kandydata (Michał Kosowski, 518075716, mmkosowski94@gmail.com, GitHub, Benefit Systems S.A., Sii Polska, Euroloan Group).
+4. Język wyjściowy: {lang.upper()} (jeśli 'PL' -> język polski, jeśli 'EN' -> język angielski).
+5. Zwróć WYŁĄCZNIE poprawny, czysty obiekt JSON o identycznej strukturze (personal_info, summary, skills, experience, languages).
+"""
+        models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        api_key = self.gemini_key or os.environ.get("GEMINI_API_KEY", "")
+
+        if api_key.strip():
+            for model_name in models_to_try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key.strip()}"
+                payload = {
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {
+                        "temperature": 0.1,
+                        "responseMimeType": "application/json"
+                    }
+                }
+                try:
+                    req = urllib.request.Request(
+                        url,
+                        data=json.dumps(payload).encode("utf-8"),
+                        headers={"Content-Type": "application/json"}
+                    )
+                    with urllib.request.urlopen(req, timeout=25) as response:
+                        res_data = json.loads(response.read().decode("utf-8"))
+                        text_response = res_data["candidates"][0]["content"]["parts"][0]["text"]
+                        parsed = self._clean_and_parse_json(text_response, None)
+                        if parsed and isinstance(parsed, dict):
+                            return parsed
+                except Exception as e:
+                    print(f"[AIEngine Refine] Gemini model {model_name} failed: {e}")
+                    continue
+
+        # Deterministic NLP fallback if Gemini is offline
+        return self._refine_with_deterministic_nlp(clean_current, user_instruction)
+
+    def _refine_with_deterministic_nlp(self, current_data: Dict[str, Any], instruction: str) -> Dict[str, Any]:
+        """Simple deterministic processor when LLM is unavailable."""
+        res = json.loads(json.dumps(current_data))
+
+        # Handle title changes
+        m_title = re.search(r'(?:zmień tytuł na|zmień stanowisko na|tytuł:\s*|stanowisko:\s*|change title to|set title to)\s*([A-Za-z0-9#+.\s/()-]+?)(?:\.|$|\n|,)', instruction, flags=re.IGNORECASE)
+        if m_title:
+            new_title = m_title.group(1).strip()
+            if new_title and len(new_title) < 60:
+                res.setdefault("personal_info", {})["title"] = new_title
+
+        # Handle adding skills
+        m_add_skill = re.findall(r'(?:dodaj|dopisz|wstaw|add|include)\s+([A-Za-z0-9#+.\s/()-]+?)(?:\s+do|\s+w|\s+to|\s+skills|\s+umiejętności|$|,|\.)', instruction, flags=re.IGNORECASE)
+        for skill_term in m_add_skill:
+            term = skill_term.strip()
+            if term and len(term) < 40:
+                skills_list = res.get("skills", [])
+                if skills_list:
+                    target_cat = skills_list[0]
+                    if any(k in term.lower() for k in ["api", "rest", "soap", "sql", "postman", "assured"]):
+                        for c in skills_list:
+                            if "api" in c.get("category", "").lower() or "bazy" in c.get("category", "").lower():
+                                target_cat = c
+                                break
+                    if term not in target_cat.get("items", []):
+                        target_cat.setdefault("items", []).insert(0, term)
+
+        # Handle removing skills
+        m_rem_skill = re.findall(r'(?:usuń|skasuj|wywal|remove|delete)\s+([A-Za-z0-9#+.\s/()-]+?)(?:\s+z|\s+ze|\s+from|$|,|\.)', instruction, flags=re.IGNORECASE)
+        for skill_term in m_rem_skill:
+            term = skill_term.strip().lower()
+            if term and len(term) < 40:
+                for c in res.get("skills", []):
+                    c["items"] = [it for it in c.get("items", []) if term not in it.lower()]
+
+        return res
+
     def _determine_provider(self) -> str:
         if self.provider == "gemini" and self.gemini_key:
             return "gemini"

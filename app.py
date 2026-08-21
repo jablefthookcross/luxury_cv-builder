@@ -349,6 +349,48 @@ def tailor_api():
         "rendered_html": rendered_html
     })
 
+@app.route("/api/refine-cv", methods=["POST"])
+def refine_cv_api():
+    payload = request.get_json() or {}
+    current_data = payload.get("current_cv_data") or get_active_profile()
+    instruction = payload.get("user_instruction", "").strip()
+    lang = payload.get("lang") or payload.get("language") or ACTIVE_LANGUAGE
+    template_name = payload.get("template", "pro_qa_sidebar")
+    
+    if not instruction:
+        return jsonify({"status": "error", "message": "Proszę podać treść instrukcji dla AI."}), 400
+        
+    try:
+        settings = get_settings()
+        gemini_key = settings.get("gemini_key") or os.environ.get("GEMINI_API_KEY", "")
+        ollama_url = settings.get("ollama_url", "http://localhost:11434")
+        ai = AIEngine(provider="auto", gemini_key=gemini_key, ollama_url=ollama_url)
+        
+        user_id = get_authenticated_user_id()
+        master_profile = DBManager.get_profile(user_id=user_id)
+        
+        updated_data = ai.refine_cv(current_data, instruction, lang=lang)
+        refined_data = QALogicEngine.audit_and_refine_profile(updated_data, lang=lang, job_text=ACTIVE_JOB_TEXT, master_profile=master_profile)
+        
+        global ACTIVE_TAILORED_PROFILE
+        ACTIVE_TAILORED_PROFILE = refined_data
+        save_json_file(TAILORED_PROFILE_PATH, refined_data)
+        
+        try:
+            rendered_html = render_template(f"cv_templates/{template_name}.html", data=refined_data, lang=lang)
+        except Exception:
+            rendered_html = render_template("cv_templates/pro_qa_sidebar.html", data=refined_data, lang=lang)
+            
+        return jsonify({
+            "status": "success",
+            "message": "Poprawki AI zostały pomyślnie zastosowane!",
+            "profile": refined_data,
+            "rendered_html": rendered_html
+        })
+    except Exception as e:
+        print(f"[Error] Refine CV failed: {e}")
+        return jsonify({"status": "error", "message": f"Błąd podczas wprowadzania poprawek: {str(e)}"}), 500
+
 @app.route("/preview/render", methods=["POST"])
 def preview_render():
     payload = request.get_json() or {}

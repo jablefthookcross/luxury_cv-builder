@@ -374,6 +374,24 @@
                             🔄 Resetuj DRAFT
                         </button>
                     </div>
+
+                    <!-- KROK 3: OSTATECZNY SZLIF AI (PROMPT REFINE) -->
+                    <div id="step3RefineCard" style="margin-top: 1rem; padding: 0.9rem; background: rgba(15, 23, 42, 0.9); border: 1px solid #8b5cf6; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                            <span style="font-weight: 700; font-size: 0.9rem; color: #c4b5fd;">✨ KROK 3: Ostateczny Szlif AI (Prompt Refine)</span>
+                            <span style="font-size: 0.72rem; background: rgba(139, 92, 246, 0.2); color: #c4b5fd; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 600;">Opcjonalne</span>
+                        </div>
+                        <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 0.5rem;">
+                            Wpisz dowolne poprawki do aktualnego CV (np. dodaj narzędzie, usuń masło maślane, doprecyzuj podsumowanie).
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0.5rem;">
+                            <textarea id="refinePromptInput" class="form-textarea" style="min-height: 65px; font-size: 0.82rem;" placeholder="np. Dodaj REST Assured do umiejętności API i usuń masło maślane z trzeciego punktu Benefit Systems..."></textarea>
+                        </div>
+                        <button class="btn-primary" style="width: 100%; font-weight: 700; background: linear-gradient(135deg, #8b5cf6, #6366f1); border: none;" onclick="applyAiRefinePrompt()">
+                            <span id="refineSpinner" class="spinner"></span>
+                            <span id="refineBtnText">🪄 Zastosuj Poprawki AI</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- ATS Match Score Widget -->
@@ -1388,6 +1406,62 @@
             const token = localStorage.getItem('supabase_token') || '';
             iframe.removeAttribute('srcdoc');
             iframe.src = '/preview/current?template=' + template + '&lang=' + effectiveLang + '&token=' + encodeURIComponent(token) + '&t=' + timestamp;
+        }
+
+        async function applyAiRefinePrompt() {
+            const promptInput = document.getElementById('refinePromptInput');
+            const instruction = promptInput.value.trim();
+            if (!instruction) {
+                alert("Wpisz instrukcję dla AI (np. co dodać, usunąć lub zmienić w CV).");
+                return;
+            }
+
+            const btnText = document.getElementById('refineBtnText');
+            const spinner = document.getElementById('refineSpinner');
+            btnText.textContent = "Szlifowanie CV przez AI...";
+            spinner.style.display = "inline-block";
+
+            const selectedLang = document.getElementById('cvLanguage').value;
+            let effectiveLang = selectedLang;
+            if (selectedLang === 'auto') {
+                effectiveLang = (currentJobSpec && currentJobSpec.detected_language) ? currentJobSpec.detected_language : 'pl';
+            }
+            const template = document.getElementById('cvTemplate').value;
+
+            try {
+                const res = await fetch('/api/refine-cv', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        current_cv_data: currentDraftProfile,
+                        user_instruction: instruction,
+                        lang: effectiveLang,
+                        template: template
+                    })
+                });
+
+                const data = await res.json();
+                if (data.status === "success" && data.profile) {
+                    currentDraftProfile = data.profile;
+                    const iframe = document.getElementById('previewIframe');
+                    if (data.rendered_html) {
+                        iframe.removeAttribute('src');
+                        iframe.srcdoc = data.rendered_html;
+                    } else {
+                        updatePreview();
+                    }
+                    populateProfileEditor(data.profile);
+                    alert("✨ Poprawki AI zostały pomyślnie zastosowane!");
+                    promptInput.value = "";
+                } else {
+                    alert("Błąd: " + (data.message || "Nie udało się nanieść poprawek AI."));
+                }
+            } catch (err) {
+                alert("Błąd połączenia: " + err.message);
+            } finally {
+                btnText.textContent = "🪄 Zastosuj Poprawki AI";
+                spinner.style.display = "none";
+            }
         }
 
         async function generateAndDownloadPdf() {
