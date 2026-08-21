@@ -236,10 +236,11 @@ INSTRUKCJA UŻYTKOWNIKA:
 
 ZASADY KOREKTY:
 1. Wprowadź DOKŁADNIE i WYŁĄCZNIE modyfikacje wskazane przez użytkownika (np. dodaj/usuń technologię z umiejętności, przeredaguj podsumowanie, zmień treść lub szyk punktu w doświadczeniu, zmień tytuł).
-2. POD ŻADNYM POZOREM NIE DODAWAJ sekcji wykształcenia (education) ani profilu LinkedIn.
-3. Zachowaj stałe dane kandydata (Michał Kosowski, 518075716, mmkosowski94@gmail.com, GitHub, Benefit Systems S.A., Sii Polska, Euroloan Group).
-4. Język wyjściowy: {lang.upper()} (jeśli 'PL' -> język polski, jeśli 'EN' -> język angielski).
-5. Zwróć WYŁĄCZNIE poprawny, czysty obiekt JSON o identycznej strukturze (personal_info, summary, skills, experience, languages).
+2. ZASADA ANTY-DUPLIKACJI: Tekst z sekcji 'professional_summary' pod żadnym pozorem nie może być kopiowany ani doklejany do punktów w sekcji 'work_experience'. Każdy punkt w 'work_experience' musi być unikalnym opisem zrealizowanego zadania technicznego.
+3. POD ŻADNYM POZOREM NIE DODAWAJ sekcji wykształcenia (education) ani profilu LinkedIn.
+4. Zachowaj stałe dane kandydata (Michał Kosowski, 518075716, mmkosowski94@gmail.com, GitHub, Benefit Systems S.A., Sii Polska, Euroloan Group).
+5. Język wyjściowy: {lang.upper()} (jeśli 'PL' -> język polski, jeśli 'EN' -> język angielski).
+6. Zwróć WYŁĄCZNIE poprawny, czysty obiekt JSON o identycznej strukturze (personal_info, summary, skills, experience, languages).
 """
         models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
         api_key = self.gemini_key or os.environ.get("GEMINI_API_KEY", "")

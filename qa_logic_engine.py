@@ -11,9 +11,13 @@ from typing import Dict, Any, List, Set
 def sanitize_prose_text(text: str) -> str:
     if not text:
         return ""
+    # Strip leading bullets, dots and punctuation
+    cleaned = re.sub(r'^[•\-\*\s.]+', '', text)
     # Strip technical bracket annotations in prose text
-    cleaned = re.sub(r'\s*\([^)]*(?:Weryfikacja|Standard|Testing|Metodyka|Analiza|Kolejki|Message|Logs|Logi|Grid|Błędów|Logów)[^)]*\)', '', text)
+    cleaned = re.sub(r'\s*\([^)]*(?:Weryfikacja|Standard|Testing|Metodyka|Analiza|Kolejki|Message|Logs|Logi|Grid|Błędów|Logów)[^)]*\)', '', cleaned)
     cleaned = re.sub(r'\s*\(\.NET\)', '', cleaned)
+    # Fix repeated periods or punctuation slop (e.g. ".." -> ".")
+    cleaned = re.sub(r'\.{2,}', '.', cleaned)
     cleaned = re.sub(r'\s{2,}', ' ', cleaned)
     return cleaned.strip()
 
@@ -127,7 +131,11 @@ class QALogicEngine:
             for item in raw_items:
                 if not item:
                     continue
-                clean_item = item.strip()
+                # Clean corrupted prefixes, quotes and bullet characters
+                clean_item = str(item).strip().strip('"\'„”` ')
+                clean_item = re.sub(r'^[•\-\*\s]+', '', clean_item)
+                clean_item = re.sub(r'^(?:ver\s+|der\s+|tag:\s*|tag\s+)', '', clean_item, flags=re.IGNORECASE).strip()
+                clean_item = clean_item.strip('"\'„”` ')
                 item_lower = clean_item.lower()
                 item_norm = re.sub(r'[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]', '', item_lower)
                 
@@ -212,20 +220,42 @@ class QALogicEngine:
                 
         refined["summary"] = sanitize_prose_text(summary)
 
-        # 4. WORK EXPERIENCE BUDGETING & PROSE SANITIZATION (3-5 HIGHLIGHTS PER POSITION)
+        # 4. WORK EXPERIENCE BUDGETING & ANTI-DUPLICATION WITH SUMMARY
+        summary_sentences = [s.strip().lower() for s in re.split(r'[.!?]', refined["summary"]) if len(s.strip()) > 10]
+
         for job in refined.get("experience", []):
             company = job.get("company", "")
             raw_hls = job.get("highlights", [])
             clean_hls = []
             
             for h in raw_hls:
-                h_clean = sanitize_prose_text(h.strip())
-                if h_clean and h_clean not in clean_hls and len(clean_hls) < 5:
+                h_clean = sanitize_prose_text(str(h).strip())
+                if not h_clean:
+                    continue
+                
+                # Check for high overlap with summary sentences (anti-duplication)
+                h_lower = h_clean.lower()
+                is_summary_clone = False
+                for sent in summary_sentences:
+                    if sent in h_lower or h_lower in sent:
+                        is_summary_clone = True
+                        break
+                    h_words = set(re.findall(r'\w{4,}', h_lower))
+                    sent_words = set(re.findall(r'\w{4,}', sent))
+                    if h_words and len(h_words & sent_words) / max(len(h_words), 1) >= 0.75:
+                        is_summary_clone = True
+                        break
+
+                if is_summary_clone:
+                    continue
+
+                if h_clean not in clean_hls and len(clean_hls) < 5:
                     clean_hls.append(h_clean)
                     
             if len(clean_hls) < 3:
-                # Ensure at least 3 bullet points per employer
+                # Ensure at least 3 bullet points per employer with authentic tasks
                 if "Benefit" in company:
+                    clean_hls.append("Projektowanie i wdrażanie automatycznych zestawów testowych E2E z wykorzystaniem Playwright oraz Selenium." if lang == "pl" else "Designed and executed automated E2E test suites utilizing Playwright and Selenium WebDriver.")
                     clean_hls.append("Wykonywanie testów integracyjnych oraz weryfikacja danych w relacyjnych bazach danych SQL." if lang == "pl" else "Executed integration testing and database verification using SQL queries.")
                 elif "Sii" in company:
                     clean_hls.append("Weryfikacja danych w bazach danych z użyciem narzędzi SQL." if lang == "pl" else "Verified database records and data integrity using SQL tools.")
@@ -267,8 +297,8 @@ class QALogicEngine:
             if job.get("start_date"):
                 job["period"] = f"{job['start_date']} – {job.get('end_date', 'Present' if lang == 'en' else 'Obecnie')}"
 
-        # 5. EDUCATION & LANGUAGES PRESERVATION
-        refined["education"] = master.get("education", [])
+        # 5. HARD LOCK: NO EDUCATION, CANDIDATE LANGUAGES
+        refined["education"] = []
 
         if lang == "en":
             refined["languages"] = [
