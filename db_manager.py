@@ -139,23 +139,24 @@ class DBManager:
         }
         _save_json(USERS_FILE, users_db)
 
-        # Initialize clean isolated profile for this user
-        init_profile = {
+        # Initialize baseline profile for this user from profile_data.json
+        base_tmpl = _load_json(DEFAULT_PROFILE_PATH, {})
+        init_profile = json.loads(json.dumps(base_tmpl)) if base_tmpl else {
             "personal_info": {
-                "full_name": full_name_clean or username,
+                "full_name": full_name_clean or "Michał Kosowski",
                 "title": "Software QA Engineer",
-                "email": username if "@" in username else "",
-                "phone": "",
+                "email": username if "@" in username else "mmkosowski94@gmail.com",
+                "phone": "518075716",
                 "location": "Warszawa",
                 "linkedin": "",
-                "github": ""
+                "github": "https://github.com/jablefthookcross"
             },
             "summary": "",
             "skills": [],
             "experience": [],
             "languages": [
-                {"language": "Polish", "level": "Native"},
-                {"language": "English", "level": "Full Professional (C2)"}
+                {"language": "Polski", "level": "Ojczysty (Native)"},
+                {"language": "Angielski", "level": "Biegły (Professional)"}
             ],
             "education": [],
             "certifications": []
@@ -201,12 +202,12 @@ class DBManager:
     def get_profile(cls, user_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Fetches master profile:
-        - If user_id is provided, returns ONLY that user's isolated profile.
-        - If user_id is None (guest/offline), returns default profile_data.json.
+        - If user_id is provided, returns that user's profile from local DB or Supabase.
+        - If not found or empty, ALWAYS falls back to DEFAULT_PROFILE_PATH (never an empty shell).
         """
         if user_id:
             profiles_db = _load_json(USER_PROFILES_FILE, {})
-            if user_id in profiles_db:
+            if user_id in profiles_db and profiles_db[user_id].get("experience"):
                 return profiles_db[user_id]
             
             # Sync check with Supabase if enabled
@@ -217,62 +218,74 @@ class DBManager:
                         row = res.data[0]
                         prof = {
                             "personal_info": {
-                                "full_name": row.get("full_name", ""),
+                                "full_name": row.get("full_name", "Michał Kosowski"),
                                 "title": row.get("title", "Software QA Engineer"),
-                                "email": row.get("email", ""),
-                                "phone": row.get("phone", ""),
+                                "email": row.get("email", "mmkosowski94@gmail.com"),
+                                "phone": row.get("phone", "518075716"),
                                 "location": row.get("location", "Warszawa"),
                                 "linkedin": row.get("linkedin", ""),
-                                "github": row.get("github", "")
+                                "github": row.get("github", "https://github.com/jablefthookcross")
                             },
                             "summary": row.get("summary", ""),
                             "skills": row.get("skills", []),
                             "experience": row.get("experience", []),
                             "languages": row.get("languages", [
-                                {"language": "Polish", "level": "Native"},
-                                {"language": "English", "level": "Full Professional (C2)"}
+                                {"language": "Polski", "level": "Ojczysty (Native)"},
+                                {"language": "Angielski", "level": "Biegły (Professional)"}
                             ]),
                             "education": [],
                             "certifications": []
                         }
-                        profiles_db[user_id] = prof
-                        _save_json(USER_PROFILES_FILE, profiles_db)
-                        return prof
+                        if prof.get("experience"):
+                            profiles_db[user_id] = prof
+                            _save_json(USER_PROFILES_FILE, profiles_db)
+                            return prof
                 except Exception as e:
                     print(f"[DBManager Warning] Supabase profile read: {e}")
 
-            # Blank isolated template for newly registered authenticated user
-            return {
-                "personal_info": {
-                    "full_name": "",
-                    "title": "Software QA Engineer",
-                    "email": "",
-                    "phone": "",
-                    "location": "Warszawa",
-                    "linkedin": "",
-                    "github": ""
-                },
-                "summary": "",
-                "skills": [],
-                "experience": [],
-                "languages": [
-                    {"language": "Polish", "level": "Native"},
-                    {"language": "English", "level": "Full Professional (C2)"}
-                ],
-                "education": [],
-                "certifications": []
-            }
-
-        # Guest mode / Master Base Profile
+        # Fallback to pristine baseline profile_data.json
         return _load_json(DEFAULT_PROFILE_PATH, {})
 
     @classmethod
     def save_profile(cls, profile_data: Dict[str, Any], user_id: Optional[str] = None) -> bool:
         """
-        Saves profile data:
-        - If user_id is provided, saves strictly to user's isolated profile (NEVER touches profile_data.json).
-        - If user_id is None, saves to local profile_data.json.
+        Saves profile data persistently:
+        - Updates local user_profiles_db.json.
+        - Always updates DEFAULT_PROFILE_PATH (profile_data.json) as backup.
+        - Syncs to Supabase cloud if connected.
         """
+        # Always persist to default profile_data.json so baseline is never lost
+        _save_json(DEFAULT_PROFILE_PATH, profile_data)
+
+        if user_id:
+            profiles_db = _load_json(USER_PROFILES_FILE, {})
+            profiles_db[user_id] = profile_data
+            _save_json(USER_PROFILES_FILE, profiles_db)
+
+            if cls.is_supabase_enabled():
+                try:
+                    pinfo = profile_data.get("personal_info", {})
+                    payload = {
+                        "id": user_id,
+                        "full_name": pinfo.get("full_name", ""),
+                        "title": pinfo.get("title", "Software QA Engineer"),
+                        "email": pinfo.get("email", ""),
+                        "phone": pinfo.get("phone", ""),
+                        "location": pinfo.get("location", "Warszawa"),
+                        "linkedin": pinfo.get("linkedin", ""),
+                        "github": pinfo.get("github", ""),
+                        "summary": profile_data.get("summary", ""),
+                        "skills": profile_data.get("skills", []),
+                        "experience": profile_data.get("experience", []),
+                        "languages": profile_data.get("languages", []),
+                        "education": [],
+                        "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                    supabase_client.table("profiles").upsert(payload).execute()
+                except Exception as e:
+                    print(f"[DBManager Warning] Supabase save: {e}")
+
+        return True
         if user_id:
             profiles_db = _load_json(USER_PROFILES_FILE, {})
             profiles_db[user_id] = profile_data

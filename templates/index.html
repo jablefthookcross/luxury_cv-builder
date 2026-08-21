@@ -1022,6 +1022,10 @@
         function populateProfileEditor(data) {
             if (!data) return;
             currentProfileData = data;
+            try {
+                localStorage.setItem('vitaecraft_cached_master_profile', JSON.stringify(data));
+            } catch (e) {}
+
             const pinfo = data.personal_info || {};
             const elFullName = document.getElementById('formFullName');
             if (elFullName) elFullName.value = pinfo.full_name || "";
@@ -1052,9 +1056,32 @@
             try {
                 const res = await fetch('/api/profile', { headers: getAuthHeaders() });
                 const data = await res.json();
-                populateProfileEditor(data);
+                if (data && data.experience && data.experience.length > 0) {
+                    populateProfileEditor(data);
+                } else {
+                    const cached = localStorage.getItem('vitaecraft_cached_master_profile');
+                    if (cached) {
+                        try {
+                            const cachedObj = JSON.parse(cached);
+                            if (cachedObj && cachedObj.experience && cachedObj.experience.length > 0) {
+                                populateProfileEditor(cachedObj);
+                                fetch('/api/profile', {
+                                    method: 'POST',
+                                    headers: getAuthHeaders(),
+                                    body: cached
+                                });
+                                return;
+                            }
+                        } catch (e) {}
+                    }
+                    populateProfileEditor(data);
+                }
             } catch (err) {
                 console.error("Błąd ładowania profilu", err);
+                const cached = localStorage.getItem('vitaecraft_cached_master_profile');
+                if (cached) {
+                    try { populateProfileEditor(JSON.parse(cached)); } catch (e) {}
+                }
             }
         }
 
