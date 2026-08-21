@@ -1440,13 +1440,14 @@
                 effectiveLang = (currentJobSpec && currentJobSpec.detected_language) ? currentJobSpec.detected_language : 'pl';
             }
             const template = document.getElementById('cvTemplate').value;
+            const draftToUse = currentDraftProfile || currentProfileData;
 
             try {
                 const res = await fetch('/api/refine-cv', {
                     method: 'POST',
                     headers: getAuthHeaders(),
                     body: JSON.stringify({
-                        current_cv_data: currentDraftProfile,
+                        current_cv_data: draftToUse,
                         user_instruction: instruction,
                         lang: effectiveLang,
                         template: template
@@ -1456,6 +1457,7 @@
                 const data = await res.json();
                 if (data.status === "success" && data.profile) {
                     currentDraftProfile = data.profile;
+                    currentProfileData = data.profile;
                     const iframe = document.getElementById('previewIframe');
                     if (data.rendered_html) {
                         iframe.removeAttribute('src');
@@ -1488,11 +1490,6 @@
             const template = document.getElementById('cvTemplate').value;
             const provider = document.getElementById('aiProvider').value;
 
-            if (!jobText) {
-                alert("Wklej treść oferty pracy przed wygenerowaniem dedykowanego PDF!");
-                return;
-            }
-
             const btn = document.getElementById('btnDownloadPdf');
             const originalText = btn.innerHTML;
             btn.innerHTML = "⏳ Kompilowanie PDF...";
@@ -1503,6 +1500,7 @@
                     method: 'POST',
                     headers: getAuthHeaders(),
                     body: JSON.stringify({
+                        profile_data: currentDraftProfile || currentProfileData,
                         job_text: jobText,
                         job_spec: currentJobSpec,
                         target_role: targetRole,
