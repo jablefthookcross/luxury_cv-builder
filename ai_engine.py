@@ -284,11 +284,39 @@ ZASADY KOREKTY:
             if new_title and len(new_title) < 60:
                 res.setdefault("personal_info", {})["title"] = new_title
 
+        # Handle summary changes (quoted strings)
+        m_summary_quote = re.search(r'(?:podsumowani[a-ząćęłńóśźż]*|summary).*?na:?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
+        if m_summary_quote:
+            new_sum_part = m_summary_quote.group(1).strip()
+            if new_sum_part:
+                old_sum = res.get("summary", "")
+                if "zmień drugie zdanie" in instruction.lower() and "." in old_sum:
+                    sentences = [s.strip() for s in old_sum.split(".") if s.strip()]
+                    if len(sentences) >= 2:
+                        sentences[1] = new_sum_part.rstrip(".")
+                        res["summary"] = ". ".join(sentences) + "."
+                    else:
+                        res["summary"] = f"{sentences[0]}. {new_sum_part.rstrip('.')}."
+                else:
+                    res["summary"] = new_sum_part
+
+        # Handle Benefit Systems bullet point modifications
+        m_bullet_3 = re.search(r'(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?na:?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
+        if m_bullet_3:
+            new_b3 = m_bullet_3.group(1).strip()
+            for job in res.get("experience", []):
+                if "Benefit" in job.get("company", "") or job == res.get("experience", [])[0]:
+                    hl = job.get("highlights", [])
+                    if len(hl) >= 3:
+                        hl[2] = new_b3
+                    elif hl:
+                        hl.append(new_b3)
+
         # Handle adding skills
-        m_add_skill = re.findall(r'(?:dodaj|dopisz|wstaw|add|include)\s+([A-Za-z0-9#+.\s/()-]+?)(?:\s+do|\s+w|\s+to|\s+skills|\s+umiejętności|$|,|\.)', instruction, flags=re.IGNORECASE)
-        for skill_term in m_add_skill:
+        m_add_skills = re.findall(r'(?:dodaj\s*tag:?|dodaj\s*umiejętność:?|dodaj|dopisz|wstaw|add|include)\s*[:\s]*([A-Za-z0-9#+.\s/()-]+?)(?:\s+do|\s+w|\s+to|\s+skills|\s+umiejętności|$|,|\.|\n)', instruction, flags=re.IGNORECASE)
+        for skill_term in m_add_skills:
             term = skill_term.strip()
-            if term and len(term) < 40:
+            if term and len(term) < 40 and not any(k in term.lower() for k in ["tag", "umiejętnoś", "sekcj", "punkt", "bullet"]):
                 skills_list = res.get("skills", [])
                 if skills_list:
                     target_cat = skills_list[0]
@@ -300,13 +328,22 @@ ZASADY KOREKTY:
                     if term not in target_cat.get("items", []):
                         target_cat.setdefault("items", []).insert(0, term)
 
-        # Handle removing skills
-        m_rem_skill = re.findall(r'(?:usuń|skasuj|wywal|remove|delete)\s+([A-Za-z0-9#+.\s/()-]+?)(?:\s+z|\s+ze|\s+from|$|,|\.)', instruction, flags=re.IGNORECASE)
-        for skill_term in m_rem_skill:
-            term = skill_term.strip().lower()
+        # Handle removing skills or fixing broken prefixes
+        m_rem_skills = re.findall(r'(?:usuń|skasuj|wywal|remove|delete)\s+([A-Za-z0-9#+.\s/()"-]+?)(?:\s+z|\s+ze|\s+from|$|,|\.|\n)', instruction, flags=re.IGNORECASE)
+        for skill_term in m_rem_skills:
+            term = skill_term.strip().lower().replace('"', '').replace('„', '').replace('”', '')
             if term and len(term) < 40:
                 for c in res.get("skills", []):
                     c["items"] = [it for it in c.get("items", []) if term not in it.lower()]
+
+        # Clean corrupted skill artifacts like "ver Playwright"
+        for c in res.get("skills", []):
+            cleaned_items = []
+            for it in c.get("items", []):
+                clean_it = re.sub(r'^(?:ver\s+|der\s+)', '', it, flags=re.IGNORECASE).strip()
+                if clean_it:
+                    cleaned_items.append(clean_it)
+            c["items"] = list(dict.fromkeys(cleaned_items))
 
         return res
 

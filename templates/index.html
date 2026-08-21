@@ -1019,27 +1019,40 @@
             return headers;
         }
 
+        function populateProfileEditor(data) {
+            if (!data) return;
+            currentProfileData = data;
+            const pinfo = data.personal_info || {};
+            const elFullName = document.getElementById('formFullName');
+            if (elFullName) elFullName.value = pinfo.full_name || "";
+            const elTitle = document.getElementById('formTitle');
+            if (elTitle) elTitle.value = pinfo.title || "Software QA Engineer";
+            const elEmail = document.getElementById('formEmail');
+            if (elEmail) elEmail.value = pinfo.email || "";
+            const elPhone = document.getElementById('formPhone');
+            if (elPhone) elPhone.value = pinfo.phone || "";
+            const elLocation = document.getElementById('formLocation');
+            if (elLocation) elLocation.value = pinfo.location || "Warszawa";
+            const elLinkedin = document.getElementById('formLinkedin');
+            if (elLinkedin) elLinkedin.value = pinfo.linkedin || "";
+            const elGithub = document.getElementById('formGithub');
+            if (elGithub) elGithub.value = pinfo.github || "";
+            const elSummary = document.getElementById('formSummary');
+            if (elSummary) elSummary.value = data.summary || "";
+
+            renderExperienceList(data.experience || []);
+            renderSkillsList(data.skills || []);
+            renderLanguagesList(data.languages || []);
+
+            const elJsonEditor = document.getElementById('profileJsonEditor');
+            if (elJsonEditor) elJsonEditor.value = JSON.stringify(data, null, 2);
+        }
+
         async function loadMasterProfileData() {
             try {
                 const res = await fetch('/api/profile', { headers: getAuthHeaders() });
                 const data = await res.json();
-                currentProfileData = data;
-                
-                const pinfo = data.personal_info || {};
-                document.getElementById('formFullName').value = pinfo.full_name || "";
-                document.getElementById('formTitle').value = pinfo.title || "Software QA Engineer";
-                document.getElementById('formEmail').value = pinfo.email || "";
-                document.getElementById('formPhone').value = pinfo.phone || "";
-                document.getElementById('formLocation').value = pinfo.location || "Warszawa";
-                document.getElementById('formLinkedin').value = pinfo.linkedin || "";
-                document.getElementById('formGithub').value = pinfo.github || "";
-                document.getElementById('formSummary').value = data.summary || "";
-
-                renderExperienceList(data.experience || []);
-                renderSkillsList(data.skills || []);
-                renderLanguagesList(data.languages || []);
-
-                document.getElementById('profileJsonEditor').value = JSON.stringify(data, null, 2);
+                populateProfileEditor(data);
             } catch (err) {
                 console.error("Błąd ładowania profilu", err);
             }
