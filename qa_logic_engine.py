@@ -235,14 +235,16 @@ class QALogicEngine:
                 
                 # Check for high overlap with summary sentences (anti-duplication)
                 h_lower = h_clean.lower()
+                h_norm = re.sub(r'[^a-zA-Z0-9]', '', h_lower)
                 is_summary_clone = False
                 for sent in summary_sentences:
-                    if sent in h_lower or h_lower in sent:
+                    sent_norm = re.sub(r'[^a-zA-Z0-9]', '', sent)
+                    if h_norm and sent_norm and h_norm == sent_norm:
                         is_summary_clone = True
                         break
                     h_words = set(re.findall(r'\w{4,}', h_lower))
                     sent_words = set(re.findall(r'\w{4,}', sent))
-                    if h_words and len(h_words & sent_words) / max(len(h_words), 1) >= 0.75:
+                    if len(h_words) >= 6 and len(h_words & sent_words) / max(len(h_words), 1) >= 0.90:
                         is_summary_clone = True
                         break
 

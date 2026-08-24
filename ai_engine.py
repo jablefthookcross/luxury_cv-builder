@@ -314,9 +314,9 @@ ZASADY KOREKTY:
             comp_key = "benefit" if "benefit" in comp_name.lower() else ("sii" if "sii" in comp_name.lower() else ("euroloan" if "euroloan" in comp_name.lower() else comp_name.lower()))
             
             # Check for full block replacement for this company
-            m_block = re.search(rf'(?:doświadczenie|experience|punkty|highlights|obowiązki).*?{comp_key}.*?(?:treścią|na:?|to:?)\s*[:\n]\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
+            m_block = re.search(rf'(?:doświadczenie|experience|punkty|highlights|obowiązki)?.*?{comp_key}.*?(?:treścią|zestawem|listą|na|to|jako|poniżej)?\s*[:\n]\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
             if not m_block and "benefit" in comp_key:
-                m_block = re.search(r'(?:benefit systems|benefit).*?(?:treścią|na:?|to:?)\s*[:\n]\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
+                m_block = re.search(r'(?:benefit systems|benefit).*?[:\n]\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
                 
             if m_block:
                 block_text = m_block.group(1).strip()
@@ -329,9 +329,9 @@ ZASADY KOREKTY:
                     job["highlights"] = parsed_bullets
             else:
                 # Check for single bullet point override (e.g. 3. punkt)
-                m_bullet = re.search(rf'(?:{comp_key}.*?)?(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?na:?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
+                m_bullet = re.search(rf'(?:{comp_key}.*?)?(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?(?:na|to)?\s*[:\n]?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
                 if not m_bullet and "benefit" in comp_key:
-                    m_bullet = re.search(r'(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?na:?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
+                    m_bullet = re.search(r'(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?(?:na|to)?\s*[:\n]?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
                 if m_bullet:
                     new_b = re.sub(r'^[•\-\*\s]+', '', m_bullet.group(1)).strip()
                     hl = job.get("highlights", [])
@@ -349,11 +349,14 @@ ZASADY KOREKTY:
                 cat_clean_name = raw_cat_name.strip().strip('"\'„”` ')
                 # Strip bracket notes like (Całkowicie usuń tagi: ...)
                 clean_items_str = re.sub(r'\(.*?\)', '', items_str).strip()
-                items = [
-                    re.sub(r'^[•\-\*\s]+', '', it).strip().strip('"\'„”` .')
-                    for it in clean_items_str.split(',')
-                    if re.sub(r'^[•\-\*\s]+', '', it).strip().strip('"\'„”` .')
-                ]
+                # Strip leading directive prefixes from the items block
+                clean_items_str = re.sub(r'^(?:zastąp\s+tagi\s+zestawem:?|zastąp\s+tagi:?|zastąp\s+zestawem:?|zastąp:?|tagi:?|tags:?|zestaw:?|użyj:?|dodaj\s+tagi:?|dodaj:?)\s*', '', clean_items_str, flags=re.IGNORECASE).strip()
+                
+                items = []
+                for it in clean_items_str.split(','):
+                    it_clean = re.sub(r'^(?:zastąp\s+tagi\s+zestawem:?|zastąp\s+tagi:?|zastąp\s+zestawem:?|zastąp:?|tagi:?|tags:?|zestaw:?|użyj:?|dodaj\s+tag:?|dodaj:?|[•\-\*\s]+)\s*', '', it, flags=re.IGNORECASE).strip().strip('"\'„”` .')
+                    if it_clean:
+                        items.append(it_clean)
                 if items:
                     defined_skills.append({
                         "category": cat_clean_name,
@@ -361,6 +364,18 @@ ZASADY KOREKTY:
                     })
             if defined_skills:
                 res["skills"] = defined_skills
+
+        # A2. Direct Tag Replacement (e.g. usuń tag "X" i zamiast niego dodaj czysty tag "Y")
+        m_replace_tag = re.search(r'usuń\s+tag\s*["„]?([^"”\n,]+)["”]?\s+i\s+(?:zamiast\s+niego\s+)?(?:dodaj|wstaw)\s+(?:czysty\s+)?tag:?\s*["„]?([^"”\n,]+)["”]?', instruction, flags=re.IGNORECASE)
+        if m_replace_tag:
+            tag_to_remove = m_replace_tag.group(1).strip().strip('"\'„”` .').lower()
+            tag_to_add = m_replace_tag.group(2).strip().strip('"\'„”` .')
+            if tag_to_add:
+                for c in res.get("skills", []):
+                    c["items"] = [
+                        tag_to_add if (it.lower() == tag_to_remove or tag_to_remove in it.lower()) else it
+                        for it in c.get("items", [])
+                    ]
 
         # B. Mass / Comma-separated Deletions
         m_rem_all = re.findall(r'(?:usuń|skasuj|wywal|remove|delete)(?:\s+tagi|\s+tags|\s+technologie)?[:\s]+([A-Za-z0-9#+.,\s/()"-]+?)(?:\.|\n|\)|$)', instruction, flags=re.IGNORECASE)
@@ -372,17 +387,31 @@ ZASADY KOREKTY:
                     del_terms.append(t_clean)
 
         if del_terms:
-            # Clean from Skills
+            # Clean from Skills (Strict whole-word match, preserve JavaScript when deleting Java)
             for c in res.get("skills", []):
-                c["items"] = [
-                    it for it in c.get("items", [])
-                    if not any(dt == it.lower() or dt in it.lower() for dt in del_terms)
-                ]
+                cleaned_cat_items = []
+                for it in c.get("items", []):
+                    should_remove = False
+                    for dt in del_terms:
+                        if dt == "java":
+                            if it.lower() == "java" or (re.search(r'\bjava\b', it, re.I) and not re.search(r'javascript', it, re.I)):
+                                should_remove = True
+                                break
+                        elif dt == it.lower() or bool(re.search(rf'\b{re.escape(dt)}\b', it, re.I)):
+                            should_remove = True
+                            break
+                    if not should_remove:
+                        cleaned_cat_items.append(it)
+                c["items"] = cleaned_cat_items
 
             # Clean from Professional Summary
             sum_text = res.get("summary", "")
             for dt in del_terms:
-                sum_text = re.sub(rf'(?:,\s*|\s+oraz\s+|\s+i\s+|\s+and\s+)?\b{re.escape(dt)}(?:\s+webdriver|\s+grid)?\b', '', sum_text, flags=re.IGNORECASE)
+                if dt == "java":
+                    sum_text = re.sub(r'(?:,\s*|\s+oraz\s+|\s+i\s+|\s+and\s+)?\bjava\b(?!\s*script)', '', sum_text, flags=re.IGNORECASE)
+                else:
+                    sum_text = re.sub(rf'(?:,\s*|\s+oraz\s+|\s+i\s+|\s+and\s+)?\b{re.escape(dt)}(?:\s+webdriver|\s+grid)?\b', '', sum_text, flags=re.IGNORECASE)
+            sum_text = re.sub(r'\s+(?:utilizing|using|with|z wykorzystaniem|w oparciu o|w)\s*[\.,]?$', '.', sum_text, flags=re.IGNORECASE)
             sum_text = re.sub(r'\s{2,}', ' ', sum_text).replace(' ,', ',').replace(' .', '.').strip()
             res["summary"] = sum_text
 
@@ -392,7 +421,11 @@ ZASADY KOREKTY:
                 for hl in job.get("highlights", []):
                     hl_text = str(hl)
                     for dt in del_terms:
-                        hl_text = re.sub(rf'(?:,\s*|\s+oraz\s+|\s+i\s+|\s+and\s+)?\b{re.escape(dt)}(?:\s+webdriver|\s+grid)?\b', '', hl_text, flags=re.IGNORECASE)
+                        if dt == "java":
+                            hl_text = re.sub(r'(?:,\s*|\s+oraz\s+|\s+i\s+|\s+and\s+)?\bjava\b(?!\s*script)', '', hl_text, flags=re.IGNORECASE)
+                        else:
+                            hl_text = re.sub(rf'(?:,\s*|\s+oraz\s+|\s+i\s+|\s+and\s+)?\b{re.escape(dt)}(?:\s+webdriver|\s+grid)?\b', '', hl_text, flags=re.IGNORECASE)
+                    hl_text = re.sub(r'\s+(?:utilizing|using|with|z wykorzystaniem|w oparciu o|w)\s*[\.,]?$', '.', hl_text, flags=re.IGNORECASE)
                     hl_text = re.sub(r'\s{2,}', ' ', hl_text).replace(' ,', ',').replace(' .', '.').strip()
                     if hl_text:
                         cleaned_hls.append(hl_text)
