@@ -372,11 +372,31 @@ ZASADY KOREKTY:
                     del_terms.append(t_clean)
 
         if del_terms:
+            # Clean from Skills
             for c in res.get("skills", []):
                 c["items"] = [
                     it for it in c.get("items", [])
                     if not any(dt == it.lower() or dt in it.lower() for dt in del_terms)
                 ]
+
+            # Clean from Professional Summary
+            sum_text = res.get("summary", "")
+            for dt in del_terms:
+                sum_text = re.sub(rf'(?:,\s*|\s+oraz\s+|\s+i\s+|\s+and\s+)?\b{re.escape(dt)}(?:\s+webdriver|\s+grid)?\b', '', sum_text, flags=re.IGNORECASE)
+            sum_text = re.sub(r'\s{2,}', ' ', sum_text).replace(' ,', ',').replace(' .', '.').strip()
+            res["summary"] = sum_text
+
+            # Clean from Experience Highlights
+            for job in res.get("experience", []):
+                cleaned_hls = []
+                for hl in job.get("highlights", []):
+                    hl_text = str(hl)
+                    for dt in del_terms:
+                        hl_text = re.sub(rf'(?:,\s*|\s+oraz\s+|\s+i\s+|\s+and\s+)?\b{re.escape(dt)}(?:\s+webdriver|\s+grid)?\b', '', hl_text, flags=re.IGNORECASE)
+                    hl_text = re.sub(r'\s{2,}', ' ', hl_text).replace(' ,', ',').replace(' .', '.').strip()
+                    if hl_text:
+                        cleaned_hls.append(hl_text)
+                job["highlights"] = cleaned_hls
 
         # C. Single Tag Additions
         m_add_skills = re.findall(r'(?:dodaj\s*tag:?|dodaj\s*umiejętność:?|dodaj|dopisz|wstaw|add|include)\s*[:\s]*["„]?([A-Za-z0-9#+.\s/()-]+?)["”]?(?:\s+do|\s+w|\s+to|\s+skills|\s+umiejętności|$|,|\.|\n)', instruction, flags=re.IGNORECASE)

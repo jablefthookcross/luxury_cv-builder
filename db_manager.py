@@ -249,43 +249,10 @@ class DBManager:
     @classmethod
     def save_profile(cls, profile_data: Dict[str, Any], user_id: Optional[str] = None) -> bool:
         """
-        Saves profile data persistently:
-        - Updates local user_profiles_db.json.
-        - Always updates DEFAULT_PROFILE_PATH (profile_data.json) as backup.
-        - Syncs to Supabase cloud if connected.
+        Saves master base profile data persistently:
+        - Updates user-specific record in user_profiles_db.json and Supabase when user_id is provided.
+        - Updates default profile_data.json only for guest mode (user_id is None).
         """
-        # Always persist to default profile_data.json so baseline is never lost
-        _save_json(DEFAULT_PROFILE_PATH, profile_data)
-
-        if user_id:
-            profiles_db = _load_json(USER_PROFILES_FILE, {})
-            profiles_db[user_id] = profile_data
-            _save_json(USER_PROFILES_FILE, profiles_db)
-
-            if cls.is_supabase_enabled():
-                try:
-                    pinfo = profile_data.get("personal_info", {})
-                    payload = {
-                        "id": user_id,
-                        "full_name": pinfo.get("full_name", ""),
-                        "title": pinfo.get("title", "Software QA Engineer"),
-                        "email": pinfo.get("email", ""),
-                        "phone": pinfo.get("phone", ""),
-                        "location": pinfo.get("location", "Warszawa"),
-                        "linkedin": pinfo.get("linkedin", ""),
-                        "github": pinfo.get("github", ""),
-                        "summary": profile_data.get("summary", ""),
-                        "skills": profile_data.get("skills", []),
-                        "experience": profile_data.get("experience", []),
-                        "languages": profile_data.get("languages", []),
-                        "education": [],
-                        "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")
-                    }
-                    supabase_client.table("profiles").upsert(payload).execute()
-                except Exception as e:
-                    print(f"[DBManager Warning] Supabase save: {e}")
-
-        return True
         if user_id:
             profiles_db = _load_json(USER_PROFILES_FILE, {})
             profiles_db[user_id] = profile_data
@@ -315,5 +282,5 @@ class DBManager:
                     print(f"[DBManager Warning] Supabase save: {e}")
             return True
 
-        # Guest mode save
+        # Guest mode save (only when user_id is None)
         return _save_json(DEFAULT_PROFILE_PATH, profile_data)
