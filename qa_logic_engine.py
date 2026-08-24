@@ -16,9 +16,12 @@ def sanitize_prose_text(text: str) -> str:
     # Strip technical bracket annotations in prose text
     cleaned = re.sub(r'\s*\([^)]*(?:Weryfikacja|Standard|Testing|Metodyka|Analiza|Kolejki|Message|Logs|Logi|Grid|Błędów|Logów)[^)]*\)', '', cleaned)
     cleaned = re.sub(r'\s*\(\.NET\)', '', cleaned)
+    # Fix dangling commas after prepositions (e.g. "utilizing, " -> "utilizing ")
+    cleaned = re.sub(r'\b(utilizing|using|with|z wykorzystaniem|w oparciu o|poprzez)\s*,\s*', r'\1 ', cleaned, flags=re.IGNORECASE)
     # Fix repeated periods or punctuation slop (e.g. ".." -> ".")
     cleaned = re.sub(r'\.{2,}', '.', cleaned)
     cleaned = re.sub(r'\s{2,}', ' ', cleaned)
+    cleaned = re.sub(r'\s+([,\.])', r'\1', cleaned)
     return cleaned.strip()
 
 PROHIBITED_AI_BUZZWORDS = [

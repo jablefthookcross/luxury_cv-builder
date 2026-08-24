@@ -313,32 +313,44 @@ ZASADY KOREKTY:
             comp_name = job.get("company", "")
             comp_key = "benefit" if "benefit" in comp_name.lower() else ("sii" if "sii" in comp_name.lower() else ("euroloan" if "euroloan" in comp_name.lower() else comp_name.lower()))
             
-            # Check for full block replacement for this company
+            # Check for full block replacement for this company (quoted OR unquoted bullet list)
             m_block = re.search(rf'(?:doświadczenie|experience|punkty|highlights|obowiązki)?.*?{comp_key}.*?(?:treścią|zestawem|listą|na|to|jako|poniżej)?\s*[:\n]\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
             if not m_block and "benefit" in comp_key:
                 m_block = re.search(r'(?:benefit systems|benefit).*?[:\n]\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
                 
-            if m_block:
+            if not m_block:
+                # Support unquoted bullet blocks starting with •, -, * or numbers following company mention
+                m_block_unquoted = re.search(rf'{comp_key}[^:\n]*:\s*\n?((?:[•\-\*]|\d+\.)\s+[^\n]+(?:\n(?:[•\-\*]|\d+\.)\s+[^\n]+)*)', instruction, flags=re.IGNORECASE)
+                if m_block_unquoted:
+                    block_text = m_block_unquoted.group(1).strip()
+                    parsed_bullets = [
+                        re.sub(r'^[•\-\*\d\.\s]+', '', b).strip()
+                        for b in re.split(r'[\n\r]+', block_text)
+                        if re.sub(r'^[•\-\*\d\.\s]+', '', b).strip()
+                    ]
+                    if parsed_bullets:
+                        job["highlights"] = parsed_bullets
+            else:
                 block_text = m_block.group(1).strip()
                 parsed_bullets = [
-                    re.sub(r'^[•\-\*\s]+', '', b).strip()
+                    re.sub(r'^[•\-\*\d\.\s]+', '', b).strip()
                     for b in re.split(r'[\n\r]+', block_text)
-                    if re.sub(r'^[•\-\*\s]+', '', b).strip()
+                    if re.sub(r'^[•\-\*\d\.\s]+', '', b).strip()
                 ]
                 if parsed_bullets:
                     job["highlights"] = parsed_bullets
-            else:
-                # Check for single bullet point override (e.g. 3. punkt)
-                m_bullet = re.search(rf'(?:{comp_key}.*?)?(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?(?:na|to)?\s*[:\n]?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
-                if not m_bullet and "benefit" in comp_key:
-                    m_bullet = re.search(r'(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?(?:na|to)?\s*[:\n]?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
-                if m_bullet:
-                    new_b = re.sub(r'^[•\-\*\s]+', '', m_bullet.group(1)).strip()
-                    hl = job.get("highlights", [])
-                    if len(hl) >= 3:
-                        hl[2] = new_b
-                    elif hl:
-                        hl.append(new_b)
+            
+            # Check for single bullet point override (e.g. 3. punkt)
+            m_bullet = re.search(rf'(?:{comp_key}.*?)?(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?(?:na|to)?\s*[:\n]?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
+            if not m_bullet and "benefit" in comp_key:
+                m_bullet = re.search(r'(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?(?:na|to)?\s*[:\n]?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
+            if m_bullet:
+                new_b = re.sub(r'^[•\-\*\s]+', '', m_bullet.group(1)).strip()
+                hl = job.get("highlights", [])
+                if len(hl) >= 3:
+                    hl[2] = new_b
+                elif hl:
+                    hl.append(new_b)
 
         # 4. SKILLS - CATEGORY DEFINITIONS, ADDITIONS & MASS DELETIONS
         # A. Check for category definitions: Kategoria "NAME": item1, item2, item3...

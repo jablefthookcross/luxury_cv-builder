@@ -60,7 +60,11 @@ class PDFExporter:
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True, args=docker_args)
                 page = browser.new_page()
-                page.set_content(html_content, wait_until="load", timeout=30000)
+                try:
+                    page.set_content(html_content, wait_until="networkidle", timeout=30000)
+                    page.evaluate("document.fonts.ready")
+                except Exception:
+                    page.set_content(html_content, wait_until="load", timeout=30000)
                 pdf_bytes = page.pdf(
                     format="A4",
                     print_background=True,
