@@ -8,7 +8,7 @@
     "linkedin": "",
     "github": "https://github.com/jablefthookcross"
   },
-  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym, integracyjnym, API (REST & SOAP) oraz automatyzacji testów. Specjalizuje się w weryfikacji baz danych za pomocą zapytań SQL, projektowaniu scenariuszy testowych i planów testów oraz śledzeniu defektów w narzędziach Jira (Xray), HP QC / ALM i TestRail. Posiada wiedzę z zakresu norm ISTQB, automatyzacji w Playwright (TypeScript) oraz Selenium WebDriver (Java).",
+  "summary": "Inżynier QA z ponad 5-letnim doświadczeniem w testowaniu manualnym, integracyjnym, API (REST & SOAP) oraz automatyzacji testów. Specjalizuje się w weryfikacji baz danych za pomocą zapytań SQL, projektowaniu scenariuszy testowych i planów testów oraz śledzeniu defektów w narzędziach Jira (Xray), HP QC / ALM i TestRail. Posiada wiedzę z zakresu norm ISTQB oraz automatyzacji testów w Playwright (TypeScript/JavaScript).",
   "skills": [
     {
       "category": "Testowanie & API",
@@ -39,14 +39,12 @@
     {
       "category": "Automatyzacja & Języki",
       "items": [
-        "SQL",
         "Playwright",
         "TypeScript",
         "JavaScript",
-        "Java",
-        "Selenium WebDriver",
-        "RestAssured",
-        "GitLab CI/CD"
+        "SQL",
+        "GitLab CI/CD",
+        "CI/CD Pipelines"
       ]
     }
   ],
