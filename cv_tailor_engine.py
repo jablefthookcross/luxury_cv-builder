@@ -16,39 +16,51 @@ PROMPT_CV_TAILORING = """
 Jesteś elitarnym architektem CV dla inżynierów QA i automatyzacji testów.
 Twoim zadaniem jest wygenerowanie spójnego merytorycznie, autentycznego profilu CV w formacie JSON, ściśle dopasowanego do przesłanej specyfikacji oferty pracy.
 
-WEJŚCIE:
-1. Master Profile (stałe dane kandydata: dane kontaktowe, historia firm, wykształcenie, języki).
-2. Job Specification (ustrukturyzowane wymagania oferty: target_role, primary_tech, secondary_tech, testing_types, tools, responsibilities).
+TWARDE REGUŁY GENEROWANIA:
+1. DOPASOWANIE DYNAMICZNE: Dostosuj treść 'professional_summary', 'skills' oraz punkty w 'benefit_systems' pod wymagania i wiodący stack technologiczny przekazanej oferty pracy.
+2. SEPARACJA RÓL (BEZWZGLĘDNY NAKAZ RÓŻNORODNOŚCI):
+   - 'benefit_systems' (Najnowsza rola): Odpowiada za najbardziej zaawansowane zadania inżynierskie (automatyzacja E2E, architektura testów, CI/CD, wiodący stack z oferty, API).
+   - 'sii_polska' (Rola: Test & Analysis Engineer): Odpowiada za testy manualne, funkcjonalne, walidację API (Postman/SoapUI), procesy Jira/Xray i weryfikację baz danych (SQL).
+   - 'euroloan' (Rola: Software Tester): Odpowiada za testy regresyjne, UI, weryfikację systemów cyfrowych i analizę kryteriów akceptacji (Acceptance Criteria).
+3. ZAKAZ DUPLIKACJI: Każda z 3 firm MUSI mieć w 100% unikalne punkty. Całkowity zakaz kopiowania tych samych zdań między firmami oraz zakaz wklejania treści z 'professional_summary' do punktów doświadczenia.
+4. BEZPIECZEŃSTWO STRUKTURY: Całkowity brak sekcji 'education', pojedynczy link do GitHub Profile (brak LinkedIn), format zamykający się idealnie na 1 stronie A4.
 
-WYMAGANIA DOTYCZĄCE WYNIKU:
-- target_title: Użyj dokładnie nazwy z job_spec.target_role.
-- professional_summary: 45-60 słów. Płynne, eleganckie podsumowanie inżynierskie. 
-  • ZAKAZ stosowania szablonowych zwrotów: "w obszarze: [Lista]", "przy użyciu technologii [Lista]", "oraz Metodyka Agile".
-  • Podsumowanie musi tworzyć spójną, naturalną narrację o kompetencjach kandydata.
-- skills: Zwróć DOKŁADNIE 3 kategorie, każda zawierająca od 4 do 6 precyzyjnych tagów.
-  • Kategoria 1 (Automatyzacja & Testy Web / Test Automation & Web Quality): Frameworki testowe i automatyzacja (Selenium, Playwright, TestNG, Appium, Cypress, Testy Webowe).
-  • Kategoria 2 (CI/CD, Narzędzia & Zarządzanie / CI/CD, Tools & Management): Jira, Confluence, Git, CI/CD Pipelines, Docker, Agile/Scrum.
-  • Kategoria 3 (Testy API & Bazy Danych / API Testing & Databases): Narzędzia i protokoły API (Postman, REST & SOAP API, Swagger, SoapUI, HL7 FHIR) oraz bazy danych (SQL, PostgreSQL).
-- work_experience: Zachowaj realne firmy (Benefit Systems S.A., Sii Polska, Euroloan Group) i daty z profilu bazowego. Zredaguj 4-5 mocnych bullet pointów w najnowszej roli (Benefit Systems), według wzorca: Czynność inżynierska ➡️ Narzędzie/Metoda ➡️ Rezultat techniczny/biznesowy.
-
-Zwróć WYŁĄCZNIE obiekt JSON w języku {LANG}:
+WYMAGANY FORMAT JSON (w języku {LANG}):
 {
-  "target_title": "...",
-  "professional_summary": "...",
-  "skills": [
-    {"category": "Nazwa Kategorii 1", "items": ["tag1", "tag2", "tag3", "tag4", "tag5"]},
-    {"category": "Nazwa Kategorii 2", "items": ["tag1", "tag2", "tag3", "tag4", "tag5"]},
-    {"category": "Nazwa Kategorii 3", "items": ["tag1", "tag2", "tag3", "tag4", "tag5"]}
-  ],
-  "work_experience": [
-    {
-      "company": "Benefit Systems S.A.",
-      "role": "Software tester / QA Automation",
-      "period": "2022 – Obecnie",
-      "location": "Warszawa",
-      "highlights": ["punkt 1", "punkt 2", "punkt 3", "punkt 4", "punkt 5"]
+  "target_title": "Nazwa roli dopasowana do oferty",
+  "professional_summary": "2-3 zdania podsumowania zawodowego dopasowane dynamicznie pod słowa kluczowe z oferty",
+  "skills": {
+    "category_1": {
+      "name": "TEST AUTOMATION & WEB QUALITY",
+      "items": ["tag1", "tag2", "tag3", "tag4", "tag5"]
+    },
+    "category_2": {
+      "name": "API TESTING & DATABASES",
+      "items": ["tag1", "tag2", "tag3", "tag4", "tag5"]
+    },
+    "category_3": {
+      "name": "TEST MANAGEMENT & TOOLS",
+      "items": ["tag1", "tag2", "tag3", "tag4", "tag5"]
     }
-  ]
+  },
+  "work_experience": {
+    "benefit_systems": [
+      "Punkt 1 dynamicznie dopasowany do oferty (automatyzacja / wiodący stack)",
+      "Punkt 2 dynamicznie dopasowany do oferty (architektura / CI/CD)",
+      "Punkt 3 dynamicznie dopasowany do oferty (API / backend / SQL)",
+      "Punkt 4 dynamicznie dopasowany do oferty (procesy jakości / Jira / Agile)"
+    ],
+    "sii_polska": [
+      "Punkt 1 (rola: Test & Analysis Engineer - manual / API / SQL)",
+      "Punkt 2",
+      "Punkt 3"
+    ],
+    "euroloan": [
+      "Punkt 1 (rola: Software Tester - funkcjonalne / UI / regresja)",
+      "Punkt 2",
+      "Punkt 3"
+    ]
+  }
 }
 """
 
@@ -672,29 +684,68 @@ class CVTailorEngine:
             result["summary"] = gemini_output["professional_summary"]
 
         # Skills
-        if gemini_output.get("skills") and isinstance(gemini_output["skills"], list):
+        raw_skills = gemini_output.get("skills")
+        if raw_skills:
             sanitized_skills = []
             used = set()
-            for cat in gemini_output["skills"]:
-                c_name = cat.get("category", "").strip()
-                c_items = []
-                for it in cat.get("items", []):
-                    it_clean = it.strip()
-                    it_key = re.sub(r'[^a-zA-Z0-9]', '', it_clean.lower())
-                    if it_key and it_key not in used and it_clean.lower() != c_name.lower() and len(c_items) < 6:
-                        c_items.append(it_clean)
-                        used.add(it_key)
-                if c_items:
-                    sanitized_skills.append({"category": c_name, "items": c_items})
+            
+            # Case 1: Dict format {"category_1": {"name": "...", "items": [...]}, ...} OR {"category_1": [...]}
+            if isinstance(raw_skills, dict):
+                for k, v in raw_skills.items():
+                    if isinstance(v, dict):
+                        c_name = str(v.get("name") or k).strip()
+                        items_raw = v.get("items", [])
+                    elif isinstance(v, list):
+                        c_name = k.replace("_", " ").title()
+                        items_raw = v
+                    else:
+                        continue
+                    
+                    c_items = []
+                    for it in items_raw:
+                        it_clean = str(it).strip()
+                        it_key = re.sub(r'[^a-zA-Z0-9]', '', it_clean.lower())
+                        if it_key and it_key not in used and it_clean.lower() != c_name.lower() and len(c_items) < 6:
+                            c_items.append(it_clean)
+                            used.add(it_key)
+                    if c_items:
+                        sanitized_skills.append({"category": c_name, "items": c_items})
+            # Case 2: List format [{"category": "...", "items": [...]}, ...]
+            elif isinstance(raw_skills, list):
+                for cat in raw_skills:
+                    c_name = str(cat.get("category") or cat.get("name") or "").strip()
+                    c_items = []
+                    for it in cat.get("items", []):
+                        it_clean = str(it).strip()
+                        it_key = re.sub(r'[^a-zA-Z0-9]', '', it_clean.lower())
+                        if it_key and it_key not in used and it_clean.lower() != c_name.lower() and len(c_items) < 6:
+                            c_items.append(it_clean)
+                            used.add(it_key)
+                    if c_items:
+                        sanitized_skills.append({"category": c_name, "items": c_items})
+
             if len(sanitized_skills) == 3:
                 result["skills"] = sanitized_skills
 
         # Experience
-        if gemini_output.get("work_experience") and isinstance(gemini_output["work_experience"], list):
-            for g_job in gemini_output["work_experience"]:
-                g_comp = g_job.get("company", "")
-                for m_job in result.get("experience", []):
-                    if g_comp.lower() in m_job.get("company", "").lower() and g_job.get("highlights"):
-                        m_job["highlights"] = g_job["highlights"][:5]
+        raw_exp = gemini_output.get("work_experience")
+        if raw_exp:
+            # Case 1: Dict format {"benefit_systems": [...], "sii_polska": [...], "euroloan": [...]}
+            if isinstance(raw_exp, dict):
+                for key, bullets in raw_exp.items():
+                    if not isinstance(bullets, list):
+                        continue
+                    k_low = key.lower()
+                    target_comp = "benefit" if "benefit" in k_low else ("sii" if "sii" in k_low else ("euroloan" if "euroloan" in k_low else k_low))
+                    for m_job in result.get("experience", []):
+                        if target_comp in m_job.get("company", "").lower() and bullets:
+                            m_job["highlights"] = [str(b).strip() for b in bullets if str(b).strip()][:5]
+            # Case 2: List format [{"company": "...", "highlights": [...]}, ...]
+            elif isinstance(raw_exp, list):
+                for g_job in raw_exp:
+                    g_comp = g_job.get("company", "")
+                    for m_job in result.get("experience", []):
+                        if g_comp.lower() in m_job.get("company", "").lower() and g_job.get("highlights"):
+                            m_job["highlights"] = [str(b).strip() for b in g_job["highlights"] if str(b).strip()][:5]
 
         return result

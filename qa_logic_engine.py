@@ -257,7 +257,7 @@ class QALogicEngine:
             if len(clean_hls) < 3:
                 # Ensure at least 3 bullet points per employer with authentic tasks
                 if "Benefit" in company:
-                    clean_hls.append("Projektowanie i wdrażanie automatycznych zestawów testowych E2E z wykorzystaniem Playwright oraz Selenium." if lang == "pl" else "Designed and executed automated E2E test suites utilizing Playwright and Selenium WebDriver.")
+                    clean_hls.append("Projektowanie i wdrażanie automatycznych zestawów testowych E2E z wykorzystaniem Playwright (TypeScript)." if lang == "pl" else "Designed and executed automated E2E test suites utilizing Playwright (TypeScript/JavaScript).")
                     clean_hls.append("Wykonywanie testów integracyjnych oraz weryfikacja danych w relacyjnych bazach danych SQL." if lang == "pl" else "Executed integration testing and database verification using SQL queries.")
                 elif "Sii" in company:
                     clean_hls.append("Weryfikacja danych w bazach danych z użyciem narzędzi SQL." if lang == "pl" else "Verified database records and data integrity using SQL tools.")
@@ -266,7 +266,64 @@ class QALogicEngine:
                     
             job["highlights"] = [sanitize_prose_text(h) for h in clean_hls[:5]]
 
-            # Ensure position and role synchronization
+        # 4B. INTER-COMPANY ANTI-DUPLICATION AUDITOR
+        # Guarantees that Sii Polska and Euroloan never copy or duplicate Benefit Systems points.
+        benefit_bullets = []
+        for job in refined.get("experience", []):
+            if "benefit" in job.get("company", "").lower():
+                for h in job.get("highlights", []):
+                    h_clean = re.sub(r'[^a-zA-Z0-9]', '', str(h).lower())
+                    if h_clean:
+                        benefit_bullets.append(h_clean)
+
+        for job in refined.get("experience", []):
+            comp_lower = job.get("company", "").lower()
+            if "benefit" in comp_lower:
+                continue
+
+            clean_unique_hls = []
+            for h in job.get("highlights", []):
+                h_str = str(h).strip()
+                h_norm = re.sub(r'[^a-zA-Z0-9]', '', h_str.lower())
+                h_words = set(re.findall(r'\w{4,}', h_str.lower()))
+
+                is_duplicate = False
+                for b_norm in benefit_bullets:
+                    if h_norm == b_norm:
+                        is_duplicate = True
+                        break
+                    b_words = set(re.findall(r'\w{4,}', b_norm))
+                    if len(h_words) >= 5 and b_words and len(h_words & b_words) / max(len(h_words), 1) >= 0.75:
+                        is_duplicate = True
+                        break
+
+                if not is_duplicate and h_str not in clean_unique_hls:
+                    clean_unique_hls.append(h_str)
+
+            # If duplicates were dropped, backfill with authentic role highlights
+            if len(clean_unique_hls) < 3:
+                if "sii" in comp_lower:
+                    default_sii = [
+                        "Conducted manual and functional testing of web application modules and customer portals based on backlog user stories." if lang == "en" else "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji biznesowych oraz HR w oparciu o wymagania z backlogu.",
+                        "Documented defects with clear reproduction steps and managed issue tracking in Jira (Xray) and HP QC / ALM following Scrum methodology." if lang == "en" else "Zgłaszanie błędów z jasnymi krokami reprodukcji i śledzenie defektów w narzędziach Jira (Xray) oraz HP QC / ALM.",
+                        "Executed backend API validation via Postman and performed data integrity verification using SQL Developer." if lang == "en" else "Wykonywanie testów backendowych i API w Postmanie oraz walidacja danych z użyciem SQL Developer."
+                    ]
+                    for d_hl in default_sii:
+                        if d_hl not in clean_unique_hls and len(clean_unique_hls) < 3:
+                            clean_unique_hls.append(d_hl)
+                elif "euroloan" in comp_lower:
+                    default_euro = [
+                        "Executed comprehensive UI, functional, exploratory, and regression testing for web and digital platforms." if lang == "en" else "Przeprowadzanie kompleksowych testów UI, funkcjonalnych i regresyjnych systemów cyfrowych oraz finansowych.",
+                        "Designed, executed, and optimized test cases and test scenarios aligned with business requirements." if lang == "en" else "Projektowanie, wykonywanie i optymalizacja przypadków testowych zgodnych z kryteriami akceptacji (Acceptance Criteria).",
+                        "Documented software defects and verified bug fixes." if lang == "en" else "Dokumentowanie defektów i weryfikacja poprawek błędów."
+                    ]
+                    for d_hl in default_euro:
+                        if d_hl not in clean_unique_hls and len(clean_unique_hls) < 3:
+                            clean_unique_hls.append(d_hl)
+
+            job["highlights"] = clean_unique_hls[:4]
+
+        for job in refined.get("experience", []):
             pos = job.get("position") or job.get("role") or "Software Tester"
             job["position"] = pos
             job["role"] = pos
