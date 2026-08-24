@@ -562,6 +562,8 @@ def export_pdf():
 
     if profile_data:
         tailored_data = profile_data
+    elif TAILORED_PROFILE_PATH.exists() or ACTIVE_TAILORED_PROFILE:
+        tailored_data = get_active_profile()
     elif job_spec:
         settings = get_settings()
         gemini_key = settings.get("gemini_key") or os.environ.get("GEMINI_API_KEY", "")
@@ -574,7 +576,7 @@ def export_pdf():
             job_spec["target_role"] = target_role
         tailored_data = CVTailorEngine.tailor(master_profile, job_spec, lang=lang, gemini_key=gemini_key, provider=provider)
     else:
-        tailored_data = get_active_profile()
+        tailored_data = master_profile
 
     # Step 3: Validate and refine through QALogicEngine
     final_data = QALogicEngine.audit_and_refine_profile(tailored_data, lang=lang, job_text=job_description or json.dumps(job_spec or {}), master_profile=master_profile)
