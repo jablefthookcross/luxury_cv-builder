@@ -125,7 +125,27 @@ class QALogicEngine:
         for cat in refined.get("skills", []):
             cat_name = cat.get("category", "").strip()
             cat_name_norm = re.sub(r'[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]', '', cat_name.lower())
-            raw_items = list(dict.fromkeys(cat.get("items", [])))
+            # Unpack glued tokens or multi-term items (e.g. "TypeScript Java", "Playwright, Selenium")
+            expanded_raw_items = []
+            for itm in cat.get("items", []):
+                if not itm:
+                    continue
+                itm_str = str(itm).strip()
+                if ',' in itm_str or ';' in itm_str or ' / ' in itm_str:
+                    sub_parts = re.split(r'[,;]|\s+/\s+', itm_str)
+                    for sp in sub_parts:
+                        sp_c = sp.strip()
+                        if sp_c:
+                            expanded_raw_items.append(sp_c)
+                elif re.search(r'\b(typescript|javascript|python|c#|\.net|java|selenium|playwright|postman|soapui|cypress|appium)\s+(typescript|javascript|python|c#|\.net|java|selenium|playwright|postman|soapui|cypress|appium)\b', itm_str, re.IGNORECASE):
+                    tokens = itm_str.split()
+                    for tok in tokens:
+                        if tok.strip():
+                            expanded_raw_items.append(tok.strip())
+                else:
+                    expanded_raw_items.append(itm_str)
+
+            raw_items = list(dict.fromkeys(expanded_raw_items))
             filtered_items = []
             
             for item in raw_items:

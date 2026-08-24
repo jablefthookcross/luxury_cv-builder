@@ -370,7 +370,7 @@ def refine_cv_api():
         master_profile = DBManager.get_profile(user_id=user_id)
         
         updated_data = ai.refine_cv(current_data, instruction, lang=lang)
-        refined_data = QALogicEngine.audit_and_refine_profile(updated_data, lang=lang, job_text=ACTIVE_JOB_TEXT, master_profile=master_profile)
+        refined_data = QALogicEngine.audit_and_refine_profile(updated_data, lang=lang, job_text="", master_profile=master_profile)
         
         global ACTIVE_TAILORED_PROFILE
         ACTIVE_TAILORED_PROFILE = refined_data
@@ -579,7 +579,15 @@ def export_pdf():
         tailored_data = master_profile
 
     # Step 3: Validate and refine through QALogicEngine
-    final_data = QALogicEngine.audit_and_refine_profile(tailored_data, lang=lang, job_text=job_description or json.dumps(job_spec or {}), master_profile=master_profile)
+    final_data = QALogicEngine.audit_and_refine_profile(
+        tailored_data,
+        lang=lang,
+        job_text="" if (profile_data or TAILORED_PROFILE_PATH.exists() or ACTIVE_TAILORED_PROFILE) else (job_description or json.dumps(job_spec or {})),
+        master_profile=master_profile
+    )
+
+    ACTIVE_TAILORED_PROFILE = final_data
+    save_json_file(TAILORED_PROFILE_PATH, final_data)
 
     # Step 4: Render directly to Jinja2 and generate PDF
     rendered_html = render_template(f"cv_templates/{template_name}.html", data=final_data, lang=lang)
@@ -590,13 +598,13 @@ def export_pdf():
     name_slug = re.sub(r'[^a-zA-Z0-9]', '_', final_data.get("personal_info", {}).get("full_name", "Michal_Kosowski")).strip('_') or "CV"
     filename = f"{name_slug}_CV.pdf" if lang == "pl" else f"{name_slug}_Resume.pdf"
 
-    # Step 5: Return PDF with zero-cache headers
+    # Step 5: Return PDF with strict zero-cache headers
     response = Response(
         pdf_bytes,
         mimetype="application/pdf",
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
-            "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+            "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0, post-check=0, pre-check=0",
             "Pragma": "no-cache",
             "Expires": "0"
         }

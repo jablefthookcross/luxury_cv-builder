@@ -377,12 +377,12 @@ ZASADY KOREKTY:
                         for it in c.get("items", [])
                     ]
 
-        # B. Mass / Comma-separated Deletions
-        m_rem_all = re.findall(r'(?:usuń|skasuj|wywal|remove|delete)(?:\s+tagi|\s+tags|\s+technologie)?[:\s]+([A-Za-z0-9#+.,\s/()"-]+?)(?:\.|\n|\)|$)', instruction, flags=re.IGNORECASE)
+        # B. Mass / Comma-separated Deletions (supports commas, "i", "oraz", "and")
+        m_rem_all = re.findall(r'(?:usuń|skasuj|wywal|remove|delete)(?:\s+tagi|\s+tags|\s+technologie|\s+słowa)?[:\s]+([A-Za-z0-9#+.,\s/()"-]+?)(?:\.|\n|\)|$)', instruction, flags=re.IGNORECASE)
         del_terms = []
         for block in m_rem_all:
-            for term in block.split(','):
-                t_clean = term.strip().lower().strip('"\'„”` ')
+            for term in re.split(r'[,;]|\s+oraz\s+|\s+i\s+|\s+and\s+', block, flags=re.IGNORECASE):
+                t_clean = term.strip().lower().strip('"\'„”` .')
                 if t_clean and len(t_clean) >= 2 and not any(k in t_clean for k in ["tagi", "tags", "umiejętnoś", "kategoria"]):
                     del_terms.append(t_clean)
 
@@ -391,17 +391,16 @@ ZASADY KOREKTY:
             for c in res.get("skills", []):
                 cleaned_cat_items = []
                 for it in c.get("items", []):
-                    should_remove = False
+                    it_cur = str(it).strip()
                     for dt in del_terms:
                         if dt == "java":
-                            if it.lower() == "java" or (re.search(r'\bjava\b', it, re.I) and not re.search(r'javascript', it, re.I)):
-                                should_remove = True
-                                break
-                        elif dt == it.lower() or bool(re.search(rf'\b{re.escape(dt)}\b', it, re.I)):
-                            should_remove = True
-                            break
-                    if not should_remove:
-                        cleaned_cat_items.append(it)
+                            it_cur = re.sub(r'(?:,\s*|\s+and\s+|\s+i\s+|\s+oraz\s+|\s+/\s+|\s+)?\bjava\b(?!\s*script)', '', it_cur, flags=re.IGNORECASE).strip(' ,/&')
+                        elif dt == "selenium":
+                            it_cur = re.sub(r'(?:,\s*|\s+and\s+|\s+i\s+|\s+oraz\s+|\s+/\s+|\s+)?\bselenium(?:\s+webdriver|\s+grid)?\b', '', it_cur, flags=re.IGNORECASE).strip(' ,/&')
+                        else:
+                            it_cur = re.sub(rf'(?:,\s*|\s+and\s+|\s+i\s+|\s+oraz\s+|\s+/\s+|\s+)?\b{re.escape(dt)}\b', '', it_cur, flags=re.IGNORECASE).strip(' ,/&')
+                    if it_cur and len(it_cur) >= 2:
+                        cleaned_cat_items.append(it_cur)
                 c["items"] = cleaned_cat_items
 
             # Clean from Professional Summary
