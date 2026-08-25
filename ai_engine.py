@@ -346,7 +346,7 @@ ZASADY KOREKTY:
                     hl.append(new_b)
 
         # 4. SKILLS - CATEGORY DEFINITIONS, ADDITIONS & MASS DELETIONS
-        # A. Check for category definitions: [Kategoria X] NAME:\nTagi: item1... OR Kategoria "NAME": item1...
+        # A. Check for category definitions: [Kategoria X] NAME:\nTagi: item1... OR - NAME: item1, item2... under SKILLS
         defined_skills = []
         for m in re.finditer(r'(?:\[\s*kategoria\s*\d*\s*\]|\bkategoria\s*\d*\b|\bcategory\s*\d*\b|^\s*-\s*kategoria)\s*[:\s]*["„]?([^:\n]+)["”]?\s*:\s*\n?(?:tagi:?|tags:?|items:?|zestaw:?|użyj:?)?\s*([^\n\r]+)', instruction, flags=re.IGNORECASE | re.MULTILINE):
             c_name = m.group(1).strip().strip(' []"\'„”`')
@@ -356,6 +356,19 @@ ZASADY KOREKTY:
             tags = [t.strip().strip('"\'„”` .') for t in c_items.split(',') if t.strip()]
             if c_name and tags and not any(k in c_name.lower() for k in ["umiejętnoś", "skills", "poprawna", "lewej"]):
                 defined_skills.append({"category": c_name, "items": tags})
+
+        if not defined_skills:
+            # Try section-scoped hyphen format: 1. Zastąp całą sekcję SKILLS:\n - NAME: tag1, tag2...
+            m_skills_sec = re.search(r'(?:sekcj[a-ząćęłńóśźż]*\s+)?(?:skills|umiejętnoś[a-ząćęłńóśźż]*)[^:\n]*:\s*([^\n\r]+(?:\n(?!\s*(?:\d+\.|\*|-)\s*(?:doświadczenie|experience|podsumowanie|summary|tytuł))[^\n\r]+)*)', instruction, flags=re.IGNORECASE)
+            if m_skills_sec:
+                sec_body = m_skills_sec.group(1)
+                for m in re.finditer(r'^\s*[-•\*]\s*["„]?([A-Z0-9\s&/–—\-]{3,35})["”]?\s*:\s*\n?(?:tagi:?|tags:?|items:?|zestaw:?|użyj:?)?\s*([^\n\r]+)', sec_body, flags=re.IGNORECASE | re.MULTILINE):
+                    c_name = m.group(1).strip().strip(' []"\'„”`')
+                    c_items = m.group(2).strip()
+                    c_items = re.sub(r'^(?:tagi:?|tags:?|items:?)\s*', '', c_items, flags=re.IGNORECASE)
+                    tags = [t.strip().strip('"\'„”` .') for t in c_items.split(',') if t.strip()]
+                    if c_name and tags and not any(k in c_name.lower() for k in ["zastąp", "skills", "umiejętnoś"]):
+                        defined_skills.append({"category": c_name, "items": tags})
 
         if defined_skills:
             res["skills"] = defined_skills
