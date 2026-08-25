@@ -279,34 +279,27 @@ ZASADY KOREKTY:
         res = json.loads(json.dumps(current_data))
 
         # 1. TITLE / ROLE CHANGES
-        m_title = re.search(r'(?:zmień tytuł na|zmień stanowisko na|tytuł:\s*|stanowisko:\s*|change title to|set title to|pod kątem roli\s+)\s*([A-Za-z0-9#+.\s/–—&-]+?)(?:\s*\(|\.|$|\n|,)', instruction, flags=re.IGNORECASE)
+        m_title = re.search(r'(?:\n|^)\s*(?:\d+\.|\*|-)?\s*(?:tytuł|stanowisko|role title|target title|position)[^:\n]*:\s*(?:zmień na:?\s*)?["„]?([^"”\n\r]+)["”]?', instruction, flags=re.IGNORECASE)
+        if not m_title:
+            m_title = re.search(r'(?:zmień tytuł na|zmień stanowisko na|change title to|set title to)\s*["„]?([^"”\n\r]+)["”]?', instruction, flags=re.IGNORECASE)
         if m_title:
-            new_title = m_title.group(1).strip()
-            if new_title and len(new_title) < 60 and not any(k in new_title.lower() for k in ["usuń", "dodaj", "kategoria"]):
-                if not any(q in new_title.lower() for q in ["qa", "tester", "engineer", "inżynier"]):
-                    new_title = f"Senior QA Engineer – {new_title}"
+            new_title = m_title.group(1).strip().strip('"\'„”` .')
+            if new_title and len(new_title) < 70 and not any(k in new_title.lower() for k in ["usuń", "dodaj", "kategoria", "podsumowanie"]):
                 res.setdefault("personal_info", {})["title"] = new_title
 
-        # 2. PROFESSIONAL SUMMARY CHANGES
-        m_summary_quote = re.search(r'(?:podsumowani[a-ząćęłńóśźż]*|summary).*?(?:treścią|na:?|to:?)\s*[:\n]\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
-        if not m_summary_quote:
-            m_summary_quote = re.search(r'(?:podsumowani[a-ząćęłńóśźż]*|summary).*?[:\n]\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
-        if not m_summary_quote:
-            m_summary_quote = re.search(r'(?:podsumowani[a-ząćęłńóśźż]*|summary).*?na:?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
-
-        if m_summary_quote:
-            new_sum_part = m_summary_quote.group(1).strip()
-            if new_sum_part:
-                old_sum = res.get("summary", "")
-                if ("drugie zdanie" in instruction.lower() or "2. zdanie" in instruction.lower()) and "." in old_sum:
-                    sentences = [s.strip() for s in old_sum.split(".") if s.strip()]
-                    if len(sentences) >= 2:
-                        sentences[1] = new_sum_part.rstrip(".")
-                        res["summary"] = ". ".join(sentences) + "."
-                    else:
-                        res["summary"] = f"{sentences[0]}. {new_sum_part.rstrip('.')}."
-                else:
-                    res["summary"] = new_sum_part
+        # 2. PROFESSIONAL SUMMARY CHANGES (Section-scoped, never matches other sections)
+        m_summary_sec = re.search(r'(?:\n|^)\s*(?:\d+\.|\*|-)?\s*(?:podsumowanie|professional summary|summary)\b[^:\n]*:\s*([^\n\r]+(?:\n(?!\s*(?:\d+\.|\*|-|\[)\s*[A-Za-z0-9])[^\n\r]+)*)', instruction, flags=re.IGNORECASE)
+        if m_summary_sec:
+            sec_text = m_summary_sec.group(1)
+            m_quote = re.search(r'["„](.*?)["”]', sec_text, flags=re.DOTALL)
+            if m_quote:
+                new_summary = m_quote.group(1).strip().strip('"\'„”` ')
+            else:
+                lines = [l.strip() for l in sec_text.split('\n') if l.strip()]
+                clean_lines = [l for l in lines if not re.match(r'^(?:zastąp|ustaw|zmień|tekst:?|podsumowanie:?)\b', l, re.I)]
+                new_summary = " ".join(clean_lines) if clean_lines else ""
+            if new_summary and len(new_summary) > 20:
+                res["summary"] = new_summary
 
         # 3. WORK EXPERIENCE - FULL BLOCK REPLACEMENT OR INDIVIDUAL BULLET OVERRIDES
         for job in res.get("experience", []):
@@ -353,29 +346,19 @@ ZASADY KOREKTY:
                     hl.append(new_b)
 
         # 4. SKILLS - CATEGORY DEFINITIONS, ADDITIONS & MASS DELETIONS
-        # A. Check for category definitions: Kategoria "NAME": item1, item2, item3...
-        cat_definitions = re.findall(r'(?:kategoria|category)\s*["„]?([^":\n]+)["”]?:?\s*([^\n]+)', instruction, flags=re.IGNORECASE)
-        if cat_definitions:
-            defined_skills = []
-            for raw_cat_name, items_str in cat_definitions:
-                cat_clean_name = raw_cat_name.strip().strip('"\'„”` ')
-                # Strip bracket notes like (Całkowicie usuń tagi: ...)
-                clean_items_str = re.sub(r'\(.*?\)', '', items_str).strip()
-                # Strip leading directive prefixes from the items block
-                clean_items_str = re.sub(r'^(?:zastąp\s+tagi\s+zestawem:?|zastąp\s+tagi:?|zastąp\s+zestawem:?|zastąp:?|tagi:?|tags:?|zestaw:?|użyj:?|dodaj\s+tagi:?|dodaj:?)\s*', '', clean_items_str, flags=re.IGNORECASE).strip()
-                
-                items = []
-                for it in clean_items_str.split(','):
-                    it_clean = re.sub(r'^(?:zastąp\s+tagi\s+zestawem:?|zastąp\s+tagi:?|zastąp\s+zestawem:?|zastąp:?|tagi:?|tags:?|zestaw:?|użyj:?|dodaj\s+tag:?|dodaj:?|[•\-\*\s]+)\s*', '', it, flags=re.IGNORECASE).strip().strip('"\'„”` .')
-                    if it_clean:
-                        items.append(it_clean)
-                if items:
-                    defined_skills.append({
-                        "category": cat_clean_name,
-                        "items": items
-                    })
-            if defined_skills:
-                res["skills"] = defined_skills
+        # A. Check for category definitions: [Kategoria X] NAME:\nTagi: item1... OR Kategoria "NAME": item1...
+        defined_skills = []
+        for m in re.finditer(r'(?:\[\s*kategoria\s*\d*\s*\]|\bkategoria\s*\d*\b|\bcategory\s*\d*\b|^\s*-\s*kategoria)\s*[:\s]*["„]?([^:\n]+)["”]?\s*:\s*\n?(?:tagi:?|tags:?|items:?|zestaw:?|użyj:?)?\s*([^\n\r]+)', instruction, flags=re.IGNORECASE | re.MULTILINE):
+            c_name = m.group(1).strip().strip(' []"\'„”`')
+            c_name = re.sub(r'^(?:\[\s*kategoria\s*\d*\s*\]|\bkategoria\s*\d*\b|\bcategory\s*\d*\b)\s*', '', c_name, flags=re.IGNORECASE).strip(' []"\'„”`')
+            c_items = m.group(2).strip()
+            c_items = re.sub(r'^(?:tagi:?|tags:?|items:?|zastąp tagi zestawem:?|zastąp tagi:?)\s*', '', c_items, flags=re.IGNORECASE)
+            tags = [t.strip().strip('"\'„”` .') for t in c_items.split(',') if t.strip()]
+            if c_name and tags and not any(k in c_name.lower() for k in ["umiejętnoś", "skills", "poprawna", "lewej"]):
+                defined_skills.append({"category": c_name, "items": tags})
+
+        if defined_skills:
+            res["skills"] = defined_skills
 
         # A2. Direct Tag Replacement (e.g. usuń tag "X" i zamiast niego dodaj czysty tag "Y")
         m_replace_tag = re.search(r'usuń\s+tag\s*["„]?([^"”\n,]+)["”]?\s+i\s+(?:zamiast\s+niego\s+)?(?:dodaj|wstaw)\s+(?:czysty\s+)?tag:?\s*["„]?([^"”\n,]+)["”]?', instruction, flags=re.IGNORECASE)
@@ -442,11 +425,11 @@ ZASADY KOREKTY:
                         cleaned_hls.append(hl_text)
                 job["highlights"] = cleaned_hls
 
-        # C. Single Tag Additions
-        m_add_skills = re.findall(r'(?:dodaj\s*tag:?|dodaj\s*umiejętność:?|dodaj|dopisz|wstaw|add|include)\s*[:\s]*["„]?([A-Za-z0-9#+.\s/()-]+?)["”]?(?:\s+do|\s+w|\s+to|\s+skills|\s+umiejętności|$|,|\.|\n)', instruction, flags=re.IGNORECASE)
+        # C. Single Tag Additions (Requires explicit keyword like 'dodaj tag', 'add tag', 'add skill')
+        m_add_skills = re.findall(r'(?:\bdodaj\s+tag:?|\bdodaj\s+umiejętność:?|\badd\s+tag:?|\badd\s+skill:?|\bwstaw\s+tag:?|\bdopisz\s+tag:?)\s*[:\s]*["„]?([A-Za-z0-9#+.\s/()-]+?)["”]?(?:\s+do|\s+w|\s+to|\s+skills|\s+umiejętności|$|,|\.|\n)', instruction, flags=re.IGNORECASE)
         for skill_term in m_add_skills:
             term = skill_term.strip().replace('"', '').replace('„', '').replace('”', '')
-            if term and len(term) < 40 and not any(k in term.lower() for k in ["tag", "umiejętnoś", "sekcj", "punkt", "bullet", "kategoria"]):
+            if term and len(term) < 40 and not any(k in term.lower() for k in ["tag", "umiejętnoś", "sekcj", "punkt", "bullet", "kategoria", "application"]):
                 skills_list = res.get("skills", [])
                 if skills_list:
                     target_cat = skills_list[0]

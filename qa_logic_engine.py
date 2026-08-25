@@ -234,12 +234,14 @@ class QALogicEngine:
                     break
             summary = " ".join(trimmed_sentences)
             
-        elif len(words) < 40 and summary:
-            # Expand summary smoothly with QA core competencies
+        elif len(words) < 30 and summary:
+            # Expand summary smoothly with QA core competencies only if very short and not already present
             if lang == "en":
-                summary += " Proven expertise in designing structured test documentation, executing regression suites, and ensuring high software quality across fast-paced delivery cycles."
+                if "Proven expertise in designing" not in summary:
+                    summary += " Proven expertise in designing structured test documentation, executing regression suites, and ensuring high software quality across fast-paced delivery cycles."
             else:
-                summary += " Posiada udokumentowane doświadczenie w tworzeniu ustrukturyzowanej dokumentacji testowej, wykonywaniu testów regresyjnych oraz dbaniu o najwyższą jakość oprogramowania w zwinnych zespołach."
+                if "Posiada udokumentowane doświadczenie" not in summary:
+                    summary += " Posiada udokumentowane doświadczenie w tworzeniu ustrukturyzowanej dokumentacji testowej, wykonywaniu testów regresyjnych oraz dbaniu o najwyższą jakość oprogramowania w zwinnych zespołach."
                 
         refined["summary"] = sanitize_prose_text(summary)
 
