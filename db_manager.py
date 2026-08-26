@@ -198,16 +198,40 @@ class DBManager:
             "access_token": token
         }
 
+    @staticmethod
+    def get_empty_profile() -> Dict[str, Any]:
+        return {
+            "personal_info": {
+                "full_name": "Michał Kosowski",
+                "title": "Software QA Engineer",
+                "email": "mmkosowski94@gmail.com",
+                "phone": "518075716",
+                "location": "Warszawa",
+                "linkedin": "",
+                "github": "https://github.com/jablefthookcross"
+            },
+            "summary": "",
+            "skills": [],
+            "experience": [],
+            "languages": [
+                {"language": "Polski", "level": "Ojczysty (Native)"},
+                {"language": "Angielski", "level": "Biegły (Professional)"}
+            ],
+            "education": [],
+            "certifications": []
+        }
+
     @classmethod
     def get_profile(cls, user_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Fetches master profile:
         - If user_id is provided, returns that user's profile from local DB or Supabase.
-        - If not found or empty, ALWAYS falls back to DEFAULT_PROFILE_PATH (never an empty shell).
+        - If user profile exists (even if empty after deletion), returns that user's profile.
+        - If new user or guest, falls back to pristine DEFAULT_PROFILE_PATH template.
         """
         if user_id:
             profiles_db = _load_json(USER_PROFILES_FILE, {})
-            if user_id in profiles_db and profiles_db[user_id].get("experience"):
+            if user_id in profiles_db:
                 return profiles_db[user_id]
             
             # Sync check with Supabase if enabled
@@ -236,15 +260,48 @@ class DBManager:
                             "education": [],
                             "certifications": []
                         }
-                        if prof.get("experience"):
-                            profiles_db[user_id] = prof
-                            _save_json(USER_PROFILES_FILE, profiles_db)
-                            return prof
+                        profiles_db[user_id] = prof
+                        _save_json(USER_PROFILES_FILE, profiles_db)
+                        return prof
                 except Exception as e:
                     print(f"[DBManager Warning] Supabase profile read: {e}")
 
         # Fallback to pristine baseline profile_data.json
         return _load_json(DEFAULT_PROFILE_PATH, {})
+
+    @classmethod
+    def delete_profile(cls, user_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Cleans the user's base profile, allowing fresh CV upload or new data entry.
+        Never touches the pristine template profile_data.json on disk!
+        """
+        empty_prof = cls.get_empty_profile()
+        if user_id:
+            profiles_db = _load_json(USER_PROFILES_FILE, {})
+            profiles_db[user_id] = empty_prof
+            _save_json(USER_PROFILES_FILE, profiles_db)
+
+            if cls.is_supabase_enabled():
+                try:
+                    payload = {
+                        "id": user_id,
+                        "full_name": empty_prof["personal_info"]["full_name"],
+                        "email": empty_prof["personal_info"]["email"],
+                        "phone": empty_prof["personal_info"]["phone"],
+                        "location": empty_prof["personal_info"]["location"],
+                        "linkedin": "",
+                        "github": empty_prof["personal_info"]["github"],
+                        "summary": "",
+                        "skills": [],
+                        "experience": [],
+                        "languages": empty_prof["languages"],
+                        "education": [],
+                        "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                    supabase_client.table("profiles").upsert(payload).execute()
+                except Exception as e:
+                    print(f"[DBManager Warning] Supabase delete sync: {e}")
+        return empty_prof
 
     @classmethod
     def save_profile(cls, profile_data: Dict[str, Any], user_id: Optional[str] = None) -> bool:
@@ -264,7 +321,6 @@ class DBManager:
                     payload = {
                         "id": user_id,
                         "full_name": pinfo.get("full_name", ""),
-                        "title": pinfo.get("title", "Software QA Engineer"),
                         "email": pinfo.get("email", ""),
                         "phone": pinfo.get("phone", ""),
                         "location": pinfo.get("location", "Warszawa"),

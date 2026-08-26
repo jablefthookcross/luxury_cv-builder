@@ -1056,19 +1056,7 @@
             try {
                 const res = await fetch('/api/profile', { headers: getAuthHeaders() });
                 const data = await res.json();
-                if (data && data.experience && data.experience.length > 0) {
-                    populateProfileEditor(data);
-                } else {
-                    const cached = localStorage.getItem('vitaecraft_master_base_profile');
-                    if (cached) {
-                        try {
-                            const cachedObj = JSON.parse(cached);
-                            if (cachedObj && cachedObj.experience && cachedObj.experience.length > 0) {
-                                populateProfileEditor(cachedObj);
-                                return;
-                            }
-                        } catch (e) {}
-                    }
+                if (data) {
                     populateProfileEditor(data);
                 }
             } catch (err) {
@@ -1303,10 +1291,20 @@
                     headers: getAuthHeaders()
                 });
                 const data = await res.json();
-                if (data.status === "success") {
+                if (data.status === "success" && data.profile) {
+                    try {
+                        localStorage.removeItem('vitaecraft_master_base_profile');
+                        localStorage.removeItem('vitaecraft_active_draft_profile');
+                    } catch (e) {}
+                    currentProfileData = data.profile;
+                    currentDraftProfile = null;
+                    populateProfileEditor(data.profile);
+                    const iframe = document.getElementById('previewIframe');
+                    if (iframe) {
+                        iframe.removeAttribute('srcdoc');
+                        iframe.src = 'about:blank';
+                    }
                     alert("✅ " + data.message);
-                    loadMasterProfileData();
-                    updatePreview();
                 }
             } catch (err) {
                 alert("Błąd podczas usuwania profilu: " + err.message);

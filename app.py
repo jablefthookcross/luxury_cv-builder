@@ -160,24 +160,8 @@ def reset_profile_api():
 @app.route("/api/profile/delete", methods=["POST", "DELETE"])
 def delete_master_profile_api():
     global ACTIVE_TAILORED_PROFILE, ACTIVE_JOB_TEXT
-    empty_profile = {
-        "personal_info": {
-            "full_name": "Michał Kosowski",
-            "title": "Software QA Engineer",
-            "email": "",
-            "phone": "",
-            "location": "Warszawa",
-            "linkedin": "",
-            "github": ""
-        },
-        "summary": "",
-        "skills": [],
-        "experience": [],
-        "languages": [],
-        "education": [],
-        "certifications": []
-    }
-    save_json_file(DEFAULT_PROFILE_PATH, empty_profile)
+    user_id = get_authenticated_user_id()
+    empty_profile = DBManager.delete_profile(user_id=user_id)
     ACTIVE_TAILORED_PROFILE = None
     ACTIVE_JOB_TEXT = ""
     if TAILORED_PROFILE_PATH.exists():
@@ -185,7 +169,11 @@ def delete_master_profile_api():
             TAILORED_PROFILE_PATH.unlink()
         except Exception:
             pass
-    return jsonify({"status": "success", "message": "Profil bazowy został pomyślnie wyczyszczony! Możesz teraz wgrać nowy plik PDF ze swoim CV.", "profile": empty_profile})
+    return jsonify({
+        "status": "success",
+        "message": "Profil bazowy został pomyślnie wyczyszczony! Możesz teraz wgrać nowy plik PDF ze swoim CV.",
+        "profile": empty_profile
+    })
 
 @app.route("/api/upload-pdf", methods=["POST"])
 def upload_pdf_api():
