@@ -296,11 +296,11 @@ ZASADY KOREKTY:
             if new_title and len(new_title) < 70 and not any(k in new_title.lower() for k in ["usuń", "dodaj", "kategoria", "podsumowanie"]):
                 res.setdefault("personal_info", {})["title"] = new_title
 
-        # 2. PROFESSIONAL SUMMARY CHANGES (Section-scoped, never matches other sections)
-        m_summary_sec = re.search(r'(?:\n|^)\s*(?:\d+\.|\*|-)?\s*(?:podsumowanie|professional summary|summary)\b[^:\n]*:\s*([^\n\r]+(?:\n(?!\s*(?:\d+\.|\*|-|\[)\s*[A-Za-z0-9])[^\n\r]+)*)', instruction, flags=re.IGNORECASE)
+        # 2. PROFESSIONAL SUMMARY CHANGES (Section-scoped, handles newlines after colon and quotes)
+        m_summary_sec = re.search(r'(?:\n|^)\s*(?:\d+\.|\*|-)?\s*(?:podsumowanie|professional summary|summary|zastąp podsumowanie|zmień podsumowanie|replace summary)\b[^:\n]*:\s*\n?([\s\S]*?)(?=(?:\n\s*(?:\d+\.|\*|-|\[)\s*(?:zastąp|skills|umiejętnoś|doświadczenie|experience|benefit|sii|euroloan|angielski|english|języki|languages)|\Z))', instruction, flags=re.IGNORECASE)
         if m_summary_sec:
-            sec_text = m_summary_sec.group(1)
-            m_quote = re.search(r'["„](.*?)["”]', sec_text, flags=re.DOTALL)
+            sec_text = m_summary_sec.group(1).strip()
+            m_quote = re.search(r'["„]([\s\S]*?)["”]', sec_text)
             if m_quote:
                 new_summary = m_quote.group(1).strip().strip('"\'„”` ')
             else:
@@ -370,10 +370,10 @@ ZASADY KOREKTY:
 
         if not defined_skills:
             # Try section-scoped hyphen format: 1. Zastąp całą sekcję SKILLS:\n - NAME: tag1, tag2...
-            m_skills_sec = re.search(r'(?:sekcj[a-ząćęłńóśźż]*\s+)?(?:skills|umiejętnoś[a-ząćęłńóśźż]*)[^:\n]*:\s*([^\n\r]+(?:\n(?!\s*(?:\d+\.|\*|-)\s*(?:doświadczenie|experience|podsumowanie|summary|tytuł))[^\n\r]+)*)', instruction, flags=re.IGNORECASE)
+            m_skills_sec = re.search(r'(?:sekcj[a-ząćęłńóśźż]*\s+)?(?:skills|umiejętnoś[a-ząćęłńóśźż]*)[^:\n]*:\s*([\s\S]*?)(?=(?:\n\s*(?:\d+\.|\*|-)\s*(?:doświadczenie|experience|podsumowanie|summary|tytuł|benefit|sii|euroloan|angielski|english)|\Z))', instruction, flags=re.IGNORECASE)
             if m_skills_sec:
                 sec_body = m_skills_sec.group(1)
-                for m in re.finditer(r'^\s*[-•\*]\s*["„]?([A-Z0-9\s&/–—\-]{3,35})["”]?\s*:\s*\n?(?:tagi:?|tags:?|items:?|zestaw:?|użyj:?)?\s*([^\n\r]+)', sec_body, flags=re.IGNORECASE | re.MULTILINE):
+                for m in re.finditer(r'^\s*[-•\*]\s*["„]?([A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s&/–—\-]{3,45})["”]?\s*:\s*\n?(?:tagi:?|tags:?|items:?|zestaw:?|użyj:?)?\s*([^\n\r]+)', sec_body, flags=re.IGNORECASE | re.MULTILINE):
                     c_name = m.group(1).strip().strip(' []"\'„”`')
                     c_items = m.group(2).strip()
                     c_items = re.sub(r'^(?:tagi:?|tags:?|items:?)\s*', '', c_items, flags=re.IGNORECASE)
