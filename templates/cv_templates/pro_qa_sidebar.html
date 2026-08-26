@@ -346,18 +346,16 @@
             </div>
             {% endif %}
 
+            {% if data.languages %}
             <div>
                 <div class="sb-sec-title">{% if lang == 'en' %}LANGUAGES{% else %}JĘZYKI{% endif %}</div>
                 <ul class="sb-list">
-                    {% if lang == 'en' %}
-                    <li class="sb-list-item">🌐 <strong>Polish:</strong>&nbsp;Native</li>
-                    <li class="sb-list-item">🌐 <strong>English:</strong>&nbsp;Full Professional (C2)</li>
-                    {% else %}
-                    <li class="sb-list-item">🌐 <strong>Polski:</strong>&nbsp;Ojczysty (Native)</li>
-                    <li class="sb-list-item">🌐 <strong>Angielski:</strong>&nbsp;Biegły (C2)</li>
-                    {% endif %}
+                    {% for item in data.languages %}
+                    <li class="sb-list-item">🌐 <strong>{{ item.language }}:</strong>&nbsp;{{ item.level }}</li>
+                    {% endfor %}
                 </ul>
             </div>
+            {% endif %}
         </aside>
 
         <!-- Main Content -->

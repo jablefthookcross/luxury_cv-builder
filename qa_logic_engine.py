@@ -111,13 +111,19 @@ class QALogicEngine:
             custom_en_level = None
 
         if lang == "en":
-            en_level = custom_en_level or "Professional Working Proficiency (B2+)"
+            if not custom_en_level or custom_en_level in ["Biegły (B2+)", "Biegły"]:
+                en_level = "Professional Working Proficiency (B2+)"
+            else:
+                en_level = custom_en_level
             refined["languages"] = [
                 {"language": "Polish", "level": "Native"},
                 {"language": "English", "level": en_level}
             ]
         else:
-            pl_en_level = custom_en_level or "Biegły (B2+)"
+            if not custom_en_level or custom_en_level in ["Professional Working Proficiency (B2+)", "Full Professional (B2+)"]:
+                pl_en_level = "Biegły (B2+)"
+            else:
+                pl_en_level = custom_en_level
             refined["languages"] = [
                 {"language": "Polski", "level": "Ojczysty (Native)"},
                 {"language": "Angielski", "level": pl_en_level}
