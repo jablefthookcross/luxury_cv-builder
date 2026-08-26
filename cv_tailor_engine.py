@@ -66,10 +66,11 @@ WYMAGANY FORMAT JSON (w języku {LANG}):
 
 POLISH_BASELINE_EXPERIENCE = [
     {
+        "position": "Software tester / QA Automation",
         "company": "Benefit Systems S.A.",
-        "role": "Software tester / QA Automation",
-        "period": "2022 – Obecnie",
         "location": "Warszawa",
+        "start_date": "2022",
+        "end_date": "Obecnie",
         "highlights": [
             "Projektowanie, rozwój i utrzymanie automatycznych zestawów testów E2E dla modułów webowych w Playwright (TypeScript/JavaScript).",
             "Integracja i uruchamianie testów automatycznych w ramach pipeline'ów CI/CD (GitLab CI / GitHub Actions / Jenkins).",
@@ -78,10 +79,11 @@ POLISH_BASELINE_EXPERIENCE = [
         ]
     },
     {
+        "position": "Test And Analysis Engineer",
         "company": "Sii Polska Sp. z o.o. (Freelance)",
-        "role": "Test And Analysis Engineer",
-        "period": "2021-09 – 2022-04",
         "location": "Warszawa",
+        "start_date": "2021-09",
+        "end_date": "2022-04",
         "highlights": [
             "Przeprowadzanie testów manualnych i funkcjonalnych modułów aplikacji webowych w oparciu o wymagania z backlogu.",
             "Dokumentowanie defektów z jasnymi krokami reprodukcji i zarządzanie błędami w narzędziach Jira (Xray) oraz HP QC / ALM.",
@@ -89,10 +91,11 @@ POLISH_BASELINE_EXPERIENCE = [
         ]
     },
     {
+        "position": "Software tester",
         "company": "Euroloan Group (Freelance)",
-        "role": "Software tester",
-        "period": "2019-07 – 2021-01",
         "location": "Warszawa",
+        "start_date": "2019-07",
+        "end_date": "2021-01",
         "highlights": [
             "Przeprowadzanie kompleksowych testów funkcjonalnych, eksploatacyjnych, UI oraz regresyjnych dla platform cyfrowych.",
             "Projektowanie, wykonywanie i optymalizacja przypadków testowych zgodnych z kryteriami akceptacji.",
@@ -103,10 +106,11 @@ POLISH_BASELINE_EXPERIENCE = [
 
 ENGLISH_BASELINE_EXPERIENCE = [
     {
+        "position": "Software tester / QA Automation",
         "company": "Benefit Systems S.A.",
-        "role": "Software tester / QA Automation",
-        "period": "2022 – Present",
         "location": "Warsaw, Poland",
+        "start_date": "2022",
+        "end_date": "Present",
         "highlights": [
             "Designing, developing, and maintaining automated E2E test suites for web applications using Playwright (TypeScript/JavaScript).",
             "Integrating and executing automated test suites within CI/CD pipelines (GitLab CI / GitHub Actions / Jenkins).",
@@ -115,10 +119,11 @@ ENGLISH_BASELINE_EXPERIENCE = [
         ]
     },
     {
+        "position": "Test And Analysis Engineer",
         "company": "Sii Polska Sp. z o.o. (Freelance)",
-        "role": "Test And Analysis Engineer",
-        "period": "2021-09 – 2022-04",
         "location": "Warsaw, Poland",
+        "start_date": "2021-09",
+        "end_date": "2022-04",
         "highlights": [
             "Conducted manual and functional testing of web application modules and customer portals based on backlog user stories.",
             "Documented defects with clear reproduction steps and managed issue tracking in Jira (Xray) and HP QC / ALM following Scrum methodology.",
@@ -126,10 +131,11 @@ ENGLISH_BASELINE_EXPERIENCE = [
         ]
     },
     {
+        "position": "Software tester",
         "company": "Euroloan Group (Freelance)",
-        "role": "Software tester",
-        "period": "2019-07 – 2021-01",
         "location": "Warsaw, Poland",
+        "start_date": "2019-07",
+        "end_date": "2021-01",
         "highlights": [
             "Executed comprehensive UI, functional, exploratory, and regression testing for web and digital platforms.",
             "Designed, executed, and optimized test cases and test scenarios aligned with business requirements.",
@@ -471,7 +477,7 @@ class CVTailorEngine:
                 if clean_t and clean_t not in auto_tech_list:
                     auto_tech_list.append(clean_t)
         if not auto_tech_list:
-            auto_tech_list = ["Selenium WebDriver", "Playwright"] if is_en else ["Selenium WebDriver", "Playwright"]
+            auto_tech_list = ["Playwright"] if is_en else ["Playwright"]
         auto_tech_str = ", ".join(auto_tech_list[:3])
 
         # 3b. CI/CD & Cloud Infrastructure (Docker, Kubernetes, AWS, Azure, Jenkins, GitLab CI)
@@ -550,7 +556,7 @@ class CVTailorEngine:
         raw_exp = ENGLISH_BASELINE_EXPERIENCE if is_en else POLISH_BASELINE_EXPERIENCE
         tailored_exp = []
 
-        AUTO_FRAMEWORKS_KW = ["playwright", "selenium", "appium", "cypress", "testng", "junit", "pytest", "robot framework", "c#", "typescript", "python"]
+        AUTO_FRAMEWORKS_KW = ["playwright", "cypress", "appium", "testng", "junit", "pytest", "robot framework", "typescript", "python", "javascript"]
         auto_frameworks = []
         for t in (primary_tech + secondary_tech + tools):
             if any(kw in t.lower() for kw in AUTO_FRAMEWORKS_KW) and "istqb" not in t.lower():
@@ -558,7 +564,9 @@ class CVTailorEngine:
                 if clean_t and clean_t not in auto_frameworks:
                     auto_frameworks.append(clean_t)
         if not auto_frameworks:
-            auto_frameworks = ["Playwright", "Selenium WebDriver", "Appium"] if is_en else ["Playwright", "Selenium WebDriver", "Appium"]
+            auto_frameworks = ["Playwright (TypeScript)"] if is_en else ["Playwright (TypeScript)"]
+
+        has_figma = any(kw in all_spec_text for kw in ["figma", "zeplin", "design system", "ui/ux"])
 
         for job in raw_exp:
             job_copy = json.loads(json.dumps(job))
@@ -571,12 +579,19 @@ class CVTailorEngine:
                         if is_en else
                         "Walidacja usług sieciowych REST & SOAP API przy użyciu narzędzi Postman oraz Swagger, weryfikacja spójności danych na relacyjnych bazach SQL oraz analiza logów aplikacyjnych w Kibana i Grafana."
                     )
-                    # Priority 2: Functional & Backend Integration
-                    bullets.append(
-                        "Conducting thorough functional, integration, and exploratory testing across backend services and web platforms."
-                        if is_en else
-                        "Przeprowadzanie testów integracyjnych, funkcjonalnych oraz eksploracyjnych systemów backendowych i platform webowych."
-                    )
+                    # Priority 2: Functional / UI-Design / Integration
+                    if has_figma:
+                        bullets.append(
+                            "Validating UI/UX implementation against Figma design specifications and executing functional and exploratory test suites across platforms."
+                            if is_en else
+                            "Weryfikacja implementacji UI/UX z makietami w Figma oraz przeprowadzanie testów funkcjonalnych i eksploracyjnych."
+                        )
+                    else:
+                        bullets.append(
+                            "Conducting thorough functional, integration, and exploratory testing across backend services and web platforms."
+                            if is_en else
+                            "Przeprowadzanie testów integracyjnych, funkcjonalnych oraz eksploracyjnych systemów backendowych i platform webowych."
+                        )
                     # Priority 3: Test Planning & Documentation
                     bullets.append(
                         "Designing structured test plans, comprehensive test scenarios, and project documentation in Jira (Xray) and Confluence in Agile/Scrum teams."
@@ -596,18 +611,25 @@ class CVTailorEngine:
                         f"Utrzymanie i rozbudowa automatycznych skryptów testowych w oparciu o {', '.join(auto_frameworks[:2])} na potrzeby testów regresyjnych."
                     )
                 elif is_mobile:
-                    # Priority 1: Mobile Testing
+                    # Priority 1: Mobile Testing & Exploratory
                     bullets.append(
-                        "Conducting comprehensive mobile application testing across iOS and Android platforms utilizing diagnostic tools and device emulators."
+                        "Conducting comprehensive functional, exploratory, and regression testing across mobile applications (iOS and Android) and web platforms."
                         if is_en else
-                        "Przeprowadzanie kompleksowych testów aplikacji mobilnych na platformach iOS i Android z wykorzystaniem narzędzi diagnostycznych i emulatorów."
+                        "Przeprowadzanie kompleksowych testów funkcjonalnych, eksploracyjnych i regresyjnych aplikacji mobilnych (iOS/Android) oraz portali webowych."
                     )
-                    # Priority 2: Automation E2E
-                    bullets.append(
-                        f"Designing and developing automated E2E test suites utilizing {', '.join(auto_frameworks[:3])}."
-                        if is_en else
-                        f"Projektowanie i wdrażanie automatycznych zestawów testowych E2E z wykorzystaniem {', '.join(auto_frameworks[:3])}."
-                    )
+                    # Priority 2: UI/UX Figma Verification / Automation E2E
+                    if has_figma:
+                        bullets.append(
+                            f"Validating UI/UX implementations against Figma designs and maintaining automated E2E test suites in {', '.join(auto_frameworks[:2])}."
+                            if is_en else
+                            f"Weryfikacja spójności UI/UX z makietami w Figma oraz rozwijanie automatycznych testów E2E w {', '.join(auto_frameworks[:2])}."
+                        )
+                    else:
+                        bullets.append(
+                            f"Designing and developing automated E2E test suites utilizing {', '.join(auto_frameworks[:3])}."
+                            if is_en else
+                            f"Projektowanie i wdrażanie automatycznych zestawów testowych E2E z wykorzystaniem {', '.join(auto_frameworks[:3])}."
+                        )
                     # Priority 3: CI/CD
                     bullets.append(
                         "Integrating mobile and web test suites into continuous delivery pipelines (GitLab CI / CI/CD Pipelines)."
@@ -633,12 +655,19 @@ class CVTailorEngine:
                         if is_en else
                         f"Projektowanie i wdrażanie automatycznych zestawów testowych E2E oraz strategii weryfikacji z wykorzystaniem {', '.join(auto_frameworks[:3])}."
                     )
-                    # Priority 2: Functional / Exploratory
-                    bullets.append(
-                        "Conducting thorough functional, integration, and exploratory testing across enterprise web platforms."
-                        if is_en else
-                        "Wykonywanie testów funkcjonalnych, integracyjnych i eksploracyjnych na platformach webowych i systemach cyfrowych."
-                    )
+                    # Priority 2: Functional / Figma / Exploratory
+                    if has_figma:
+                        bullets.append(
+                            "Validating UI/UX implementations against Figma specifications while conducting functional and exploratory tests across web platforms."
+                            if is_en else
+                            "Weryfikacja implementacji UI/UX z projektami w Figma oraz wykonywanie testów funkcjonalnych i eksploracyjnych."
+                        )
+                    else:
+                        bullets.append(
+                            "Conducting thorough functional, integration, and exploratory testing across enterprise web platforms."
+                            if is_en else
+                            "Wykonywanie testów funkcjonalnych, integracyjnych i eksploracyjnych na platformach webowych i systemach cyfrowych."
+                        )
                     # Priority 3: CI/CD
                     if secondary_tech or "docker" in str(tools).lower() or "jenkins" in str(tools).lower() or has_cicd:
                         ci_tools = [t for t in (secondary_tech + tools) if any(k in t.lower() for k in ["docker", "jenkins", "gitlab", "github", "ci"])]

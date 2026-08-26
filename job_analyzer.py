@@ -74,12 +74,12 @@ ARCHETYPES = {
             "rabbitmq", "elastic stack", "ui & api", "ui and api"
         ],
         "core_skills_pl": [
-            "Playwright (TypeScript/C#)", "Selenium / Selenoid", "Apache JMeter (Performance)",
-            "Automatyzacja UI & API", "Page Object Model (POM)", "Docker & Jenkins CI/CD"
+            "Playwright (TypeScript/JS)", "Automatyzacja UI & API", "Page Object Model (POM)",
+            "Automatyzacja Testów E2E", "GitLab CI & CI/CD", "Postman (API Testing)"
         ],
         "core_skills_en": [
-            "Playwright (TypeScript/C#)", "Selenium / Selenoid", "Apache JMeter (Performance)",
-            "UI & API Test Automation", "Page Object Model (POM)", "Docker & Jenkins CI/CD"
+            "Playwright (TypeScript/JS)", "UI & API Test Automation", "Page Object Model (POM)",
+            "E2E Test Automation", "GitLab CI & CI/CD", "Postman (API Testing)"
         ]
     },
     "management_process": {
@@ -250,14 +250,13 @@ class JobAnalyzer:
         elif primary_id == "automation":
             cat1_name = "Test Automation & Performance" if is_en else "Automatyzacja & Performance"
             cat1_pool = [
-                "Playwright (TypeScript/C#)",
-                "C# (.NET)",
-                "Selenium / Selenoid",
-                "Apache JMeter" if is_en else "Apache JMeter (Performance)",
+                "Playwright (TypeScript/JS)",
+                "Playwright E2E Automation" if is_en else "Automatyzacja E2E (Playwright)",
+                "TypeScript & JavaScript",
                 "UI & API Test Automation" if is_en else "Automatyzacja UI & API",
                 "Page Object Model (POM)",
-                "TypeScript / JavaScript",
-                "E2E Test Automation" if is_en else "Automatyzacja E2E"
+                "E2E Test Automation" if is_en else "Automatyzacja E2E",
+                "Apache JMeter" if is_en else "Apache JMeter (Performance)"
             ]
             cat2_name = "CI/CD & Environments" if is_en else "CI/CD & Środowiska"
             cat2_pool = [

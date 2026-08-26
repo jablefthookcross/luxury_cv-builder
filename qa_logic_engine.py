@@ -107,7 +107,7 @@ class QALogicEngine:
         else:
             refined["languages"] = [
                 {"language": "Polski", "level": "Ojczysty (Native)"},
-                {"language": "Angielski", "level": "Biegły (Professional)"}
+                {"language": "Angielski", "level": "Biegły (C2)"}
             ]
 
         # 2. CANONICAL SYNONYM DEDUPLICATION & CROSS-CATEGORY BUDGETING

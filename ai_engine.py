@@ -160,24 +160,32 @@ def load_master_it_catalog() -> Dict[str, str]:
     }
 
 def clean_job_offer_text(raw_text: str) -> str:
-    """Strips web scraping clutter (navigation items, revenue stats, apply buttons)."""
+    """Strips web scraping clutter (navigation items, revenue stats, apply buttons, perks)."""
     if not raw_text:
         return ""
         
     lines = raw_text.split("\n")
     cleaned_lines = []
     
-    ignore_patterns = [
-        r"^0[0-9].*", r"^quick apply.*", r"^zapisz.*", r"^aplikuj.*", r"^zgłaszam się do.*",
-        r"^brakuje ci informacji.*", r"^przekażemy twoje pytanie.*", r"^dodane [0-9]+ dni temu.*",
-        r"^obroty w 20[0-9]{2}.*", r"^szukamy osób kreatywnych.*star wars.*", r"^jesteś mistrzem komunikacji.*"
+    PERK_KEYWORDS = [
+        "luxmed", "multisport", "opieka medyczna", "pakiet medyczny", "pakiet sportowy",
+        "płatny urlop", "b2b remuneration", "wynagrodzenie b2b", "private healthcare",
+        "birthday perks", "welcome pack", "imprezy integracyjne", "team integrations",
+        "christmas perks", "karta sportowa", "dofinansowanie do", "co-financing"
+    ]
+
+    HEADER_IGNORE_PATTERNS = [
+        r"^[•\-\*\s]*(?:0[0-9]|quick apply|zapisz|aplikuj|zgłaszam się do|brakuje ci informacji|przekażemy twoje pytanie|dodane\s+[0-9]+|dodane dzisiaj|na tej stronie|podobne oferty|ostatnio przeglądane|powiązane wyszukiwania|zakres zadań|o firmie|lokalizacja|oferujemy|benefits|co oferujemy|welcome to\s+[A-Za-z0-9]+|we blend data-driven|driven by our values|our mission is|obroty w 20[0-9]{2}|szukamy osób kreatywnych|jesteś mistrzem komunikacji).*"
     ]
     
     for line in lines:
         l_str = line.strip()
         if not l_str:
             continue
-        if any(re.match(p, l_str.lower()) for p in ignore_patterns):
+        l_low = l_str.lower()
+        if any(kw in l_low for kw in PERK_KEYWORDS):
+            continue
+        if any(re.match(p, l_low) for p in HEADER_IGNORE_PATTERNS):
             continue
         cleaned_lines.append(l_str)
         
@@ -281,7 +289,7 @@ ZASADY KOREKTY:
         # 1. TITLE / ROLE CHANGES
         m_title = re.search(r'(?:\n|^)\s*(?:\d+\.|\*|-)?\s*(?:tytuł|stanowisko|role title|target title|position)[^:\n]*:\s*(?:zmień na:?\s*)?["„]?([^"”\n\r]+)["”]?', instruction, flags=re.IGNORECASE)
         if not m_title:
-            m_title = re.search(r'(?:zmień tytuł na|zmień stanowisko na|change title to|set title to)\s*["„]?([^"”\n\r]+)["”]?', instruction, flags=re.IGNORECASE)
+            m_title = re.search(r'(?:\d+\.|\*|-)?\s*(?:zmień tytuł na|zmień stanowisko na|change title to|set title to|ustaw tytuł na)\s*:?\s*["„]?([^"”\n\r]+)["”]?', instruction, flags=re.IGNORECASE)
         if m_title:
             new_title = m_title.group(1).strip().strip('"\'„”` .')
             if new_title and len(new_title) < 70 and not any(k in new_title.lower() for k in ["usuń", "dodaj", "kategoria", "podsumowanie"]):
@@ -333,17 +341,19 @@ ZASADY KOREKTY:
                 if parsed_bullets:
                     job["highlights"] = parsed_bullets
             
-            # Check for single bullet point override (e.g. 3. punkt)
-            m_bullet = re.search(rf'(?:{comp_key}.*?)?(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?(?:na|to)?\s*[:\n]?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
-            if not m_bullet and "benefit" in comp_key:
-                m_bullet = re.search(r'(?:trzeci|3\.|3\s*punkt|punkt\s*3|bullet\s*3).*?(?:na|to)?\s*[:\n]?\s*["„](.*?)["”]', instruction, flags=re.IGNORECASE | re.DOTALL)
-            if m_bullet:
-                new_b = re.sub(r'^[•\-\*\s]+', '', m_bullet.group(1)).strip()
-                hl = job.get("highlights", [])
-                if len(hl) >= 3:
-                    hl[2] = new_b
-                elif hl:
-                    hl.append(new_b)
+            # Check for single bullet point override (e.g. punkt 1, punkt 2, punkt 3, etc.)
+            for b_idx in range(1, 6):
+                m_bullet = re.search(rf'(?:{comp_key}.*?)?(?:punkt\s*{b_idx}|{b_idx}\s*punkt|bullet\s*{b_idx}|{b_idx}\s*bullet).*?(?:na|to)?\s*[:\n]?\s*["„]?([^\n\r]+)["”]?', instruction, flags=re.IGNORECASE)
+                if not m_bullet and "benefit" in comp_key:
+                    m_bullet = re.search(rf'(?:punkt\s*{b_idx}|{b_idx}\s*punkt|bullet\s*{b_idx}|{b_idx}\s*bullet).*?(?:na|to)?\s*[:\n]?\s*["„]?([^\n\r]+)["”]?', instruction, flags=re.IGNORECASE)
+                if m_bullet:
+                    new_b = re.sub(r'^[•\-\*\s]+', '', m_bullet.group(1)).strip().strip('"\'„”` ')
+                    if new_b and len(new_b) > 10:
+                        hl = job.get("highlights", [])
+                        if len(hl) >= b_idx:
+                            hl[b_idx - 1] = new_b
+                        elif hl:
+                            hl.append(new_b)
 
         # 4. SKILLS - CATEGORY DEFINITIONS, ADDITIONS & MASS DELETIONS
         # A. Check for category definitions: [Kategoria X] NAME:\nTagi: item1... OR - NAME: item1, item2... under SKILLS
