@@ -189,11 +189,21 @@ class JobExtractor:
         target_role = ""
         role_candidates = [
             "senior test engineer-qa (ui & api)", "senior test engineer", "qa automation engineer",
-            "senior qa engineer", "senior qa specialist", "tester / testerka", "testerka / tester",
-            "tester oprogramowania", "manual software tester", "tester aplikacji webowej", "tester aplikacji webowych",
-            "test and analysis engineer", "software qa engineer", "qa engineer", "tester"
+            "senior qa engineer", "senior qa specialist", "qa engineer", "software qa engineer",
+            "test and analysis engineer", "manual software tester", "tester oprogramowania",
+            "tester aplikacji webowej", "tester aplikacji webowych", "tester / testerka", "testerka / tester",
+            "qa tester", "tester"
         ]
-        for line in lines[:6]:
+        
+        # Filter out portal breadcrumbs and badges
+        candidate_lines = []
+        for line in lines[:10]:
+            l_low = line.lower()
+            if "·" in line or "kategoria:" in l_low or l_low in ["nowe", "100% zdalnie", "zdalnie", "pełny wymiar", "b2b", "warszawa", "kraków", "wrocław"]:
+                continue
+            candidate_lines.append(line)
+
+        for line in candidate_lines:
             l_low = line.lower()
             for cand in role_candidates:
                 if cand in l_low and len(line) < 70:
@@ -202,7 +212,7 @@ class JobExtractor:
             if target_role:
                 break
         if not target_role:
-            target_role = lines[0] if lines and len(lines[0]) < 50 else "Tester Oprogramowania"
+            target_role = candidate_lines[0] if candidate_lines and len(candidate_lines[0]) < 50 else "QA Engineer"
 
         # Clean & Normalize target role
         target_role = clean_target_role(target_role)

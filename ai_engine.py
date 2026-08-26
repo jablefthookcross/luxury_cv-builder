@@ -175,7 +175,8 @@ def clean_job_offer_text(raw_text: str) -> str:
     ]
 
     HEADER_IGNORE_PATTERNS = [
-        r"^[•\-\*\s]*(?:0[0-9]|quick apply|zapisz|aplikuj|zgłaszam się do|brakuje ci informacji|przekażemy twoje pytanie|dodane\s+[0-9]+|dodane dzisiaj|na tej stronie|podobne oferty|ostatnio przeglądane|powiązane wyszukiwania|zakres zadań|o firmie|lokalizacja|oferujemy|benefits|co oferujemy|welcome to\s+[A-Za-z0-9]+|we blend data-driven|driven by our values|our mission is|obroty w 20[0-9]{2}|szukamy osób kreatywnych|jesteś mistrzem komunikacji).*"
+        r"^[•\-\*\s]*(?:0[0-9]|quick apply|zapisz|aplikuj|zgłaszam się do|brakuje ci informacji|przekażemy twoje pytanie|dodane\s+[0-9]+|dodane dzisiaj|na tej stronie|podobne oferty|ostatnio przeglądane|powiązane wyszukiwania|zakres zadań|o firmie|lokalizacja|oferujemy|benefits|co oferujemy|welcome to\s+[A-Za-z0-9]+|we blend data-driven|driven by our values|our mission is|obroty w 20[0-9]{2}|szukamy osób kreatywnych|jesteś mistrzem komunikacji|nowe|100%\s*zdalnie|pełny wymiar|b2b).*",
+        r".*·.*"
     ]
     
     for line in lines:
