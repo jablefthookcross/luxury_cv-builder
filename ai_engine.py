@@ -465,14 +465,22 @@ ZASADY KOREKTY:
                     if term not in target_cat.get("items", []):
                         target_cat.setdefault("items", []).insert(0, term)
 
-        # D. Clean corrupted skill artifacts like "ver Playwright"
-        for c in res.get("skills", []):
-            cleaned_items = []
-            for it in c.get("items", []):
-                clean_it = re.sub(r'^(?:ver\s+|der\s+|tag:\s*|tag\s+|•\s*|-\s*|\*\s*)', '', str(it), flags=re.IGNORECASE).strip().strip('"\'„”` .')
-                if clean_it:
-                    cleaned_items.append(clean_it)
-            c["items"] = list(dict.fromkeys(cleaned_items))
+        # E. LANGUAGES LEVEL CHANGES
+        m_lang = re.search(r'(?:zmień\s+poziom\s+(?:języka\s+)?angielskiego\s+na|zmień\s+angielski\s+na|angielski|change\s+english\s+(?:level\s+)?to|set\s+english\s+to|english)\s*:?\s*["„]?([A-Za-z0-9\s()+-]+?)["”]?(?:\s*$|\s*\n|\s*,)', instruction, flags=re.IGNORECASE)
+        if m_lang:
+            new_level = m_lang.group(1).strip().strip('"\'„”` .')
+            if new_level and len(new_level) < 40 and any(k in new_level.lower() for k in ["a1", "a2", "b1", "b2", "c1", "c2", "biegły", "zaawansowany", "podstawowy", "intermediate", "fluent", "professional", "native"]):
+                langs = res.get("languages", [])
+                if not langs:
+                    langs = [
+                        {"language": "Polski", "level": "Ojczysty (Native)"},
+                        {"language": "Angielski", "level": new_level}
+                    ]
+                else:
+                    for l in langs:
+                        if any(k in l.get("language", "").lower() for k in ["angielski", "english"]):
+                            l["level"] = new_level
+                res["languages"] = langs
 
         return res
 

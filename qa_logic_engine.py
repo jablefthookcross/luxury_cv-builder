@@ -98,16 +98,29 @@ class QALogicEngine:
         refined["personal_info"] = pinfo
         refined["education"] = []
 
-        # Languages section lock
+        # Languages section
+        current_langs = refined.get("languages", [])
+        custom_en_level = None
+        for l in current_langs:
+            if any(k in l.get("language", "").lower() for k in ["english", "angielski"]):
+                custom_en_level = l.get("level")
+                break
+
+        # Normalize legacy / default levels to B2+ standard
+        if not custom_en_level or (any(kw in custom_en_level.lower() for kw in ["professional", "c2", "biegły", "native"]) and "b2" not in custom_en_level.lower()):
+            custom_en_level = None
+
         if lang == "en":
+            en_level = custom_en_level or "Professional Working Proficiency (B2+)"
             refined["languages"] = [
                 {"language": "Polish", "level": "Native"},
-                {"language": "English", "level": "Full Professional (C2)"}
+                {"language": "English", "level": en_level}
             ]
         else:
+            pl_en_level = custom_en_level or "Biegły (B2+)"
             refined["languages"] = [
                 {"language": "Polski", "level": "Ojczysty (Native)"},
-                {"language": "Angielski", "level": "Biegły (C2)"}
+                {"language": "Angielski", "level": pl_en_level}
             ]
 
         # 2. CANONICAL SYNONYM DEDUPLICATION & CROSS-CATEGORY BUDGETING
@@ -381,20 +394,8 @@ class QALogicEngine:
             if job.get("start_date"):
                 job["period"] = f"{job['start_date']} – {job.get('end_date', 'Present' if lang == 'en' else 'Obecnie')}"
 
-        # 5. HARD LOCK: NO EDUCATION, CANDIDATE LANGUAGES
+        # 5. HARD LOCK: NO EDUCATION & CERTIFICATIONS RESET
         refined["education"] = []
-
-        if lang == "en":
-            refined["languages"] = [
-                {"language": "Polish", "level": "Native"},
-                {"language": "English", "level": "Full Professional (C2)"}
-            ]
-        else:
-            refined["languages"] = [
-                {"language": "Polski", "level": "Ojczysty (Native)"},
-                {"language": "Angielski", "level": "Biegły (Professional)"}
-            ]
-
         refined["certifications"] = []
         return refined
 

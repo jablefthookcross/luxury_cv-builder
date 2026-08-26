@@ -215,7 +215,7 @@ class DBManager:
             "experience": [],
             "languages": [
                 {"language": "Polski", "level": "Ojczysty (Native)"},
-                {"language": "Angielski", "level": "Biegły (Professional)"}
+                {"language": "Angielski", "level": "Biegły (B2+)"}
             ],
             "education": [],
             "certifications": []
@@ -255,7 +255,7 @@ class DBManager:
                             "experience": row.get("experience", []),
                             "languages": row.get("languages", [
                                 {"language": "Polski", "level": "Ojczysty (Native)"},
-                                {"language": "Angielski", "level": "Biegły (Professional)"}
+                                {"language": "Angielski", "level": "Biegły (B2+)"}
                             ]),
                             "education": [],
                             "certifications": []
