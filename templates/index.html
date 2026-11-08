@@ -394,53 +394,45 @@
                     </div>
                 </div>
 
+                <div id="atsPlaceholderCard" class="card" style="margin-top: 1rem; text-align: center; color: var(--text-muted); padding: 1.5rem; font-size: 0.88rem; border: 1px dashed rgba(255,255,255,0.15);">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.4rem;">📊</div>
+                    <strong style="color: #94a3b8;">Analiza Dopasowania & ATS</strong><br>
+                    <span style="font-size: 0.8rem; margin-top: 0.4rem; display: inline-block;">Wklej treść oferty pracy i kliknij <em>"Wygeneruj Dedykowane CV"</em>, aby wygenerować analizę słów kluczowych i ocenę zgodności.</span>
+                </div>
+
                 <!-- ATS Match Score Widget -->
-                <div class="ats-widget" id="atsWidget">
+                <div class="ats-widget" id="atsWidget" style="display: none;">
                     <div class="score-circle" id="scoreCircle">
-                        <div class="score-inner" id="scoreValue">100%</div>
+                        <div class="score-inner" id="scoreValue">0%</div>
                     </div>
                     <div class="score-info">
                         <div class="score-title">QA & ATS Match Score</div>
                         <div class="form-label" style="font-size: 0.8rem;">Dopasowane Słowa Klucze:</div>
-                        <div class="kw-badges" id="matchedBadges">
-                            <span class="kw-badge">SQL</span>
-                            <span class="kw-badge">Jira</span>
-                            <span class="kw-badge">ISTQB</span>
-                        </div>
+                        <div class="kw-badges" id="matchedBadges"></div>
                     </div>
                 </div>
 
                 <!-- 3-Buckets Breakdown Widget -->
-                <div class="ats-widget" id="bucketsWidget" style="margin-top: 1rem; background: #0f172a; border: 1px solid var(--border-color); display: block;">
+                <div class="ats-widget" id="bucketsWidget" style="margin-top: 1rem; background: #0f172a; border: 1px solid var(--border-color); display: none;">
                     <div style="font-weight: 700; font-size: 0.92rem; color: #60a5fa; margin-bottom: 0.6rem;">
                         📦 Analiza Selekcji (3 Koszyki)
                     </div>
                     <div style="margin-bottom: 0.5rem;">
                         <div style="font-size: 0.78rem; color: #34d399; font-weight: 600;">🟢 Koszyk A (Wyeksponowane z Oferty):</div>
-                        <div id="bucketABadges" class="kw-badges" style="margin-top: 0.2rem;">
-                            <span class="kw-badge bucket-badge-a">ISTQB</span>
-                            <span class="kw-badge bucket-badge-a">Jira</span>
-                            <span class="kw-badge bucket-badge-a">SQL</span>
-                        </div>
+                        <div id="bucketABadges" class="kw-badges" style="margin-top: 0.2rem;"></div>
                     </div>
                     <div style="margin-bottom: 0.5rem;">
                         <div style="font-size: 0.78rem; color: #60a5fa; font-weight: 600;">🟡 Koszyk B (Tło / Wsparcie):</div>
-                        <div id="bucketBBadges" class="kw-badges" style="margin-top: 0.2rem;">
-                            <span class="kw-badge bucket-badge-b">Confluence</span>
-                            <span class="kw-badge bucket-badge-b">Docker</span>
-                        </div>
+                        <div id="bucketBBadges" class="kw-badges" style="margin-top: 0.2rem;"></div>
                     </div>
                     <div>
                         <div style="font-size: 0.78rem; color: #f87171; font-weight: 600;">🔴 Koszyk C (Wycięty Szum):</div>
-                        <div id="bucketCBadges" class="kw-badges" style="margin-top: 0.2rem;">
-                            <span class="kw-badge bucket-badge-c">Android Studio</span>
-                            <span class="kw-badge bucket-badge-c">Xcode</span>
-                        </div>
+                        <div id="bucketCBadges" class="kw-badges" style="margin-top: 0.2rem;"></div>
                     </div>
                 </div>
 
                 <!-- Anti-AI & ATS Audit Card -->
-                <div class="ats-widget" style="margin-top: 1rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.95)); border: 1px solid rgba(16, 185, 129, 0.35);">
+                <div class="ats-widget" id="auditWidget" style="margin-top: 1rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.95)); border: 1px solid rgba(16, 185, 129, 0.35); display: none;">
                     <div style="flex: 1;">
                         <div style="font-weight: 700; font-size: 0.95rem; color: #34d399; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                             <span>🛡️ Audyt Autentyczności & Bezpieczeństwa ATS</span>
@@ -849,6 +841,15 @@
                     document.getElementById('jobDescription').value = "";
                     document.getElementById('targetRole').value = "";
                     document.getElementById('jobSpecCard').style.display = "none";
+
+                    const placeholder = document.getElementById('atsPlaceholderCard');
+                    if (placeholder) placeholder.style.display = 'block';
+                    const atsWidget = document.getElementById('atsWidget');
+                    if (atsWidget) atsWidget.style.display = 'none';
+                    const bucketsWidget = document.getElementById('bucketsWidget');
+                    if (bucketsWidget) bucketsWidget.style.display = 'none';
+                    const auditWidget = document.getElementById('auditWidget');
+                    if (auditWidget) auditWidget.style.display = 'none';
                     
                     const iframe = document.getElementById('previewIframe');
                     iframe.removeAttribute('srcdoc');
@@ -864,6 +865,8 @@
 
         function renderBucketsWidget(buckets) {
             if (!buckets) return;
+            const bucketsWidget = document.getElementById('bucketsWidget');
+            if (bucketsWidget) bucketsWidget.style.display = 'block';
             const bA = document.getElementById('bucketABadges');
             const bB = document.getElementById('bucketBBadges');
             const bC = document.getElementById('bucketCBadges');
@@ -1022,21 +1025,18 @@
         function populateProfileEditor(data) {
             if (!data) return;
             currentProfileData = data;
-            try {
-                localStorage.setItem('vitaecraft_master_base_profile', JSON.stringify(data));
-            } catch (e) {}
 
             const pinfo = data.personal_info || {};
             const elFullName = document.getElementById('formFullName');
             if (elFullName) elFullName.value = pinfo.full_name || "";
             const elTitle = document.getElementById('formTitle');
-            if (elTitle) elTitle.value = pinfo.title || "Software QA Engineer";
+            if (elTitle) elTitle.value = pinfo.title || "";
             const elEmail = document.getElementById('formEmail');
             if (elEmail) elEmail.value = pinfo.email || "";
             const elPhone = document.getElementById('formPhone');
             if (elPhone) elPhone.value = pinfo.phone || "";
             const elLocation = document.getElementById('formLocation');
-            if (elLocation) elLocation.value = pinfo.location || "Warszawa";
+            if (elLocation) elLocation.value = pinfo.location || "";
             const elLinkedin = document.getElementById('formLinkedin');
             if (elLinkedin) elLinkedin.value = pinfo.linkedin || "";
             const elGithub = document.getElementById('formGithub');
@@ -1061,10 +1061,6 @@
                 }
             } catch (err) {
                 console.error("Błąd ładowania profilu", err);
-                const cached = localStorage.getItem('vitaecraft_master_base_profile');
-                if (cached) {
-                    try { populateProfileEditor(JSON.parse(cached)); } catch (e) {}
-                }
             }
         }
 
@@ -1115,12 +1111,12 @@
         function addExperienceCard() {
             if (!currentProfileData.experience) currentProfileData.experience = [];
             currentProfileData.experience.push({
-                position: "Software QA Engineer",
-                company: "Nowa Firma S.A.",
-                start_date: "2023",
-                end_date: "Obecnie",
-                location: "Warszawa",
-                highlights: ["Wykonywanie testów automatycznych i manualnych."]
+                position: "",
+                company: "",
+                start_date: "",
+                end_date: "",
+                location: "",
+                highlights: []
             });
             renderExperienceList(currentProfileData.experience);
         }
@@ -1159,7 +1155,7 @@
 
         function addSkillCard() {
             if (!currentProfileData.skills) currentProfileData.skills = [];
-            currentProfileData.skills.push({ category: "Nowa Kategoria", items: ["Narzędzie 1", "Narzędzie 2"] });
+            currentProfileData.skills.push({ category: "", items: [] });
             renderSkillsList(currentProfileData.skills);
         }
 
@@ -1196,7 +1192,7 @@
 
         function addLanguageCard() {
             if (!currentProfileData.languages) currentProfileData.languages = [];
-            currentProfileData.languages.push({ language: "Niemiecki", level: "Podstawowy (A2)" });
+            currentProfileData.languages.push({ language: "", level: "" });
             renderLanguagesList(currentProfileData.languages);
         }
 
@@ -1224,8 +1220,8 @@
                 profileToSave = JSON.parse(JSON.stringify(currentProfileData || {}));
                 if (!profileToSave.personal_info) profileToSave.personal_info = {};
 
-                profileToSave.personal_info.full_name = document.getElementById('formFullName').value || "Michał Kosowski";
-                profileToSave.personal_info.title = document.getElementById('formTitle').value || "Software QA Engineer";
+                profileToSave.personal_info.full_name = document.getElementById('formFullName').value.trim();
+                profileToSave.personal_info.title = document.getElementById('formTitle').value.trim();
                 profileToSave.personal_info.email = document.getElementById('formEmail').value || "";
                 profileToSave.personal_info.phone = document.getElementById('formPhone').value || "";
                 profileToSave.personal_info.location = document.getElementById('formLocation').value || "";
@@ -1358,6 +1354,13 @@
         }
 
         function updateAtsWidget(analysis, audit) {
+            const placeholder = document.getElementById('atsPlaceholderCard');
+            if (placeholder) placeholder.style.display = 'none';
+            const atsWidget = document.getElementById('atsWidget');
+            if (atsWidget) atsWidget.style.display = 'flex';
+            const auditWidget = document.getElementById('auditWidget');
+            if (auditWidget) auditWidget.style.display = 'block';
+
             if (analysis) {
                 const scoreVal = document.getElementById('scoreValue');
                 const scoreCircle = document.getElementById('scoreCircle');
@@ -1538,12 +1541,12 @@
                 const a = document.createElement('a');
                 a.href = blobUrl;
                 
-                let dlName = 'Michal_Kosowski_CV.pdf';
+                let dlName = (effectiveLang === 'en') ? 'Tailored_Resume.pdf' : 'Dedykowane_CV.pdf';
                 if (currentProfileData && currentProfileData.personal_info && currentProfileData.personal_info.full_name) {
                     const rawName = currentProfileData.personal_info.full_name.replace(/[^a-zA-Z0-9]/g, '_');
                     dlName = (effectiveLang === 'en') ? `${rawName}_Resume.pdf` : `${rawName}_CV.pdf`;
                 } else {
-                    dlName = (effectiveLang === 'en') ? 'Michal_Kosowski_Resume.pdf' : 'Michal_Kosowski_CV.pdf';
+                    dlName = (effectiveLang === 'en') ? 'Tailored_Resume.pdf' : 'Dedykowane_CV.pdf';
                 }
                 a.download = dlName;
                 document.body.appendChild(a);
@@ -1739,30 +1742,20 @@
         window.addEventListener('DOMContentLoaded', async () => {
             checkAuthStateAndApplyGuard();
 
-            // 1. Instant local storage restoration
-            const localGemini = localStorage.getItem('gemini_api_key');
-            const localOllamaUrl = localStorage.getItem('ollama_url');
-            const localOllamaModel = localStorage.getItem('ollama_model');
-            if (localGemini) document.getElementById('geminiApiKey').value = localGemini;
-            if (localOllamaUrl) document.getElementById('ollamaUrl').value = localOllamaUrl;
-            if (localOllamaModel) document.getElementById('ollamaModel').value = localOllamaModel;
-
-            // 2. Fetch server persisted settings
+            // 1. Fetch server persisted settings (safe, zero secret leakage)
             try {
                 const res = await fetch('/api/settings');
                 const data = await res.json();
                 const s = data.settings || data;
-                if (s.gemini_key) {
-                    document.getElementById('geminiApiKey').value = s.gemini_key;
-                    localStorage.setItem('gemini_api_key', s.gemini_key);
+                const geminiInput = document.getElementById('geminiApiKey');
+                if (s.has_gemini_key && geminiInput) {
+                    geminiInput.placeholder = "✓ Skonfigurowany i zabezpieczony na serwerze (.env)";
                 }
                 if (s.ollama_url) {
                     document.getElementById('ollamaUrl').value = s.ollama_url;
-                    localStorage.setItem('ollama_url', s.ollama_url);
                 }
                 if (s.ollama_model) {
                     document.getElementById('ollamaModel').value = s.ollama_model;
-                    localStorage.setItem('ollama_model', s.ollama_model);
                 }
             } catch(e) {
                 console.warn("Could not fetch server settings:", e);

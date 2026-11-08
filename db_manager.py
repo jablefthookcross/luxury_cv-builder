@@ -142,25 +142,20 @@ class DBManager:
         # Initialize a clean, isolated starter profile for this new user (no data leakage)
         init_profile = {
             "personal_info": {
-                "full_name": full_name_clean or username,
-                "title": "Software QA Engineer",
+                "full_name": full_name_clean or "",
+                "title": "",
                 "email": username if "@" in username else "",
                 "phone": "",
                 "location": "",
                 "linkedin": "",
-                "github": ""
+                "github": "",
+                "website": ""
             },
             "summary": "",
-            "skills": [
-                {"category": "TEST AUTOMATION & TOOLS", "items": []},
-                {"category": "API & DATABASES", "items": []},
-                {"category": "TEST METHODOLOGIES", "items": []}
-            ],
+            "skills": [],
             "experience": [],
-            "languages": [
-                {"language": "Polski", "level": "Ojczysty (Native)"},
-                {"language": "Angielski", "level": "Biegły (B2+)"}
-            ],
+            "languages": [],
+            "projects": [],
             "education": [],
             "certifications": []
         }
@@ -244,24 +239,19 @@ class DBManager:
         return {
             "personal_info": {
                 "full_name": full_name,
-                "title": "Software QA Engineer",
+                "title": "",
                 "email": email,
                 "phone": "",
-                "location": "Warszawa",
+                "location": "",
                 "linkedin": "",
-                "github": ""
+                "github": "",
+                "website": ""
             },
             "summary": "",
-            "skills": [
-                {"category": "TEST AUTOMATION & TOOLS", "items": []},
-                {"category": "API & DATABASES", "items": []},
-                {"category": "TEST METHODOLOGIES", "items": []}
-            ],
+            "skills": [],
             "experience": [],
-            "languages": [
-                {"language": "Polski", "level": "Ojczysty (Native)"},
-                {"language": "Angielski", "level": "Biegły (B2+)"}
-            ],
+            "languages": [],
+            "projects": [],
             "education": [],
             "certifications": []
         }
@@ -306,22 +296,21 @@ class DBManager:
                         prof = {
                             "personal_info": {
                                 "full_name": row.get("full_name") or "",
-                                "title": row.get("title") or "Software QA Engineer",
+                                "title": row.get("title") or "",
                                 "email": row.get("email") or user_email,
                                 "phone": row.get("phone") or "",
-                                "location": row.get("location") or "Warszawa",
+                                "location": row.get("location") or "",
                                 "linkedin": row.get("linkedin") or "",
-                                "github": row.get("github") or ""
+                                "github": row.get("github") or "",
+                                "website": row.get("website") or ""
                             },
                             "summary": row.get("summary") or "",
                             "skills": row.get("skills") or [],
                             "experience": row.get("experience") or [],
-                            "languages": row.get("languages") or [
-                                {"language": "Polski", "level": "Ojczysty (Native)"},
-                                {"language": "Angielski", "level": "Biegły (B2+)"}
-                            ],
-                            "education": [],
-                            "certifications": []
+                            "languages": row.get("languages") or [],
+                            "projects": row.get("projects") or [],
+                            "education": row.get("education") or [],
+                            "certifications": row.get("certifications") or []
                         }
                         profiles_db[user_id] = prof
                         _save_json(USER_PROFILES_FILE, profiles_db)

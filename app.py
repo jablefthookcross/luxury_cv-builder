@@ -212,10 +212,11 @@ def settings_api():
         return jsonify({"status": "error", "message": "Błąd zapisu ustawień."}), 500
 
     settings = get_settings()
+    has_gemini = bool(settings.get("gemini_key"))
     return jsonify({
         "status": "success",
         "settings": {
-            "gemini_key": settings.get("gemini_key", ""),
+            "has_gemini_key": has_gemini,
             "ollama_url": settings.get("ollama_url", "http://localhost:11434"),
             "ollama_model": settings.get("ollama_model", "llama3.2")
         }
