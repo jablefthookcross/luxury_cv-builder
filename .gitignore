@@ -11,6 +11,9 @@ __pycache__/
 .pytest_cache/
 
 # Local settings and secrets
+.env
+.env.local
+*.env
 settings.json
 
 # Scratch and temporary outputs
