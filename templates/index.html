@@ -1650,10 +1650,13 @@
                     if (data.user) {
                         localStorage.setItem('user_email', data.user.email);
                     }
+                    localStorage.removeItem('vitaecraft_master_base_profile');
+                    localStorage.removeItem('vitaecraft_active_draft_profile');
                     setTimeout(() => {
                         closeAuthModal();
                         checkAuthStateAndApplyGuard();
-                    }, 1200);
+                        loadMasterProfileData();
+                    }, 800);
                 } else {
                     alertBox.style.display = 'block';
                     alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
@@ -1689,7 +1692,12 @@
         function logoutUser() {
             localStorage.removeItem('user_email');
             localStorage.removeItem('supabase_token');
-            checkAuthStateAndApplyGuard();
+            localStorage.removeItem('vitaecraft_master_base_profile');
+            localStorage.removeItem('vitaecraft_active_draft_profile');
+            currentProfileData = null;
+            currentDraftProfile = null;
+            currentJobSpec = null;
+            window.location.reload();
         }
 
         function checkAuthStateAndApplyGuard() {

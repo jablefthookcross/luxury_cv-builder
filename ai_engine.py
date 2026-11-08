@@ -247,11 +247,13 @@ ZASADY KOREKTY:
 1. Wprowadź DOKŁADNIE i WYŁĄCZNIE modyfikacje wskazane przez użytkownika (np. dodaj/usuń technologię z umiejętności, przeredaguj podsumowanie, zmień treść lub szyk punktu w doświadczeniu, zmień tytuł).
 2. ZASADA ANTY-DUPLIKACJI: Tekst z sekcji 'professional_summary' pod żadnym pozorem nie może być kopiowany ani doklejany do punktów w sekcji 'work_experience'. Każdy punkt w 'work_experience' musi być unikalnym opisem zrealizowanego zadania technicznego.
 3. POD ŻADNYM POZOREM NIE DODAWAJ sekcji wykształcenia (education) ani profilu LinkedIn.
-4. Zachowaj stałe dane kandydata (Michał Kosowski, 518075716, mmkosowski94@gmail.com, GitHub, Benefit Systems S.A., Sii Polska, Euroloan Group).
+4. Zachowaj stałe dane kontaktowe oraz faktyczne firmy z przesłanego profilu (nie zmieniaj nazw firm ani danych kontaktowych, chyba że instrukcja użytkownika wprost tego wymaga).
 5. Język wyjściowy: {lang.upper()} (jeśli 'PL' -> język polski, jeśli 'EN' -> język angielski).
 6. Zwróć WYŁĄCZNIE poprawny, czysty obiekt JSON o identycznej strukturze (personal_info, summary, skills, experience, languages).
+7. ZASADA PIERWSZEJ OSOBY: W sekcji 'summary' pisz w pierwszej osobie (np. 'Specjalizuję się...', 'Projektuję...', 'Posiadam...') lub w zwięzłej formie profilowej. NIGDY nie pisz w trzeciej osobie (np. 'Michał posiada...', 'Zna...', 'Specjalizuje się...').
+8. ZASADA CZYSTEJ TREŚCI: Pola w JSON muszą zawierać wyłącznie ostateczny tekst do wydruku w CV. Pod żadnym pozorem nie przepisuj poleceń użytkownika (np. 'Dodaj...', 'Zmień...', 'Wskaż...').
 """
-        models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        models_to_try = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
         api_key = self.gemini_key or os.environ.get("GEMINI_API_KEY", "")
 
         if api_key.strip():
@@ -364,7 +366,7 @@ ZASADY KOREKTY:
             c_name = re.sub(r'^(?:\[\s*kategoria\s*\d*\s*\]|\bkategoria\s*\d*\b|\bcategory\s*\d*\b)\s*', '', c_name, flags=re.IGNORECASE).strip(' []"\'„”`')
             c_items = m.group(2).strip()
             c_items = re.sub(r'^(?:tagi:?|tags:?|items:?|zastąp tagi zestawem:?|zastąp tagi:?)\s*', '', c_items, flags=re.IGNORECASE)
-            tags = [t.strip().strip('"\'„”` .') for t in c_items.split(',') if t.strip()]
+            tags = [t.strip().strip('"\'„”` .') for t in re.split(r',\s*(?![^()]*\))', c_items) if t.strip()]
             if c_name and tags and not any(k in c_name.lower() for k in ["umiejętnoś", "skills", "poprawna", "lewej"]):
                 defined_skills.append({"category": c_name, "items": tags})
 
@@ -373,11 +375,11 @@ ZASADY KOREKTY:
             m_skills_sec = re.search(r'(?:sekcj[a-ząćęłńóśźż]*\s+)?(?:skills|umiejętnoś[a-ząćęłńóśźż]*)[^:\n]*:\s*([\s\S]*?)(?=(?:\n\s*(?:\d+\.|\*|-)\s*(?:doświadczenie|experience|podsumowanie|summary|tytuł|benefit|sii|euroloan|angielski|english)|\Z))', instruction, flags=re.IGNORECASE)
             if m_skills_sec:
                 sec_body = m_skills_sec.group(1)
-                for m in re.finditer(r'^\s*[-•\*]\s*["„]?([A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s&/–—\-]{3,45})["”]?\s*:\s*\n?(?:tagi:?|tags:?|items:?|zestaw:?|użyj:?)?\s*([^\n\r]+)', sec_body, flags=re.IGNORECASE | re.MULTILINE):
+                for m in re.finditer(r'^\s*[-•\*]\s*["„]?([A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s&/–—\-,]{3,55})["”]?\s*:\s*\n?(?:tagi:?|tags:?|items:?|zestaw:?|użyj:?)?\s*([^\n\r]+)', sec_body, flags=re.IGNORECASE | re.MULTILINE):
                     c_name = m.group(1).strip().strip(' []"\'„”`')
                     c_items = m.group(2).strip()
                     c_items = re.sub(r'^(?:tagi:?|tags:?|items:?)\s*', '', c_items, flags=re.IGNORECASE)
-                    tags = [t.strip().strip('"\'„”` .') for t in c_items.split(',') if t.strip()]
+                    tags = [t.strip().strip('"\'„”` .') for t in re.split(r',\s*(?![^()]*\))', c_items) if t.strip()]
                     if c_name and tags and not any(k in c_name.lower() for k in ["zastąp", "skills", "umiejętnoś"]):
                         defined_skills.append({"category": c_name, "items": tags})
 
@@ -527,7 +529,7 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV zgodnie z podanym schematem.
         """
         Calls Gemini 2.5 Flash / 1.5 Flash with forced Structured Output (responseMimeType: application/json).
         """
-        models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash"]
+        models_to_try = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
         last_error = None
 
         prompt = self._build_prompt(master_profile, job_description, target_role, lang=lang)

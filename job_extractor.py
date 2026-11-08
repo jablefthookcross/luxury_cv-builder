@@ -135,7 +135,7 @@ class JobExtractor:
     @staticmethod
     def _extract_with_gemini(cleaned_text: str, api_key: str) -> Dict[str, Any]:
         """Calls Gemini Flash API with Structured JSON Outputs."""
-        models_to_try = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+        models_to_try = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
         last_error = None
 
         for model in models_to_try:

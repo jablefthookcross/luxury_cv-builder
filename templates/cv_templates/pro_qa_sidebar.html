@@ -190,7 +190,8 @@
             font-size: 0.84rem;
             color: #334155;
             line-height: 1.48;
-            text-align: justify;
+            text-align: left;
+            text-wrap: pretty;
         }
 
         .exp-item {
@@ -304,25 +305,37 @@
         <aside class="sidebar">
             <div>
                 <div class="avatar-circle">
-                    MK
+                    {% if data.personal_info.full_name %}
+                        {{ data.personal_info.full_name.split()[0][0] if data.personal_info.full_name.split() else 'Q' }}{{ data.personal_info.full_name.split()[-1][0] if data.personal_info.full_name.split()|length > 1 else 'A' }}
+                    {% else %}
+                        QA
+                    {% endif %}
                 </div>
             </div>
 
             <div>
                 <div class="sb-sec-title">{% if lang == 'en' %}PERSONAL INFO{% else %}DANE KONTAKTOWE{% endif %}</div>
                 <ul class="sb-list">
-                    <li class="sb-list-item">📞 518075716</li>
-                    <li class="sb-list-item">📧 mmkosowski94@gmail.com</li>
-                    <li class="sb-list-item">📍 {{ 'Warsaw, Poland' if lang == 'en' else 'Warszawa, Polska' }}</li>
+                    {% if data.personal_info.phone %}
+                    <li class="sb-list-item">📞 {{ data.personal_info.phone }}</li>
+                    {% endif %}
+                    {% if data.personal_info.email %}
+                    <li class="sb-list-item">📧 {{ data.personal_info.email }}</li>
+                    {% endif %}
+                    {% if data.personal_info.location %}
+                    <li class="sb-list-item">📍 {{ data.personal_info.location }}</li>
+                    {% endif %}
                 </ul>
             </div>
 
+            {% if data.personal_info.github %}
             <div>
                 <div class="sb-sec-title">{% if lang == 'en' %}LINKS{% else %}LINKI{% endif %}</div>
                 <ul class="sb-list">
-                    <li class="sb-list-item">💻 <a href="https://github.com/jablefthookcross" target="_blank">{% if lang == 'en' %}GitHub Profile{% else %}Profil GitHub{% endif %}</a></li>
+                    <li class="sb-list-item">💻 <a href="{{ data.personal_info.github }}" target="_blank">{% if lang == 'en' %}GitHub Profile{% else %}Profil GitHub{% endif %}</a></li>
                 </ul>
             </div>
+            {% endif %}
 
             {% if data.skills %}
             <div>

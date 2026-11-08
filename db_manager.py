@@ -139,24 +139,27 @@ class DBManager:
         }
         _save_json(USERS_FILE, users_db)
 
-        # Initialize baseline profile for this user from profile_data.json
-        base_tmpl = _load_json(DEFAULT_PROFILE_PATH, {})
-        init_profile = json.loads(json.dumps(base_tmpl)) if base_tmpl else {
+        # Initialize a clean, isolated starter profile for this new user (no data leakage)
+        init_profile = {
             "personal_info": {
-                "full_name": full_name_clean or "Michał Kosowski",
+                "full_name": full_name_clean or username,
                 "title": "Software QA Engineer",
-                "email": username if "@" in username else "mmkosowski94@gmail.com",
-                "phone": "518075716",
-                "location": "Warszawa",
+                "email": username if "@" in username else "",
+                "phone": "",
+                "location": "",
                 "linkedin": "",
-                "github": "https://github.com/jablefthookcross"
+                "github": ""
             },
             "summary": "",
-            "skills": [],
+            "skills": [
+                {"category": "TEST AUTOMATION & TOOLS", "items": []},
+                {"category": "API & DATABASES", "items": []},
+                {"category": "TEST METHODOLOGIES", "items": []}
+            ],
             "experience": [],
             "languages": [
                 {"language": "Polski", "level": "Ojczysty (Native)"},
-                {"language": "Angielski", "level": "Biegły (Professional)"}
+                {"language": "Angielski", "level": "Biegły (B2+)"}
             ],
             "education": [],
             "certifications": []
@@ -198,20 +201,62 @@ class DBManager:
             "access_token": token
         }
 
-    @staticmethod
-    def get_empty_profile() -> Dict[str, Any]:
+    DEMO_PROFILE: Dict[str, Any] = {
+        "personal_info": {
+            "full_name": "Jan Kowalski (Profil Demo)",
+            "title": "Software QA Engineer / Test Automation",
+            "email": "kontakt.demo@przyklad.pl",
+            "phone": "+48 000 000 000",
+            "location": "Warszawa",
+            "linkedin": "",
+            "github": "https://github.com"
+        },
+        "summary": "Inżynier jakości oprogramowania z doświadczeniem w testach automatycznych (Playwright, TypeScript), testach API (Postman, REST) i weryfikacji relacyjnych baz danych. Profil demonstracyjny aplikacji VitaeCraft AI.",
+        "skills": [
+            {"category": "TEST AUTOMATION & QUALITY", "items": ["Playwright", "TypeScript", "E2E Testing", "CI/CD"]},
+            {"category": "API & DATABASES", "items": ["REST API", "Postman", "SQL", "Swagger"]},
+            {"category": "TOOLS & METHODOLOGIES", "items": ["Jira (Xray)", "Git", "Agile/Scrum", "TestRail"]}
+        ],
+        "experience": [
+            {
+                "position": "QA Automation Engineer",
+                "company": "Przykładowa Firma IT Sp. z o.o.",
+                "location": "Warszawa",
+                "start_date": "2022",
+                "end_date": "Obecnie",
+                "highlights": [
+                    "Projektowanie i automatyzacja testów E2E w oparciu o Playwright i TypeScript.",
+                    "Weryfikacja kontraktów REST API z użyciem Postman i zapytań SQL.",
+                    "Projektowanie scenariuszy testowych w Jira (Xray) oraz raportowanie błędów."
+                ]
+            }
+        ],
+        "languages": [
+            {"language": "Polski", "level": "Ojczysty (Native)"},
+            {"language": "Angielski", "level": "Biegły (B2+)"}
+        ],
+        "education": [],
+        "certifications": []
+    }
+
+    @classmethod
+    def get_empty_profile(cls, full_name: str = "", email: str = "") -> Dict[str, Any]:
         return {
             "personal_info": {
-                "full_name": "Michał Kosowski",
+                "full_name": full_name,
                 "title": "Software QA Engineer",
-                "email": "mmkosowski94@gmail.com",
-                "phone": "518075716",
+                "email": email,
+                "phone": "",
                 "location": "Warszawa",
                 "linkedin": "",
-                "github": "https://github.com/jablefthookcross"
+                "github": ""
             },
             "summary": "",
-            "skills": [],
+            "skills": [
+                {"category": "TEST AUTOMATION & TOOLS", "items": []},
+                {"category": "API & DATABASES", "items": []},
+                {"category": "TEST METHODOLOGIES", "items": []}
+            ],
             "experience": [],
             "languages": [
                 {"language": "Polski", "level": "Ojczysty (Native)"},
@@ -226,14 +271,32 @@ class DBManager:
         """
         Fetches master profile:
         - If user_id is provided, returns that user's profile from local DB or Supabase.
-        - If user profile exists (even if empty after deletion), returns that user's profile.
-        - If new user or guest, falls back to pristine DEFAULT_PROFILE_PATH template.
+        - If the user is Michał Kosowski (admin / owner), loads the master profile_data.json.
+        - If a newly registered user has no profile yet, returns a clean empty starter profile.
+        - If guest (user_id is None), returns the anonymous DEMO_PROFILE (protecting private data).
         """
         if user_id:
             profiles_db = _load_json(USER_PROFILES_FILE, {})
             if user_id in profiles_db:
                 return profiles_db[user_id]
-            
+
+            # Check if this user is the owner (Michał)
+            users_db = _load_json(USERS_FILE, {})
+            is_owner = False
+            user_email = ""
+            for uname, udata in users_db.items():
+                if udata.get("id") == user_id:
+                    user_email = uname
+                    if any(k in uname for k in ["mmkosowski", "michal", "mike", "jablefthookcross"]):
+                        is_owner = True
+                    break
+
+            if is_owner:
+                master = _load_json(DEFAULT_PROFILE_PATH, {})
+                profiles_db[user_id] = master
+                _save_json(USER_PROFILES_FILE, profiles_db)
+                return master
+
             # Sync check with Supabase if enabled
             if cls.is_supabase_enabled():
                 try:
@@ -242,21 +305,21 @@ class DBManager:
                         row = res.data[0]
                         prof = {
                             "personal_info": {
-                                "full_name": row.get("full_name", "Michał Kosowski"),
-                                "title": row.get("title", "Software QA Engineer"),
-                                "email": row.get("email", "mmkosowski94@gmail.com"),
-                                "phone": row.get("phone", "518075716"),
-                                "location": row.get("location", "Warszawa"),
-                                "linkedin": row.get("linkedin", ""),
-                                "github": row.get("github", "https://github.com/jablefthookcross")
+                                "full_name": row.get("full_name") or "",
+                                "title": row.get("title") or "Software QA Engineer",
+                                "email": row.get("email") or user_email,
+                                "phone": row.get("phone") or "",
+                                "location": row.get("location") or "Warszawa",
+                                "linkedin": row.get("linkedin") or "",
+                                "github": row.get("github") or ""
                             },
-                            "summary": row.get("summary", ""),
-                            "skills": row.get("skills", []),
-                            "experience": row.get("experience", []),
-                            "languages": row.get("languages", [
+                            "summary": row.get("summary") or "",
+                            "skills": row.get("skills") or [],
+                            "experience": row.get("experience") or [],
+                            "languages": row.get("languages") or [
                                 {"language": "Polski", "level": "Ojczysty (Native)"},
                                 {"language": "Angielski", "level": "Biegły (B2+)"}
-                            ]),
+                            ],
                             "education": [],
                             "certifications": []
                         }
@@ -266,8 +329,13 @@ class DBManager:
                 except Exception as e:
                     print(f"[DBManager Warning] Supabase profile read: {e}")
 
-        # Fallback to pristine baseline profile_data.json
-        return _load_json(DEFAULT_PROFILE_PATH, {})
+            empty_prof = cls.get_empty_profile(email=user_email)
+            profiles_db[user_id] = empty_prof
+            _save_json(USER_PROFILES_FILE, profiles_db)
+            return empty_prof
+
+        # Guest mode: Return DEMO_PROFILE so real personal data is never exposed publicly
+        return json.loads(json.dumps(cls.DEMO_PROFILE))
 
     @classmethod
     def delete_profile(cls, user_id: Optional[str] = None) -> Dict[str, Any]:
@@ -338,5 +406,5 @@ class DBManager:
                     print(f"[DBManager Warning] Supabase save: {e}")
             return True
 
-        # Guest mode save (only when user_id is None)
-        return _save_json(DEFAULT_PROFILE_PATH, profile_data)
+        # Guest mode: Do not mutate the server-side master profile file
+        return True

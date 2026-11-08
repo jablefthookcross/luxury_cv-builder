@@ -14,16 +14,16 @@ from pathlib import Path
 
 PROMPT_CV_TAILORING = """
 Jesteś elitarnym architektem CV dla inżynierów QA i automatyzacji testów.
-Twoim zadaniem jest wygenerowanie spójnego merytorycznie, autentycznego profilu CV w formacie JSON, ściśle dopasowanego do przesłanej specyfikacji oferty pracy.
+Twoim zadaniem jest wygenerowanie spójnego merytorycznie, autentycznego profilu CV w formacie JSON, ściśle dopasowanego do przesłanej specyfikacji oferty pracy oraz rzeczywistej historii kandydata (Master Profile).
 
 TWARDE REGUŁY GENEROWANIA:
-1. DOPASOWANIE DYNAMICZNE: Dostosuj treść 'professional_summary', 'skills' oraz punkty w 'benefit_systems' pod wymagania i wiodący stack technologiczny przekazanej oferty pracy.
-2. SEPARACJA RÓL (BEZWZGLĘDNY NAKAZ RÓŻNORODNOŚCI):
-   - 'benefit_systems' (Najnowsza rola): Odpowiada za najbardziej zaawansowane zadania inżynierskie (automatyzacja E2E, architektura testów, CI/CD, wiodący stack z oferty, API).
-   - 'sii_polska' (Rola: Test & Analysis Engineer): Odpowiada za testy manualne, funkcjonalne, walidację API (Postman/SoapUI), procesy Jira/Xray i weryfikację baz danych (SQL).
-   - 'euroloan' (Rola: Software Tester): Odpowiada za testy regresyjne, UI, weryfikację systemów cyfrowych i analizę kryteriów akceptacji (Acceptance Criteria).
-3. ZAKAZ DUPLIKACJI: Każda z 3 firm MUSI mieć w 100% unikalne punkty. Całkowity zakaz kopiowania tych samych zdań między firmami oraz zakaz wklejania treści z 'professional_summary' do punktów doświadczenia.
-4. BEZPIECZEŃSTWO STRUKTURY: Całkowity brak sekcji 'education', pojedynczy link do GitHub Profile (brak LinkedIn), format zamykający się idealnie na 1 stronie A4.
+1. DOPASOWANIE DYNAMICZNE: Dostosuj treść 'professional_summary', 'skills' oraz punkty w sekcji doświadczenia pod wymagania i wiodący stack technologiczny oferty pracy.
+2. ZASADA PRAWDZIWOŚCI (ZERO HALUCYNACJI): Zachowaj dokładnie te same firmy, stanowiska i daty, które znajdują się w przesłanym profilu kandydata. Nie twórz zmyślonych pracodawców ani nieistniejących projektów.
+3. SEPARACJA RÓL I PROGRESJA:
+   - Najnowsze stanowisko: Akcentuj najbardziej zaawansowane zadania inżynierskie (automatyzacja E2E, architektura testów, CI/CD, kluczowy stack z oferty, API).
+   - Wcześniejsze stanowiska: Akcentuj solidne fundamenty inżynierii jakości (testy manualne, funkcjonalne, weryfikacja baz danych, procesy Jira/Xray/TestRail, regresja).
+4. ZAKAZ DUPLIKACJI: Każda firma MUSI mieć w 100% unikalne punkty. Całkowity zakaz powielania zdań między firmami oraz zakaz kopiowania treści z 'professional_summary' do punktów doświadczenia.
+5. BEZPIECZEŃSTWO STRUKTURY: Format zamykający się na 1 stronie A4, zwięzłe punkty oparte o czasowniki akcji (Action Verbs).
 
 WYMAGANY FORMAT JSON (w języku {LANG}):
 {
@@ -31,7 +31,7 @@ WYMAGANY FORMAT JSON (w języku {LANG}):
   "professional_summary": "2-3 zdania podsumowania zawodowego dopasowane dynamicznie pod słowa kluczowe z oferty",
   "skills": {
     "category_1": {
-      "name": "TEST AUTOMATION & WEB QUALITY",
+      "name": "TEST AUTOMATION & TOOLS",
       "items": ["tag1", "tag2", "tag3", "tag4", "tag5"]
     },
     "category_2": {
@@ -39,28 +39,29 @@ WYMAGANY FORMAT JSON (w języku {LANG}):
       "items": ["tag1", "tag2", "tag3", "tag4", "tag5"]
     },
     "category_3": {
-      "name": "TEST MANAGEMENT & TOOLS",
+      "name": "TEST MANAGEMENT & QUALITY",
       "items": ["tag1", "tag2", "tag3", "tag4", "tag5"]
     }
   },
-  "work_experience": {
-    "benefit_systems": [
-      "Punkt 1 dynamicznie dopasowany do oferty (automatyzacja / wiodący stack)",
-      "Punkt 2 dynamicznie dopasowany do oferty (architektura / CI/CD)",
-      "Punkt 3 dynamicznie dopasowany do oferty (API / backend / SQL)",
-      "Punkt 4 dynamicznie dopasowany do oferty (procesy jakości / Jira / Agile)"
-    ],
-    "sii_polska": [
-      "Punkt 1 (rola: Test & Analysis Engineer - manual / API / SQL)",
-      "Punkt 2",
-      "Punkt 3"
-    ],
-    "euroloan": [
-      "Punkt 1 (rola: Software Tester - funkcjonalne / UI / regresja)",
-      "Punkt 2",
-      "Punkt 3"
-    ]
-  }
+  "work_experience": [
+    {
+      "company": "Dokładna nazwa firmy 1 z profilu kandydata",
+      "highlights": [
+        "Punkt 1 dynamicznie dopasowany do oferty (automatyzacja / wiodący stack)",
+        "Punkt 2 dynamicznie dopasowany do oferty (architektura / CI/CD)",
+        "Punkt 3 dynamicznie dopasowany do oferty (API / backend / SQL)",
+        "Punkt 4 dynamicznie dopasowany do oferty (procesy jakości / Jira / Agile)"
+      ]
+    },
+    {
+      "company": "Dokładna nazwa firmy 2 z profilu kandydata",
+      "highlights": [
+        "Punkt 1 (rola: testy funkcjonalne / API / SQL)",
+        "Punkt 2",
+        "Punkt 3"
+      ]
+    }
+  ]
 }
 """
 
@@ -289,7 +290,7 @@ class CVTailorEngine:
     @staticmethod
     def _tailor_with_gemini(master_profile: Dict[str, Any], job_spec: Dict[str, Any], lang: str, api_key: str) -> Dict[str, Any]:
         """Calls Gemini Flash API for synthesis."""
-        models_to_try = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+        models_to_try = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
         prompt = PROMPT_CV_TAILORING.replace("{LANG}", "English" if lang == "en" else "Polski")
         input_data = {
             "master_profile": {
@@ -771,10 +772,19 @@ class CVTailorEngine:
                             m_job["highlights"] = [str(b).strip() for b in bullets if str(b).strip()][:5]
             # Case 2: List format [{"company": "...", "highlights": [...]}, ...]
             elif isinstance(raw_exp, list):
-                for g_job in raw_exp:
-                    g_comp = g_job.get("company", "")
+                for idx, g_job in enumerate(raw_exp):
+                    if not isinstance(g_job, dict):
+                        continue
+                    g_comp = str(g_job.get("company", "")).strip().lower()
+                    g_bullets = [str(b).strip() for b in g_job.get("highlights", []) if str(b).strip()][:5]
+                    matched = False
                     for m_job in result.get("experience", []):
-                        if g_comp.lower() in m_job.get("company", "").lower() and g_job.get("highlights"):
-                            m_job["highlights"] = [str(b).strip() for b in g_job["highlights"] if str(b).strip()][:5]
+                        m_comp = m_job.get("company", "").lower()
+                        if (g_comp and (g_comp in m_comp or m_comp in g_comp)) and g_bullets:
+                            m_job["highlights"] = g_bullets
+                            matched = True
+                            break
+                    if not matched and idx < len(result.get("experience", [])) and g_bullets:
+                        result["experience"][idx]["highlights"] = g_bullets
 
         return result

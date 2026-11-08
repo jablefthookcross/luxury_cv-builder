@@ -15,6 +15,11 @@ import argparse
 from pathlib import Path
 from typing import Optional, Dict, Any
 from flask import Flask, render_template, request, jsonify, Response
+from dotenv import load_dotenv
+
+APP_DIR = Path(__file__).resolve().parent
+# Load local .env variables into environment automatically
+load_dotenv(APP_DIR / ".env")
 
 from ai_engine import AIEngine, clean_job_offer_text
 from job_extractor import JobExtractor
@@ -26,17 +31,11 @@ from qa_logic_engine import QALogicEngine
 from cv_archive_manager import CVArchiveManager
 from db_manager import DBManager
 
-APP_DIR = Path(__file__).resolve().parent
 DEFAULT_PROFILE_PATH = APP_DIR / "profile_data.json"
-TAILORED_PROFILE_PATH = APP_DIR / "active_tailored_profile.json"
 SETTINGS_PATH = APP_DIR / "settings.json"
 OUTPUT_DIR = APP_DIR / "output"
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-
-ACTIVE_TAILORED_PROFILE = None
-ACTIVE_LANGUAGE = "pl"
-ACTIVE_JOB_TEXT = ""
 
 def load_json_file(path: Path, default_data: dict) -> dict:
     if not path.exists():
@@ -58,25 +57,22 @@ def save_json_file(path: Path, data: dict) -> bool:
         return False
 
 def get_settings() -> dict:
-    default_settings = {
-        "gemini_key": os.environ.get("GEMINI_API_KEY", ""),
-        "ollama_url": os.environ.get("OLLAMA_URL", "http://localhost:11434"),
-        "ollama_model": os.environ.get("OLLAMA_MODEL", "llama3.2")
+    gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    file_settings = load_json_file(SETTINGS_PATH, {})
+    if not gemini_key:
+        gemini_key = file_settings.get("gemini_key", "").strip()
+    return {
+        "gemini_key": gemini_key,
+        "ollama_url": os.environ.get("OLLAMA_URL", file_settings.get("ollama_url", "http://localhost:11434")),
+        "ollama_model": os.environ.get("OLLAMA_MODEL", file_settings.get("ollama_model", "llama3.2"))
     }
-    return load_json_file(SETTINGS_PATH, default_settings)
 
-def get_active_profile() -> dict:
-    global ACTIVE_TAILORED_PROFILE
-    if TAILORED_PROFILE_PATH.exists():
-        loaded = load_json_file(TAILORED_PROFILE_PATH, {})
-        if loaded:
-            return loaded
-    if ACTIVE_TAILORED_PROFILE:
-        return ACTIVE_TAILORED_PROFILE
-    return load_json_file(DEFAULT_PROFILE_PATH, {})
+def get_active_profile(user_id: Optional[str] = None) -> dict:
+    """Stateless profile loader: fetches profile scoped strictly to user_id or returns safe demo."""
+    return DBManager.get_profile(user_id=user_id)
 
 def get_authenticated_user_id() -> Optional[str]:
-    """Securely extracts authenticated user ID from Supabase Bearer token."""
+    """Securely extracts authenticated user ID from Bearer token or query param."""
     auth_header = request.headers.get("Authorization", "")
     token = None
     if auth_header.startswith("Bearer "):
@@ -128,15 +124,10 @@ def auth_status():
 
 @app.route("/api/profile", methods=["GET", "POST"])
 def master_profile_api():
-    global ACTIVE_TAILORED_PROFILE, ACTIVE_JOB_TEXT
     user_id = get_authenticated_user_id()
     if request.method == "POST":
         new_data = request.get_json()
         if DBManager.save_profile(new_data, user_id=user_id):
-            if not user_id:
-                ACTIVE_TAILORED_PROFILE = new_data
-                ACTIVE_JOB_TEXT = ""
-                save_json_file(TAILORED_PROFILE_PATH, new_data)
             return jsonify({"status": "success", "message": "Główny profil bazowy pomyślnie zapisany!"})
         return jsonify({"status": "error", "message": "Błąd podczas zapisu profilu."}), 500
     
@@ -145,30 +136,14 @@ def master_profile_api():
 
 @app.route("/api/profile/reset", methods=["POST"])
 def reset_profile_api():
-    global ACTIVE_TAILORED_PROFILE, ACTIVE_JOB_TEXT
-    ACTIVE_TAILORED_PROFILE = None
-    ACTIVE_JOB_TEXT = ""
-    if TAILORED_PROFILE_PATH.exists():
-        try:
-            TAILORED_PROFILE_PATH.unlink()
-        except Exception:
-            pass
     user_id = get_authenticated_user_id()
     master_profile = DBManager.get_profile(user_id=user_id)
     return jsonify({"status": "success", "message": "Aktywny DRAFT został zresetowany. Przywrócono czysty profil bazowy!", "profile": master_profile})
 
 @app.route("/api/profile/delete", methods=["POST", "DELETE"])
 def delete_master_profile_api():
-    global ACTIVE_TAILORED_PROFILE, ACTIVE_JOB_TEXT
     user_id = get_authenticated_user_id()
     empty_profile = DBManager.delete_profile(user_id=user_id)
-    ACTIVE_TAILORED_PROFILE = None
-    ACTIVE_JOB_TEXT = ""
-    if TAILORED_PROFILE_PATH.exists():
-        try:
-            TAILORED_PROFILE_PATH.unlink()
-        except Exception:
-            pass
     return jsonify({
         "status": "success",
         "message": "Profil bazowy został pomyślnie wyczyszczony! Możesz teraz wgrać nowy plik PDF ze swoim CV.",
@@ -202,11 +177,6 @@ def upload_pdf_api():
         new_profile = PDFParser.convert_text_to_profile(raw_text, ai_engine=ai, existing_profile=existing_profile)
         
         DBManager.save_profile(new_profile, user_id=user_id)
-        
-        global ACTIVE_TAILORED_PROFILE, ACTIVE_JOB_TEXT
-        ACTIVE_TAILORED_PROFILE = new_profile
-        ACTIVE_JOB_TEXT = ""
-        save_json_file(TAILORED_PROFILE_PATH, new_profile)
         
         return jsonify({
             "status": "success",
@@ -281,7 +251,6 @@ def tailor_api():
     ETAP 2: Moduł Dopasowania i Syntezy CV.
     Łączy nienaruszalny profil bazowy z JobSpecification JSON i zwraca dedykowany profil CV.
     """
-    global ACTIVE_TAILORED_PROFILE, ACTIVE_LANGUAGE, ACTIVE_JOB_TEXT
     payload = request.get_json() or {}
     
     job_description = payload.get("job_description") or payload.get("job_text") or ""
@@ -300,8 +269,7 @@ def tailor_api():
 
     detected_lang = job_spec.get("detected_language") or JobExtractor.detect_language(job_description)
     req_lang = payload.get("lang") or payload.get("language")
-    ACTIVE_LANGUAGE = req_lang if (req_lang and req_lang != "auto") else detected_lang
-    ACTIVE_JOB_TEXT = job_description
+    effective_lang = req_lang if (req_lang and req_lang != "auto") else detected_lang
     
     # Load profile baseline for authenticated user or fallback for guest
     user_id = get_authenticated_user_id()
@@ -311,20 +279,17 @@ def tailor_api():
         job_spec["target_role"] = target_role
 
     # Synthesize tailored profile in memory
-    tailored_profile = CVTailorEngine.tailor(master_profile, job_spec, lang=ACTIVE_LANGUAGE, gemini_key=gemini_key, provider=provider)
-    tailored_profile = QALogicEngine.audit_and_refine_profile(tailored_profile, lang=ACTIVE_LANGUAGE, job_text=job_description or json.dumps(job_spec), master_profile=master_profile)
+    tailored_profile = CVTailorEngine.tailor(master_profile, job_spec, lang=effective_lang, gemini_key=gemini_key, provider=provider)
+    tailored_profile = QALogicEngine.audit_and_refine_profile(tailored_profile, lang=effective_lang, job_text=job_description or json.dumps(job_spec), master_profile=master_profile)
     
     ats_analysis = JobAnalyzer.analyze(job_description or json.dumps(job_spec), tailored_profile)
     audit_results = QALogicEngine.audit_anti_ai_and_ats(tailored_profile)
 
-    ACTIVE_TAILORED_PROFILE = tailored_profile
-    save_json_file(TAILORED_PROFILE_PATH, tailored_profile)
-    
     template_name = payload.get("template", "pro_qa_sidebar")
     try:
-        rendered_html = render_template(f"cv_templates/{template_name}.html", data=tailored_profile, lang=ACTIVE_LANGUAGE)
+        rendered_html = render_template(f"cv_templates/{template_name}.html", data=tailored_profile, lang=effective_lang)
     except Exception:
-        rendered_html = render_template("cv_templates/pro_qa_sidebar.html", data=tailored_profile, lang=ACTIVE_LANGUAGE)
+        rendered_html = render_template("cv_templates/pro_qa_sidebar.html", data=tailored_profile, lang=effective_lang)
 
     return jsonify({
         "status": "success",
@@ -340,9 +305,10 @@ def tailor_api():
 @app.route("/api/refine-cv", methods=["POST"])
 def refine_cv_api():
     payload = request.get_json() or {}
-    current_data = payload.get("current_cv_data") or get_active_profile()
+    user_id = get_authenticated_user_id()
+    current_data = payload.get("current_cv_data") or get_active_profile(user_id=user_id)
     instruction = payload.get("user_instruction", "").strip()
-    lang = payload.get("lang") or payload.get("language") or ACTIVE_LANGUAGE
+    lang = payload.get("lang") or payload.get("language") or "pl"
     template_name = payload.get("template", "pro_qa_sidebar")
     
     if not instruction:
@@ -354,15 +320,10 @@ def refine_cv_api():
         ollama_url = settings.get("ollama_url", "http://localhost:11434")
         ai = AIEngine(provider="auto", gemini_key=gemini_key, ollama_url=ollama_url)
         
-        user_id = get_authenticated_user_id()
         master_profile = DBManager.get_profile(user_id=user_id)
         
         updated_data = ai.refine_cv(current_data, instruction, lang=lang)
         refined_data = QALogicEngine.audit_and_refine_profile(updated_data, lang=lang, job_text="", master_profile=master_profile)
-        
-        global ACTIVE_TAILORED_PROFILE
-        ACTIVE_TAILORED_PROFILE = refined_data
-        save_json_file(TAILORED_PROFILE_PATH, refined_data)
         
         try:
             rendered_html = render_template(f"cv_templates/{template_name}.html", data=refined_data, lang=lang)
@@ -382,13 +343,14 @@ def refine_cv_api():
 @app.route("/preview/render", methods=["POST"])
 def preview_render():
     payload = request.get_json() or {}
-    data = payload.get("profile") or get_active_profile()
-    template_name = payload.get("template", "pro_qa_sidebar")
-    lang = payload.get("lang") or payload.get("language") or ACTIVE_LANGUAGE
-    
     user_id = get_authenticated_user_id()
+    data = payload.get("profile") or get_active_profile(user_id=user_id)
+    template_name = payload.get("template", "pro_qa_sidebar")
+    lang = payload.get("lang") or payload.get("language") or "pl"
+    job_text = payload.get("job_text") or ""
+    
     master_profile = DBManager.get_profile(user_id=user_id)
-    refined_data = QALogicEngine.audit_and_refine_profile(data, lang=lang, job_text=ACTIVE_JOB_TEXT, master_profile=master_profile)
+    refined_data = QALogicEngine.audit_and_refine_profile(data, lang=lang, job_text=job_text, master_profile=master_profile)
     
     try:
         html = render_template(f"cv_templates/{template_name}.html", data=refined_data, lang=lang)
@@ -401,14 +363,15 @@ def preview_render():
 
 @app.route("/api/saved-cvs", methods=["GET", "POST"])
 def saved_cvs_archive_api():
+    user_id = get_authenticated_user_id()
     if request.method == "POST":
         payload = request.get_json() or {}
         company_name = payload.get("company_name", "Moja Aplikacja")
         target_title = payload.get("target_title", "")
-        lang = payload.get("lang", ACTIVE_LANGUAGE)
+        lang = payload.get("lang", "pl")
         match_score = payload.get("match_score", 0)
-        profile_data = payload.get("profile_data") or get_active_profile()
-        job_text = payload.get("job_text", ACTIVE_JOB_TEXT)
+        profile_data = payload.get("profile_data") or get_active_profile(user_id=user_id)
+        job_text = payload.get("job_text", "")
         
         record = CVArchiveManager.save_cv(
             company_name=company_name,
@@ -416,11 +379,12 @@ def saved_cvs_archive_api():
             lang=lang,
             match_score=match_score,
             profile_data=profile_data,
-            job_text=job_text
+            job_text=job_text,
+            user_id=user_id
         )
         return jsonify({"status": "success", "message": f"CV dla {company_name} zostało pomyślnie zapisane w Moich CV!", "record": record})
         
-    records = CVArchiveManager.list_saved_cvs()
+    records = CVArchiveManager.list_saved_cvs(user_id=user_id)
     return jsonify({"status": "success", "cvs": records})
 
 @app.route("/api/saved-cvs/<cv_id>", methods=["GET", "PUT", "DELETE"])
@@ -475,19 +439,11 @@ def saved_cv_export_pdf(cv_id):
 
 @app.route("/preview/current")
 def preview_current():
-    global ACTIVE_LANGUAGE, ACTIVE_JOB_TEXT
     template_name = request.args.get("template", "pro_qa_sidebar")
-    req_lang = request.args.get("lang", ACTIVE_LANGUAGE)
-    if not req_lang or req_lang == "auto":
-        lang = JobExtractor.detect_language(ACTIVE_JOB_TEXT) if ACTIVE_JOB_TEXT else "pl"
-    else:
-        lang = req_lang
-    ACTIVE_LANGUAGE = lang
-    
+    lang = request.args.get("lang") or "pl"
     user_id = get_authenticated_user_id()
     master_profile = DBManager.get_profile(user_id=user_id)
-    data = master_profile if user_id else get_active_profile()
-    data = QALogicEngine.audit_and_refine_profile(data, lang=lang, job_text=ACTIVE_JOB_TEXT, master_profile=master_profile)
+    data = QALogicEngine.audit_and_refine_profile(master_profile, lang=lang, job_text="", master_profile=master_profile)
     
     template_file = f"cv_templates/{template_name}.html"
     try:
@@ -508,18 +464,16 @@ def export_pdf():
     """
     Stateless In-Memory PDF generation pipeline:
     1. Extracts raw job description from request (POST payload or GET query).
-    2. Runs AIEngine with pristine baseline (profile_data.json) + fresh job text.
+    2. Runs AIEngine with pristine baseline + fresh job text.
     3. Validates and sanitizes data via QALogicEngine.
     4. Passes JSON directly to Jinja2 template and compiles PDF via PDFExporter (Playwright).
     5. Returns fresh PDF with strict anti-caching headers.
     """
-    global ACTIVE_LANGUAGE, ACTIVE_JOB_TEXT, ACTIVE_TAILORED_PROFILE
-
     if request.method == "POST":
         payload = request.get_json() or {}
         profile_data = payload.get("profile_data")
         job_spec = payload.get("job_spec")
-        job_description = payload.get("job_text") or payload.get("job_description") or ACTIVE_JOB_TEXT or ""
+        job_description = payload.get("job_text") or payload.get("job_description") or ""
         target_role = payload.get("target_role", "")
         template_name = payload.get("template", "pro_qa_sidebar")
         req_lang = payload.get("language") or payload.get("lang")
@@ -527,7 +481,7 @@ def export_pdf():
     else:
         profile_data = None
         job_spec = None
-        job_description = request.args.get("job_text") or request.args.get("job_description") or ACTIVE_JOB_TEXT or ""
+        job_description = request.args.get("job_text") or request.args.get("job_description") or ""
         target_role = request.args.get("target_role", "")
         template_name = request.args.get("template", "pro_qa_sidebar")
         req_lang = request.args.get("language") or request.args.get("lang")
@@ -540,7 +494,7 @@ def export_pdf():
         elif job_description.strip():
             lang = JobExtractor.detect_language(job_description)
         else:
-            lang = ACTIVE_LANGUAGE or "pl"
+            lang = "pl"
     else:
         lang = req_lang
 
@@ -550,8 +504,6 @@ def export_pdf():
 
     if profile_data:
         tailored_data = profile_data
-    elif TAILORED_PROFILE_PATH.exists() or ACTIVE_TAILORED_PROFILE:
-        tailored_data = get_active_profile()
     elif job_spec:
         settings = get_settings()
         gemini_key = settings.get("gemini_key") or os.environ.get("GEMINI_API_KEY", "")
@@ -570,12 +522,9 @@ def export_pdf():
     final_data = QALogicEngine.audit_and_refine_profile(
         tailored_data,
         lang=lang,
-        job_text="" if (profile_data or TAILORED_PROFILE_PATH.exists() or ACTIVE_TAILORED_PROFILE) else (job_description or json.dumps(job_spec or {})),
+        job_text="" if profile_data else (job_description or json.dumps(job_spec or {})),
         master_profile=master_profile
     )
-
-    ACTIVE_TAILORED_PROFILE = final_data
-    save_json_file(TAILORED_PROFILE_PATH, final_data)
 
     # Step 4: Render directly to Jinja2 and generate PDF
     rendered_html = render_template(f"cv_templates/{template_name}.html", data=final_data, lang=lang)
@@ -583,7 +532,7 @@ def export_pdf():
     if not pdf_bytes:
         pdf_bytes = PDFExporter.generate_pdf(final_data, lang=lang)
 
-    name_slug = re.sub(r'[^a-zA-Z0-9]', '_', final_data.get("personal_info", {}).get("full_name", "Michal_Kosowski")).strip('_') or "CV"
+    name_slug = re.sub(r'[^a-zA-Z0-9]', '_', final_data.get("personal_info", {}).get("full_name", "CV")).strip('_') or "CV"
     filename = f"{name_slug}_CV.pdf" if lang == "pl" else f"{name_slug}_Resume.pdf"
 
     # Step 5: Return PDF with strict zero-cache headers

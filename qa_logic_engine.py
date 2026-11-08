@@ -89,12 +89,19 @@ class QALogicEngine:
         
         # 1. PERSONAL INFO SANITY CHECK & GROUND TRUTH LOCK
         pinfo = refined.get("personal_info", {})
-        pinfo["full_name"] = "Michał Kosowski"
-        pinfo["email"] = "mmkosowski94@gmail.com"
-        pinfo["phone"] = "518075716"
-        pinfo["location"] = "Warsaw, Poland" if lang == "en" else "Warszawa"
+        if master_pinfo:
+            pinfo["full_name"] = master_pinfo.get("full_name") or pinfo.get("full_name", "")
+            pinfo["email"] = master_pinfo.get("email") or pinfo.get("email", "")
+            pinfo["phone"] = master_pinfo.get("phone") or pinfo.get("phone", "")
+            pinfo["location"] = master_pinfo.get("location") or pinfo.get("location", "Warszawa")
+            pinfo["github"] = master_pinfo.get("github") or pinfo.get("github", "")
+        else:
+            pinfo["full_name"] = pinfo.get("full_name", "")
+            pinfo["email"] = pinfo.get("email", "")
+            pinfo["phone"] = pinfo.get("phone", "")
+            pinfo["location"] = pinfo.get("location", "Warszawa")
+            pinfo["github"] = pinfo.get("github", "")
         pinfo["linkedin"] = ""
-        pinfo["github"] = "https://github.com/jablefthookcross"
         refined["personal_info"] = pinfo
         refined["education"] = []
 
@@ -153,8 +160,8 @@ class QALogicEngine:
                 if not itm:
                     continue
                 itm_str = str(itm).strip()
-                if ',' in itm_str or ';' in itm_str or ' / ' in itm_str:
-                    sub_parts = re.split(r'[,;]|\s+/\s+', itm_str)
+                if ';' in itm_str or ' / ' in itm_str or (',' in itm_str and not re.search(r'\([^)]*,[^)]*\)', itm_str)):
+                    sub_parts = re.split(r';|\s+/\s+|,\s*(?![^()]*\))', itm_str)
                     for sp in sub_parts:
                         sp_c = sp.strip()
                         if sp_c:
@@ -205,7 +212,11 @@ class QALogicEngine:
             filtered_items = list(dict.fromkeys(filtered_items))
             
             if len(filtered_items) < 4:
-                fallbacks = ["Jira (Xray)", "Confluence", "Git", "Postman", "Playwright"] if lang != "en" else ["Jira (Xray)", "Confluence", "Git", "Postman", "Playwright"]
+                is_methodology_cat = any(k in cat_name_norm for k in ["metodyk", "testowan", "rodzaj", "obszar", "funkcjon", "manual"])
+                if is_methodology_cat:
+                    fallbacks = ["Testy Eksploracyjne", "Testy Regresyjne", "Testy Funkcjonalne", "Scenariusze Testowe"] if lang != "en" else ["Exploratory Testing", "Regression Testing", "Functional Testing", "Test Scenarios"]
+                else:
+                    fallbacks = ["Jira (Xray)", "Confluence", "Git", "Postman", "SQL"] if lang != "en" else ["Jira (Xray)", "Confluence", "Git", "Postman", "SQL"]
                 for fb in fallbacks:
                     fb_norm = re.sub(r'[^a-zA-Z0-9]', '', fb.lower())
                     if fb_norm not in seen_skills and fb_norm != cat_name_norm and len(filtered_items) < 5:
