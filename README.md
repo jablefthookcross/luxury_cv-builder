@@ -7,6 +7,8 @@
 [![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-black?style=flat-square)](https://ollama.ai/)
 [![ATS](https://img.shields.io/badge/ATS-100%25_Compliant-success?style=flat-square)](https://workday.com)
 
+> **Live Demo**: [vitaecraft-ai.onrender.com](https://vitaecraft-ai.onrender.com)
+
 VitaeCraft AI to inteligentny, lokalny generator oraz optymalizator CV stworzony z myślą o Inżynierach QA, Testerach Oprogramowania i Specjalistach IT. Aplikacja analizuje treść ofert pracy, weryfikuje słownictwo domenowe inżynierii jakości, dopasowuje profil kandydata pod skanery korporacyjne (ATS) i eksportuje wektorowe pliki PDF 1:1 za pomocą bezgłowej przeglądarki Chromium (Playwright Vector Engine).
 
 ---
