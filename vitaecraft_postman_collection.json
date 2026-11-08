@@ -1,0 +1,379 @@
+{
+  "info": {
+    "name": "VitaeCraft AI API",
+    "description": "Oficjalna kolekcja Postman dla aplikacji VitaeCraft AI - silnika generowania dedykowanych CV dla inżynierów QA oraz nuklearnego czyszczenia.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:5000",
+      "type": "string"
+    },
+    {
+      "key": "adminSecret",
+      "value": "vitaecraft-nuclear-secret-2026",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "💥 Admin & Nuclear Cleanup",
+      "item": [
+        {
+          "name": "Nuklearne Czyszczenie Bazy (POST /admin/cleanup)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-secret",
+                "value": "{{adminSecret}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preserve_owner\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/cleanup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "cleanup"
+              ]
+            },
+            "description": "Usuwa wszystkie konta testowe, profile testowe, zapisane CV oraz pliki tymczasowe."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Rejestracja Użytkownika (POST /api/auth/register)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nowy_tester@example.com\",\n  \"password\": \"tajnehaslo123\",\n  \"full_name\": \"Jan Tester\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logowanie Użytkownika (POST /api/auth/login)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mmkosowski94@gmail.com\",\n  \"password\": \"tester_qa_2026\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Status Sesji (GET /api/auth/status)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "status"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Profile Management",
+      "item": [
+        {
+          "name": "Pobranie Profilu Bazowego (GET /api/profile)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Zapisanie Profilu Bazowego (POST /api/profile)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personal_info\": {\n    \"full_name\": \"Micha\\u0142 Kosowski\",\n    \"title\": \"Software QA Engineer\"\n  },\n  \"skills\": [],\n  \"experience\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset DRAFT-u do Profilu Bazowego (POST /api/profile/reset)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profile/reset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "reset"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🤖 AI Tailoring & Intelligence",
+      "item": [
+        {
+          "name": "Krok 1: Analiza Oferty (POST /api/analyze-job)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_text\": \"Szukamy Senior QA Automation z Playwright, TypeScript i SQL...\",\n  \"provider\": \"auto\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/analyze-job",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analyze-job"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Krok 2: Dopasowanie CV (POST /api/tailor)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_description\": \"Wymagania: Playwright, TypeScript, SQL\",\n  \"target_role\": \"QA Automation\",\n  \"lang\": \"pl\",\n  \"template\": \"pro_qa_sidebar\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tailor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tailor"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Krok 3: Szlifowanie Promptem (POST /api/refine-cv)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_cv_data\": {},\n  \"user_instruction\": \"Skr\\u00f3\\u0107 podsumowanie i wyeksponuj Playwright.\",\n  \"lang\": \"pl\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/refine-cv",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "refine-cv"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📄 Export & PDF",
+      "item": [
+        {
+          "name": "Pobranie PDF (POST /api/export/pdf)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"template\": \"pro_qa_sidebar\",\n  \"lang\": \"pl\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/export/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "export",
+                "pdf"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📚 Saved CVs Archive",
+      "item": [
+        {
+          "name": "Lista Zapisanych CV (GET /api/saved-cvs)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/saved-cvs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "saved-cvs"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

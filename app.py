@@ -96,6 +96,7 @@ def index():
 @app.route("/docs")
 @app.route("/swagger")
 @app.route("/api/docs")
+@app.route("/api-docs")
 def swagger_ui():
     """Renders interactive Swagger UI documentation for VitaeCraft API."""
     return render_template("swagger_ui.html")
@@ -103,6 +104,7 @@ def swagger_ui():
 @app.route("/api/openapi.json")
 @app.route("/openapi.json")
 @app.route("/swagger.json")
+@app.route("/api-docs.json")
 def openapi_json():
     """Serves the OpenAPI 3.0 specification in JSON format."""
     return jsonify(get_openapi_spec())

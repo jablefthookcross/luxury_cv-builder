@@ -23,8 +23,8 @@ def get_openapi_spec() -> dict:
             }
         },
         "servers": [
-            {"url": "http://127.0.0.1:5000", "description": "Lokalny serwer deweloperski / testowy"},
-            {"url": "https://vitaecraft-ai.onrender.com", "description": "Środowisko chmurowe / produkcyjne"}
+            {"url": "https://vitaecraft-ai.onrender.com", "description": "Środowisko chmurowe / produkcyjne (zawsze online)"},
+            {"url": "http://127.0.0.1:5000", "description": "Lokalny serwer deweloperski / testowy"}
         ],
         "tags": [
             {"name": "Admin & Technical", "description": "Nuklearne czyszczenie danych testowych i reset stanu aplikacji"},
