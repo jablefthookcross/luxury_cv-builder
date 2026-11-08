@@ -40,6 +40,44 @@ def test_flask_endpoints():
     assert res_saved.status_code == 200
     print("✅ Flask API endpoints unit test passed!")
 
+def test_swagger_and_openapi():
+    from app import app
+    client = app.test_client()
+    res_docs = client.get("/docs")
+    assert res_docs.status_code == 200
+    assert "SwaggerUIBundle" in res_docs.get_data(as_text=True)
+
+    res_json = client.get("/api/openapi.json")
+    assert res_json.status_code == 200
+    spec = res_json.get_json()
+    assert spec["openapi"] == "3.0.3"
+    assert "/admin/cleanup" in spec["paths"]
+    assert "/api/tailor" in spec["paths"]
+    assert "/api/profile" in spec["paths"]
+    print("✅ Swagger UI & OpenAPI 3.0 specification unit test passed!")
+
+def test_admin_nuclear_cleanup():
+    from app import app
+    client = app.test_client()
+
+    # 1. Missing secret must return 403
+    res_unauth = client.post("/admin/cleanup")
+    assert res_unauth.status_code == 403
+    assert "x-admin-secret" in res_unauth.get_json().get("message", "")
+
+    # 2. Invalid secret must return 403
+    res_wrong = client.post("/admin/cleanup", headers={"x-admin-secret": "wrong-secret-123"})
+    assert res_wrong.status_code == 403
+
+    # 3. Valid secret executes cleanup
+    res_clean = client.post("/admin/cleanup", headers={"x-admin-secret": "vitaecraft-nuclear-secret-2026"})
+    assert res_clean.status_code == 200
+    json_data = res_clean.get_json()
+    assert json_data["status"] == "success"
+    assert "details" in json_data
+    assert "users_deleted" in json_data["details"]
+    print("✅ Admin nuclear cleanup technical endpoint unit test passed!")
+
 def test_regression_skill_parsing_and_parentheses():
     engine = AIEngine(provider="fallback")
     master = {
@@ -91,6 +129,8 @@ if __name__ == "__main__":
     test_job_analyzer()
     test_ai_fallback()
     test_flask_endpoints()
+    test_swagger_and_openapi()
+    test_admin_nuclear_cleanup()
     test_regression_skill_parsing_and_parentheses()
     test_regression_css_no_justify_rivers()
     test_regression_methodology_fallback_no_jira()

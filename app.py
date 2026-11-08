@@ -30,6 +30,7 @@ from pdf_exporter import PDFExporter
 from qa_logic_engine import QALogicEngine
 from cv_archive_manager import CVArchiveManager
 from db_manager import DBManager
+from openapi_spec import get_openapi_spec
 
 DEFAULT_PROFILE_PATH = APP_DIR / "profile_data.json"
 SETTINGS_PATH = APP_DIR / "settings.json"
@@ -89,6 +90,55 @@ def get_authenticated_user_id() -> Optional[str]:
 @app.route("/")
 def index():
     return render_template("index.html")
+
+# --- SWAGGER & OPENAPI DOCUMENTATION ROUTES ---
+
+@app.route("/docs")
+@app.route("/swagger")
+@app.route("/api/docs")
+def swagger_ui():
+    """Renders interactive Swagger UI documentation for VitaeCraft API."""
+    return render_template("swagger_ui.html")
+
+@app.route("/api/openapi.json")
+@app.route("/openapi.json")
+@app.route("/swagger.json")
+def openapi_json():
+    """Serves the OpenAPI 3.0 specification in JSON format."""
+    return jsonify(get_openapi_spec())
+
+# --- NUCLEAR CLEANUP TECHNICAL ENDPOINT ---
+
+@app.route("/admin/cleanup", methods=["POST"])
+@app.route("/api/admin/cleanup", methods=["POST"])
+def admin_cleanup_api():
+    """
+    POST /admin/cleanup
+    Nuklearne czyszczenie danych testowych dla Postmana oraz testów automatycznych.
+    Wymaga nagłówka 'x-admin-secret: <ADMIN_CLEANUP_SECRET>'.
+    """
+    secret = (
+        request.headers.get("x-admin-secret")
+        or request.headers.get("X-Admin-Secret")
+        or request.args.get("secret")
+    )
+    expected_secret = (
+        os.environ.get("ADMIN_CLEANUP_SECRET")
+        or os.environ.get("ADMIN_SECRET")
+        or "vitaecraft-nuclear-secret-2026"
+    )
+
+    if not secret or secret.strip() != expected_secret.strip():
+        return jsonify({
+            "status": "error",
+            "message": "Brak dostępu. Wymagany poprawny nagłówek 'x-admin-secret'."
+        }), 403
+
+    payload = request.get_json(silent=True) or {}
+    preserve_owner = payload.get("preserve_owner", True)
+
+    result = DBManager.nuclear_cleanup(preserve_owner=preserve_owner)
+    return jsonify(result), 200
 
 @app.route("/api/auth/register", methods=["POST"])
 def auth_register():

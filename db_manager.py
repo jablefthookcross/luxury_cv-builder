@@ -397,3 +397,83 @@ class DBManager:
 
         # Guest mode: Do not mutate the server-side master profile file
         return True
+
+    @classmethod
+    def nuclear_cleanup(cls, preserve_owner: bool = True) -> Dict[str, Any]:
+        """
+        Nuklearne czyszczenie danych testowych (Nuclear Cleanup).
+        Usuwa konta testowe, profile niebędące właścicielem, zapisane CV oraz pliki tymczasowe.
+        Domyślnie zachowuje profil właściciela (Michał Kosowski / tester_qa_2026) oraz bazowy profile_data.json.
+        """
+        deleted_users = 0
+        deleted_profiles = 0
+        deleted_saved_cvs = 0
+        deleted_temp_files = 0
+
+        # 1. Czyszczenie kont użytkowników w users_db.json
+        users_db = _load_json(USERS_FILE, {})
+        new_users_db = {}
+        owner_ids = set()
+
+        for uname, udata in users_db.items():
+            is_owner = any(k in uname.lower() for k in ["mmkosowski", "michal", "mike", "jablefthookcross"]) or uname == "tester_qa_2026"
+            if preserve_owner and is_owner:
+                new_users_db[uname] = udata
+                if udata.get("id"):
+                    owner_ids.add(udata.get("id"))
+            else:
+                deleted_users += 1
+
+        _save_json(USERS_FILE, new_users_db)
+
+        # 2. Czyszczenie profili w user_profiles_db.json
+        profiles_db = _load_json(USER_PROFILES_FILE, {})
+        new_profiles_db = {}
+        for uid, pdata in profiles_db.items():
+            if preserve_owner and uid in owner_ids:
+                new_profiles_db[uid] = pdata
+            else:
+                deleted_profiles += 1
+
+        _save_json(USER_PROFILES_FILE, new_profiles_db)
+
+        # 3. Czyszczenie lokalnego katalogu saved_cvs
+        saved_cvs_dir = APP_DIR / "saved_cvs"
+        if saved_cvs_dir.exists():
+            for f in saved_cvs_dir.glob("*.json"):
+                try:
+                    f.unlink()
+                    deleted_saved_cvs += 1
+                except Exception as e:
+                    print(f"[Nuclear Cleanup] Failed deleting {f}: {e}")
+
+        # 4. Czyszczenie katalogu wyjściowego output/ oraz plików tymczasowych
+        output_dir = APP_DIR / "output"
+        if output_dir.exists():
+            for f in output_dir.glob("*"):
+                if f.is_file():
+                    try:
+                        f.unlink()
+                        deleted_temp_files += 1
+                    except Exception:
+                        pass
+
+        # 5. Czyszczenie Supabase (jeśli podłączona baza w chmurze)
+        if cls.is_supabase_enabled():
+            try:
+                # Wyczyść zapisane CV w chmurze
+                supabase_client.table("saved_cvs").delete().neq("id", "00000000-0000-0000-0000-000000000000").execute()
+            except Exception as e:
+                print(f"[Nuclear Cleanup Supabase Warning]: {e}")
+
+        return {
+            "status": "success",
+            "message": "Nuklearne czyszczenie wykonane pomyślnie. Śmieci usunięte, stan zresetowany.",
+            "details": {
+                "users_deleted": deleted_users,
+                "profiles_deleted": deleted_profiles,
+                "saved_cvs_deleted": deleted_saved_cvs,
+                "temp_files_deleted": deleted_temp_files,
+                "preserve_owner": preserve_owner
+            }
+        }
