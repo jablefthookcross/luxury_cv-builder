@@ -119,7 +119,7 @@ class JobExtractor:
 
         api_key = gemini_key or os.environ.get("GEMINI_API_KEY", "")
 
-        if provider in ["gemini", "auto"] and api_key.strip():
+        if provider in ["gemini", "auto"] and api_key.strip().startswith("AIzaSy"):
             try:
                 spec = JobExtractor._extract_with_gemini(cleaned_text, api_key.strip())
                 if spec and spec.get("target_role"):
@@ -172,6 +172,8 @@ class JobExtractor:
                     return JobExtractor._sanitize_spec(parsed)
             except Exception as e:
                 last_error = e
+                if isinstance(e, urllib.error.HTTPError) and e.code in [400, 401, 403]:
+                    break
                 continue
 
         raise RuntimeError(f"All Gemini models failed: {last_error}")

@@ -24,3 +24,10 @@ users_db.json
 user_profiles_db.json
 *.log
 .DS_Store
+
+# Playwright & Allure Test Artifacts
+node_modules/
+test-results/
+playwright-report/
+allure-results/
+allure-report/

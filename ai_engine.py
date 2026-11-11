@@ -256,7 +256,7 @@ ZASADY KOREKTY:
         models_to_try = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
         api_key = self.gemini_key or os.environ.get("GEMINI_API_KEY", "")
 
-        if api_key.strip():
+        if api_key.strip().startswith("AIzaSy"):
             for model_name in models_to_try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key.strip()}"
                 payload = {
@@ -280,6 +280,8 @@ ZASADY KOREKTY:
                             return parsed
                 except Exception as e:
                     print(f"[AIEngine Refine] Gemini model {model_name} failed: {e}")
+                    if isinstance(e, urllib.error.HTTPError) and e.code in [400, 401, 403]:
+                        break
                     continue
 
         # Deterministic NLP fallback if Gemini is offline
@@ -487,12 +489,13 @@ ZASADY KOREKTY:
         return res
 
     def _determine_provider(self) -> str:
-        if self.provider == "gemini" and self.gemini_key:
+        has_real_gemini = bool(self.gemini_key and self.gemini_key.strip().startswith("AIzaSy"))
+        if self.provider == "gemini" and has_real_gemini:
             return "gemini"
         elif self.provider == "ollama":
             return "ollama"
         elif self.provider == "auto":
-            if self.gemini_key:
+            if has_real_gemini:
                 return "gemini"
             elif self._check_ollama_alive():
                 return "ollama"
@@ -557,6 +560,8 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV zgodnie z podanym schematem.
                         return self._normalize_gemini_output(parsed, master_profile)
             except Exception as e:
                 last_error = e
+                if isinstance(e, urllib.error.HTTPError) and e.code in [400, 401, 403]:
+                    break
                 continue
 
         raise RuntimeError(f"All Gemini models failed. Last error: {last_error}")

@@ -277,7 +277,7 @@ class CVTailorEngine:
         clean_master = json.loads(json.dumps(master_profile))
         api_key = gemini_key or os.environ.get("GEMINI_API_KEY", "")
 
-        if provider in ["gemini", "auto"] and api_key.strip():
+        if provider in ["gemini", "auto"] and api_key.strip().startswith("AIzaSy"):
             try:
                 gemini_tailored = CVTailorEngine._tailor_with_gemini(clean_master, job_spec, lang=lang, api_key=api_key.strip())
                 if gemini_tailored and gemini_tailored.get("skills"):
@@ -336,6 +336,8 @@ class CVTailorEngine:
                     return json.loads(text_content)
             except Exception as e:
                 last_error = e
+                if isinstance(e, urllib.error.HTTPError) and e.code in [400, 401, 403]:
+                    break
                 continue
 
         raise RuntimeError(f"All Gemini models failed in tailoring: {last_error}")
@@ -465,6 +467,29 @@ class CVTailorEngine:
             {"category": cat2_name, "items": cat2_items[:6]},
             {"category": cat3_name, "items": cat3_items[:6]}
         ]
+
+        # Compute 3-Buckets Breakdown (A: Exposed Core, B: Supporting Skills, C: Pruned Out of Scope)
+        master_all_skills = []
+        for cat in master_profile.get("skills", []):
+            master_all_skills.extend(cat.get("items", []))
+
+        bucket_a = [s for s in selected_skills if any(t.lower() in s.lower() or s.lower() in t.lower() for t in (primary_tech + testing_types))]
+        if not bucket_a:
+            bucket_a = cat1_items[:4]
+
+        bucket_b = [s for s in selected_skills if s not in bucket_a]
+        if not bucket_b:
+            bucket_b = cat2_items[:4]
+
+        bucket_c = [s for s in master_all_skills if not any(s.lower() in sel.lower() or sel.lower() in s.lower() for sel in selected_skills)]
+        if not bucket_c:
+            bucket_c = ["Legacy Tools", "Manual Ad-hoc Tests", "PHP", "WordPress"] if is_en else ["Stare Narzędzia", "Testy Ad-hoc", "PHP", "WordPress"]
+
+        tailored["_buckets_breakdown"] = {
+            "bucket_a": list(dict.fromkeys(bucket_a))[:6],
+            "bucket_b": list(dict.fromkeys(bucket_b))[:6],
+            "bucket_c": list(dict.fromkeys(bucket_c))[:5]
+        }
 
         # 3. Dynamic Summary Synthesis (No AI slop or bracket lists)
         exp_phrase = "5+ years of" if is_en else "ponad 5-letnim"
@@ -786,5 +811,15 @@ class CVTailorEngine:
                             break
                     if not matched and idx < len(result.get("experience", [])) and g_bullets:
                         result["experience"][idx]["highlights"] = g_bullets
+
+        if "_buckets_breakdown" not in result:
+            skills = result.get("skills", [])
+            cat1 = skills[0].get("items", []) if len(skills) > 0 else []
+            cat2 = skills[1].get("items", []) if len(skills) > 1 else []
+            result["_buckets_breakdown"] = {
+                "bucket_a": cat1[:4],
+                "bucket_b": cat2[:4],
+                "bucket_c": ["Nieużywane Technologie", "Szum Poza Ofertą"] if lang == "pl" else ["Unused Technologies", "Out of Scope Skills"]
+            }
 
         return result
