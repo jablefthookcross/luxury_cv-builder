@@ -119,7 +119,7 @@ class JobExtractor:
 
         api_key = gemini_key or os.environ.get("GEMINI_API_KEY", "")
 
-        if provider in ["gemini", "auto"] and api_key.strip().startswith("AIzaSy"):
+        if provider in ["gemini", "auto"] and api_key.strip():
             try:
                 spec = JobExtractor._extract_with_gemini(cleaned_text, api_key.strip())
                 if spec and spec.get("target_role"):

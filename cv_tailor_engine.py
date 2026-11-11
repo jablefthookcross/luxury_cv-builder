@@ -277,7 +277,7 @@ class CVTailorEngine:
         clean_master = json.loads(json.dumps(master_profile))
         api_key = gemini_key or os.environ.get("GEMINI_API_KEY", "")
 
-        if provider in ["gemini", "auto"] and api_key.strip().startswith("AIzaSy"):
+        if provider in ["gemini", "auto"] and api_key.strip():
             try:
                 gemini_tailored = CVTailorEngine._tailor_with_gemini(clean_master, job_spec, lang=lang, api_key=api_key.strip())
                 if gemini_tailored and gemini_tailored.get("skills"):

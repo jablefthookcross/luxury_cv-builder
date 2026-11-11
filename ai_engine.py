@@ -256,7 +256,7 @@ ZASADY KOREKTY:
         models_to_try = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
         api_key = self.gemini_key or os.environ.get("GEMINI_API_KEY", "")
 
-        if api_key.strip().startswith("AIzaSy"):
+        if api_key.strip():
             for model_name in models_to_try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key.strip()}"
                 payload = {
@@ -489,7 +489,7 @@ ZASADY KOREKTY:
         return res
 
     def _determine_provider(self) -> str:
-        has_real_gemini = bool(self.gemini_key and self.gemini_key.strip().startswith("AIzaSy"))
+        has_real_gemini = bool(self.gemini_key and self.gemini_key.strip())
         if self.provider == "gemini" and has_real_gemini:
             return "gemini"
         elif self.provider == "ollama":
