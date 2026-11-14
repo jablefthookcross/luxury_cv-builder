@@ -137,14 +137,14 @@ class PDFParser:
 
         return {
             "personal_info": {
-                "full_name": full_name or "Michał Kosowski",
+                "full_name": full_name or "",
                 "title": default_title or "Software QA Engineer",
-                "email": email or "mmkosowski94@gmail.com",
-                "phone": phone or "518075716",
+                "email": email or "",
+                "phone": phone or "",
                 "location": location or "Warszawa",
                 "website": "",
                 "linkedin": "",
-                "github": "https://github.com/jablefthookcross"
+                "github": ""
             },
             "summary": "QA Engineer z ponad 5-letnim doświadczeniem w zapewnianiu jakości oprogramowania poprzez testy manualne, walidację API oraz automatyzację testów w Playwright (TypeScript/JavaScript).",
             "skills": skills,

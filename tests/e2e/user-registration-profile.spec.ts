@@ -3,6 +3,7 @@ import { test, expect } from "../fixtures/test-fixtures";
 import { LandingPage } from "../pages/LandingPage";
 import { AuthModalPage } from "../pages/AuthModalPage";
 import { ProfilePage } from "../pages/ProfilePage";
+import { TailoringPage } from "../pages/TailoringPage";
 import { buildQaUser, buildCandidateProfile } from "../data/builders";
 
 test.describe("E2E UI - Rejestracja Użytkownika i Zarządzanie Profilem Bazowym", () => {
@@ -47,6 +48,42 @@ test.describe("E2E UI - Rejestracja Użytkownika i Zarządzanie Profilem Bazowym
     await test.step("Krok 4: Przejście do zakładki 'Profil Bazowy' i weryfikacja czystości formularza", async () => {
       await profilePage.open();
       await profilePage.expectCleanProfile(testUser.fullName);
+    });
+  });
+
+  test("Rejestracja użytkownika bez imienia i nazwiska: podgląd iframe nie wycieka 'Michał Kosowski' @smoke @regression @ui @security", async ({
+    page,
+    cleanup,
+  }) => {
+    void cleanup;
+    await allure.story("Brak wycieku danych właściciela (Michał Kosowski) dla nowego konta z pustym nazwiskiem");
+
+    const landing = new LandingPage(page);
+    const authModal = new AuthModalPage(page);
+    const tailoring = new TailoringPage(page);
+    const testUser = buildQaUser({ fullName: "" });
+
+    await test.step("Krok 1: Rejestracja nowego konta bez podawania imienia i nazwiska", async () => {
+      await landing.open();
+      await landing.clickRegister();
+      await authModal.registerUser(testUser.email, testUser.password, "");
+      await authModal.expectSuccessToast();
+    });
+
+    await test.step("Krok 2: Weryfikacja podglądu DRAFT CV w iframe - brak danych Michała Kosowskiego", async () => {
+      const appDashboard = page.locator("#appDashboard");
+      await expect(appDashboard).toBeVisible({ timeout: 10_000 });
+
+      // Sprawdzamy podgląd w iframe
+      const candidateName = await tailoring.getIframeCandidateName();
+      expect(candidateName.trim()).not.toBe("Michał Kosowski");
+      expect(candidateName.trim()).toBe("");
+
+      // Sprawdzamy, czy w całym iframe nie występuje Michał Kosowski ani jego dane kontaktowe
+      const iframeText = await tailoring.iframeBody.locator("body").innerText();
+      expect(iframeText).not.toContain("Michał Kosowski");
+      expect(iframeText).not.toContain("mmkosowski94@gmail.com");
+      expect(iframeText).not.toContain("518075716");
     });
   });
 

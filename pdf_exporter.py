@@ -161,7 +161,9 @@ class PDFExporter:
         )
 
         pinfo = data.get("personal_info", {})
-        story.append(Paragraph(pinfo.get("full_name", "Michał Kosowski"), title_style))
+        full_name = pinfo.get("full_name", "")
+        if full_name:
+            story.append(Paragraph(full_name, title_style))
         if pinfo.get("title"):
             story.append(Paragraph(pinfo.get("title"), subtitle_style))
         

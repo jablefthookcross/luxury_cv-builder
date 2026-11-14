@@ -272,7 +272,7 @@ ZASADY KOREKTY:
                         data=json.dumps(payload).encode("utf-8"),
                         headers={"Content-Type": "application/json"}
                     )
-                    with urllib.request.urlopen(req, timeout=25) as response:
+                    with urllib.request.urlopen(req, timeout=6) as response:
                         res_data = json.loads(response.read().decode("utf-8"))
                         text_response = res_data["candidates"][0]["content"]["parts"][0]["text"]
                         parsed = self._clean_and_parse_json(text_response, None)
@@ -280,7 +280,7 @@ ZASADY KOREKTY:
                             return parsed
                 except Exception as e:
                     print(f"[AIEngine Refine] Gemini model {model_name} failed: {e}")
-                    if isinstance(e, urllib.error.HTTPError) and e.code in [400, 401, 403]:
+                    if isinstance(e, urllib.error.HTTPError) and e.code in [400, 401, 403, 404, 429]:
                         break
                     continue
 
@@ -552,7 +552,7 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV zgodnie z podanym schematem.
                     data=json.dumps(payload).encode("utf-8"),
                     headers={"Content-Type": "application/json"}
                 )
-                with urllib.request.urlopen(req, timeout=30) as response:
+                with urllib.request.urlopen(req, timeout=6) as response:
                     res_data = json.loads(response.read().decode("utf-8"))
                     text_response = res_data["candidates"][0]["content"]["parts"][0]["text"]
                     parsed = self._clean_and_parse_json(text_response, None)
@@ -560,7 +560,7 @@ Zwróć TYLKO czysty obiekt JSON dopasowanego CV zgodnie z podanym schematem.
                         return self._normalize_gemini_output(parsed, master_profile)
             except Exception as e:
                 last_error = e
-                if isinstance(e, urllib.error.HTTPError) and e.code in [400, 401, 403]:
+                if isinstance(e, urllib.error.HTTPError) and e.code in [400, 401, 403, 404, 429]:
                     break
                 continue
 

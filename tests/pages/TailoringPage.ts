@@ -122,6 +122,12 @@ export class TailoringPage extends BasePage {
     await expect(this.atsReadinessVal).toContainText(/100%|Bezpieczny/i);
   }
 
+  async getIframeCandidateName(): Promise<string> {
+    const el = this.iframeBody.locator(".candidate-name, .name");
+    await el.waitFor({ state: "attached" });
+    return (await el.textContent()) || "";
+  }
+
   async getIframeCandidateTitle(): Promise<string> {
     const el = this.iframeBody.locator(".candidate-title");
     await el.waitFor({ state: "visible" });

@@ -370,8 +370,8 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="header-main">
-                <h1 class="candidate-name">Michał Kosowski</h1>
-                <div class="candidate-title">{{ data.personal_info.title }}</div>
+                <h1 class="candidate-name">{{ data.personal_info.full_name or '' }}</h1>
+                <div class="candidate-title">{{ data.personal_info.title or '' }}</div>
             </header>
 
             {% if data.summary %}

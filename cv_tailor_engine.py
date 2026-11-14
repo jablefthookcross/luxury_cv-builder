@@ -329,14 +329,14 @@ class CVTailorEngine:
             )
 
             try:
-                with urllib.request.urlopen(req, timeout=14) as response:
+                with urllib.request.urlopen(req, timeout=6) as response:
                     raw_resp = response.read().decode("utf-8")
                     data = json.loads(raw_resp)
                     text_content = data["candidates"][0]["content"]["parts"][0]["text"]
                     return json.loads(text_content)
             except Exception as e:
                 last_error = e
-                if isinstance(e, urllib.error.HTTPError) and e.code in [400, 401, 403]:
+                if isinstance(e, urllib.error.HTTPError) and e.code in [400, 401, 403, 404, 429]:
                     break
                 continue
 
